@@ -1,10 +1,17 @@
 .App {
   text-align: center;
+  overflow: hidden;
+  height: 100vh;
+  margin: 0;
+  position: relative;
 }
 
 .App-logo {
   height: 40vmin;
   pointer-events: none;
+  position: absolute; /* Position the logo absolutely within .App */
+  top: 0vh; /* Offset from the top */
+  transform: translateX(-50%);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -14,7 +21,6 @@
 }
 
 .App-header {
-  background-color: #282c34;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -22,6 +28,7 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+  position: relative;
 }
 
 .App-link {
