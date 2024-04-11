@@ -35,7 +35,7 @@ export default function homeAnimation(p) {
   
     p.setup = () => {
         p.createCanvas(p.windowWidth, p.windowHeight);
-        const particlesLength = Math.min(Math.floor(window.innerWidth / 10), 100); // Adjust for number of particles based on screen width
+        const particlesLength = 1000 ; //Math.min(Math.floor(window.innerWidth / 10), 100); // Adjust for number of particles based on screen width
         for (let i = 0; i < particlesLength; i++) {
             particles.push(new Particle());
         }
@@ -47,6 +47,9 @@ export default function homeAnimation(p) {
             particle.update();
             particle.display();
         });
+        
+        if (p.frameCount % 100 == 0)
+          p.print(p.str(p.frameRate()));
     };
   
     p.windowResized = () => {
