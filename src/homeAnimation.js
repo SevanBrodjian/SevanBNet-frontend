@@ -48,8 +48,6 @@ export default function homeAnimation(p) {
             particle.display();
         });
         
-        if (p.frameCount % 100 == 0)
-          p.print(p.str(p.frameRate()));
     };
   
     p.windowResized = () => {
