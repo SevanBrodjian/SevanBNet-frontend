@@ -14,7 +14,7 @@ function App() {
   return (
     <div className="App">
       <div ref={sketchRef} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%' }}></div>
-      <header className="App-header">
+      <header>
         <div className={`circle ${isExpanded ? "expanded" : ""}`} onClick={() => setIsExpanded(!isExpanded)}></div>
       </header>
     </div>
