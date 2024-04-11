@@ -5,7 +5,7 @@ import './App.css';
 
 function App() {
   const sketchRef = useRef();
-  const [isExpanded, setIsExpanded] = useState(false);
+  // const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     new p5(homeAnimation, sketchRef.current);
@@ -14,9 +14,9 @@ function App() {
   return (
     <div className="App">
       <div ref={sketchRef} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%' }}></div>
-      <header>
+      {/* <header>
         <div className={`circle ${isExpanded ? "expanded" : ""}`} onClick={() => setIsExpanded(!isExpanded)}></div>
-      </header>
+      </header> */}
     </div>
   );
 }
