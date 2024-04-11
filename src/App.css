@@ -1,45 +1,41 @@
-.App {
-  text-align: center;
-  overflow: hidden;
-  height: 100vh;
-  margin: 0;
-  position: relative;
+.circle {
+  background-color: white;
+  border-radius: 50%;
+  width: 5vh;
+  height: 5vh;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.5s ease;
+  cursor: pointer;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-  position: absolute; /* Position the logo absolutely within .App */
-  top: 0vh; /* Offset from the top */
-  transform: translateX(-50%);
+.circle.expanded {
+  width: 20vh;
+  height: 20vh;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.circle.expanded::before,
+.circle.expanded::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  transition: all 0.5s ease 0.1s;
 }
 
-.App-header {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-  position: relative;
+.circle.expanded::before {
+  top: -25%;
+  left: -25%;
+  right: -25%;
+  bottom: -25%;
+  border: 2px solid white;
 }
 
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.circle.expanded::after {
+  top: -50%;
+  left: -50%;
+  right: -50%;
+  bottom: -50%;
+  border: 2px solid white;
 }
