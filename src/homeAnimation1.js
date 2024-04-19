@@ -47,7 +47,6 @@ export default function homeAnimation(p) {
             particle.update();
             particle.display();
         });
-        p.print(p.frameRate())
     };
 
     p.windowResized = () => {

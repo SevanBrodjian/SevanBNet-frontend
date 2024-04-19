@@ -1,56 +1,160 @@
 // homeAnimation.js
 export default function homeAnimation(p) {
-    let particles = [];
+    let A, B, nextA, nextB;
+    const dA = 1.0;
+    const dB = 0.5;
+    const f = 0.035;
+    const k = 0.058;
+    let scale = 5;
+    let rows, cols;
+    let isResizing = false;
 
-    class Particle {
-        constructor() {
-            this.pos = p.createVector(p.random(p.width), p.random(p.height));
-            this.vel = p.createVector(p.random(-2, 2), p.random(-2, 2));
-            this.size = 10;
+    const col1 = p.color(p.random(128, 255), p.random(0, 128), 0);
+    const col2 = p.color(0, p.random(128, 255), p.random(128, 255));
+
+    p.windowResized = () => {
+        if (p.abs(p.windowWidth - p.width) / p.width < 0.2) 
+            return;
+
+        isResizing = true;
+        p.resizeCanvas(p.windowWidth, p.windowHeight);
+        if (getScreenSizeCategory() == "Small") {
+            scale = 5;
+        } else {
+            scale = 5;
         }
+        initArrays();
+        isResizing = false;
+    };
 
-        update() {
-            this.pos.add(this.vel);
-            this.edges();
+    p.setup = function() {
+        p.createCanvas(p.windowWidth, p.windowHeight);
+        if (getScreenSizeCategory() == "Small") {
+            scale = 2;
+        } else {
+            scale = 5;
         }
+        p.noStroke();
+        initArrays();
+    };
 
-        display() {
-            p.noStroke();
-            p.fill('rgba(255, 255, 255, 0.5)');
-            p.circle(this.pos.x, this.pos.y, this.size);
-        }
+    p.draw = function() {
+        if (isResizing)
+            return;
 
-        edges() {
-            if (this.pos.x < 0 || this.pos.x > p.width) {
-                this.pos.x = p.constrain(this.pos.x, 0, p.width);
-                this.vel.x *= -1;
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                let col = p.lerpColor(col1, col2, A[r][c]);
+                p.fill(col);
+                p.rect(c * scale, r * scale, scale, scale);
             }
+        }
+        update();
 
-            if (this.pos.y < 0 || this.pos.y > p.height) {
-                this.pos.y = p.constrain(this.pos.y, 0, p.height);
-                this.vel.y *= -1;
+        console.log(p.frameRate());
+
+        let mouseR = Math.floor(p.mouseX / scale);
+        let mouseC = Math.floor(p.mouseY / scale);
+        for (let x = -5; x < 6; x++) {
+            for (let y = -5; y < 6; y++) {
+                if (p.abs(x) + p.abs(y) > 7)
+                    continue;
+                let valX = p.constrain(mouseR + x, 0, cols-1);
+                let valY = p.constrain(mouseC + y, 0, rows-1);
+                A[valY][valX] = 0.0;
+                B[valY][valX] = 1.0;
+            }
+        }
+    };
+
+    function getScreenSizeCategory() {
+        if (p.width < 768) {
+            return "Small";
+        } else if (p.width >= 768 && p.width <= 1024) {
+            return "Medium";
+        } else {
+            return "Large";
+        }
+    }
+
+    function initArrays() {
+        rows = Math.floor(p.height / scale);
+        cols = Math.floor(p.width / scale);
+        A = new Array(rows);
+        B = new Array(rows);
+        nextA = new Array(rows);
+        nextB = new Array(rows);
+
+        for (let r = 0; r < rows; r++) {
+            A[r] = new Array(cols).fill(1.0);
+            B[r] = new Array(cols).fill(0.0);
+            nextA[r] = new Array(cols).fill(1.0);
+            nextB[r] = new Array(cols).fill(0.0);
+
+            for (let c = 0; c < cols; c++) {
+                if (p.random(1) > 0.95) {
+                    A[r][c] = 0.0;
+                    B[r][c] = 1.0;
+                }
             }
         }
     }
 
-    p.setup = () => {
-        p.createCanvas(p.windowWidth, p.windowHeight);
-        const particlesLength = 1000 ; //Math.min(Math.floor(window.innerWidth / 10), 100); // Adjust for number of particles based on screen width
-        for (let i = 0; i < particlesLength; i++) {
-            particles.push(new Particle());
+    function update() {
+        // Temporary variables for storing wrapped indices
+        let rN, rS, cE, cW;
+    
+        for (let r = 0; r < rows; r++) {
+            // Compute north and south wrap indices once per row
+            rN = (r - 1 + rows) % rows;
+            rS = (r + 1) % rows;
+    
+            for (let c = 0; c < cols; c++) {
+                // Compute east and west wrap indices once per column
+                cE = (c + 1) % cols;
+                cW = (c - 1 + cols) % cols;
+    
+                // Cache the central cell values
+                let centralA = A[r][c];
+                let centralB = B[r][c];
+    
+                // Compute next values using cached indices and values
+                nextA[r][c] = centralA +
+                              A[rN][cW] * dA * 0.05 +
+                              A[rN][cE] * dA * 0.05 +
+                              A[rS][cW] * dA * 0.05 +
+                              A[rS][cE] * dA * 0.05 +
+                              A[rN][c] * dA * 0.2 +
+                              A[rS][c] * dA * 0.2 +
+                              A[r][cW] * dA * 0.2 +
+                              A[r][cE] * dA * 0.2 +
+                              -centralA * dA -
+                              centralA * centralB * centralB +
+                              f * (1 - centralA);
+    
+                nextB[r][c] = centralB +
+                              B[rN][cW] * dB * 0.05 +
+                              B[rN][cE] * dB * 0.05 +
+                              B[rS][cW] * dB * 0.05 +
+                              B[rS][cE] * dB * 0.05 +
+                              B[rN][c] * dB * 0.2 +
+                              B[rS][c] * dB * 0.2 +
+                              B[r][cW] * dB * 0.2 +
+                              B[r][cE] * dB * 0.2 +
+                              -centralB * dB +
+                              centralA * centralB * centralB -
+                              (f + k) * centralB;
+    
+                // Optionally, you might update A and B here directly
+            }
         }
-    };
-
-    p.draw = () => {
-        p.background(100, 55, 144);
-        particles.forEach(particle => {
-            particle.update();
-            particle.display();
-        });
-        p.print(p.frameRate())
-    };
-
-    p.windowResized = () => {
-        p.resizeCanvas(p.windowWidth, p.windowHeight);
-    };
+    
+        // Update the actual arrays if not done in the main loop
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                A[r][c] = nextA[r][c];
+                B[r][c] = nextB[r][c];
+            }
+        }
+    }    
 }
