@@ -1,14 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import p5 from 'p5';
 import './App.css';
-import homeAnimation1 from './homeAnimation1';
-import homeAnimation2 from './homeAnimation2';
-import homeAnimation3 from './homeAnimation3';
-import homeAnimation4 from './homeAnimation4';
-import homeAnimation5 from './homeAnimation5';
+import testAnimation from './home_animations/testAnimation.js';
+import reactionDiffusion from './home_animations/reactionDiffusion.js';
 
 function App() {
-  const animations = [homeAnimation1, homeAnimation2];
+  const animations = [testAnimation, reactionDiffusion];
   const [animationIndex, setAnimationIndex] = useState(Math.floor(Math.random() * animations.length));
   const [opacity, setOpacity] = useState(1);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
@@ -20,28 +17,35 @@ function App() {
     const handleMouseUp = () => {
       if (buttonPressedRef.current) {
         buttonPressedRef.current = false;
-        changeAnimation();  // Change animation if the button was initially pressed
+        changeAnimation();
       }
     };
-
     document.addEventListener('mouseup', handleMouseUp);
-    return () => document.removeEventListener('mouseup', handleMouseUp);
-  }, []);  // Only attach this listener once
+
+    return () => {
+      document.removeEventListener('mouseup', handleMouseUp);
+      if (p5Instance.current) {
+        p5Instance.current.remove();
+      }
+    }
+  }, []);
 
   useEffect(() => {
     setOpacity(0);
+    const delayBeforeNewAnimation = isFirstLoad ? 0 : 1500;
+    if (isFirstLoad) {
+      setIsFirstLoad(false);
+    }
     const timeoutIdAnimation = setTimeout(() => {
       if (p5Instance.current) {
         p5Instance.current.remove();
       }
-      const delayBeforeNewAnimation = isFirstLoad ? 0 : 1000;
-      setTimeout(() => {
-        p5Instance.current = new p5(animations[animationIndex], sketchRef.current);
-        setOpacity(1);
-        setIsFirstLoad(false);
-      }, delayBeforeNewAnimation);
-    }, 500);
-    return () => clearTimeout(timeoutIdAnimation);
+      p5Instance.current = new p5(animations[animationIndex], sketchRef.current);
+      setOpacity(1);
+    }, delayBeforeNewAnimation);
+    return () => {
+      clearTimeout(timeoutIdAnimation);
+    }
   }, [animationIndex]);
 
   const changeAnimation = () => {
@@ -51,12 +55,11 @@ function App() {
             do {
                 newIndex = Math.floor(Math.random() * animations.length);
             } while (newIndex === currentIndex);
-            setTimeout(() => console.log(newIndex), 0);  // Log the new index after state updates
+            setTimeout(() => console.log(newIndex), 0);
             return newIndex;
         });
     }
-};
-
+  };
 
   const handleMouseDown = () => {
     buttonPressedRef.current = true;
@@ -64,7 +67,7 @@ function App() {
 
   return (
     <div className="App">
-      <div ref={sketchRef} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', opacity: opacity, transition: 'opacity 1s ease' }}></div>
+      <div ref={sketchRef} className="background-animation" style={{opacity: opacity}}></div>
       <header className="App-header">
         <button className="animation-btn" onMouseDown={handleMouseDown}>Change Animation</button>
       </header>
