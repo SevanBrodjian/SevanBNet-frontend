@@ -69,6 +69,6 @@
 
 /* Active/click state - compresses the button */
 .animation-btn:active {
-  transform: scale(0.95);
+  transform: scale(0.9);
   transition: transform 0.2s ease;
 }

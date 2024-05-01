@@ -1,70 +1,5 @@
 // homeAnimation.js
 export default function homeAnimation(p) {
-    const workerCode = `
-        self.onmessage = function(e) {
-            const { A, B, rows, cols, dA, dB, f, k } = e.data;
-            let rN, rS, cE, cW;
-
-            let bufA = new Array(rows);
-            let bufB = new Array(rows);
-            for (let r = 0; r < rows; r++) {
-                bufA[r] = new Array(cols);
-                bufB[r] = new Array(cols);
-                for (let c = 0; c < cols; c++) {
-                    bufA[r][c] = A[r][c];
-                    bufB[r][c] = B[r][c];
-                }
-            }
-            let count = 4;
-            let nextA;
-            let nextB;
-
-            for (let i = 0; i < count; i++) {
-                nextA = new Array(rows);
-                nextB = new Array(rows);
-
-                for (let r = 0; r < rows; r++) {
-                    nextA[r] = new Array(cols);
-                    nextB[r] = new Array(cols);
-                    rN = (r - 1 + rows) % rows;
-                    rS = (r + 1) % rows;
-
-                    for (let c = 0; c < cols; c++) {
-                        cE = (c + 1) % cols;
-                        cW = (c - 1 + cols) % cols;
-
-                        const centralA = bufA[r][c];
-                        const centralB = bufB[r][c];
-
-                        nextA[r][c] = centralA +
-                                    (bufA[rN][cW] + bufA[rN][cE] + bufA[rS][cW] + bufA[rS][cE] +
-                                    bufA[rN][c] * 4 + bufA[rS][c] * 4 +
-                                    bufA[r][cW] * 4 + bufA[r][cE] * 4) * dA * 0.05 -
-                                    centralA * dA - centralA * centralB * centralB + f * (1 - centralA);
-
-                        nextB[r][c] = centralB +
-                                    (bufB[rN][cW] + bufB[rN][cE] + bufB[rS][cW] + bufB[rS][cE] +
-                                    bufB[rN][c] * 4 + bufB[rS][c] * 4 +
-                                    bufB[r][cW] * 4 + bufB[r][cE] * 4) * dB * 0.05 -
-                                    centralB * dB + centralA * centralB * centralB - (f + k) * centralB;
-                    }
-                }
-                if (i < count - 1) {
-                    for (let r = 0; r < rows; r++) {
-                        for (let c = 0; c < cols; c++) {
-                            bufA[r][c] = nextA[r][c];
-                            bufB[r][c] = nextB[r][c];
-                        }
-                    }
-                }
-            }
-
-            self.postMessage({nextA, nextB});
-        }
-    `;
-    const blob = new Blob([workerCode], { type: 'application/javascript' });
-    const updateWorker = new Worker(URL.createObjectURL(blob));
-
     let A, B, nextA, nextB;
     const dA = 1.0;
     const dB = 0.5;
@@ -73,14 +8,14 @@ export default function homeAnimation(p) {
     let scale = 5;
     let rows, cols;
     let isResizing = false;
-    let gotDataFromWorker = false;
+    let mouseDown = false;
 
     let greenCol = p.random(255);
     const col1 = p.color(p.random(128, 255), greenCol, 0);
     const col2 = p.color(0, 255 - greenCol, p.random(128, 255));
 
     p.windowResized = () => {
-        if (p.abs(p.windowWidth - p.width) / p.width < 0.2) 
+        if ((p.abs(p.windowWidth - p.width) / p.width < 0.2)  && (p.abs(p.windowHeight - p.height) / p.height < 0.2))
             return;
  
         isResizing = true;
@@ -92,24 +27,16 @@ export default function homeAnimation(p) {
 
     p.setup = function() {
         p.createCanvas(p.windowWidth, p.windowHeight);
+        p.frameRate(10);
         scale = getScaleForScreenSize();
         p.noStroke();
         initArrays();
-
-        updateWorker.onmessage = function(event) {
-            const { nextA, nextB } = event.data;
-            gotDataFromWorker = true;
-            for (let r = 0; r < rows; r++) {
-                for (let c = 0; c < cols; c++) {
-                    A[r][c] = nextA[r][c];
-                    B[r][c] = nextB[r][c];
-                }
-            }
-        };
-        console.log(A.length);
-        updateWorker.postMessage({ A, B, rows, cols, dA, dB, f, k });
+        
+        for (let i = 0; i < 5; i++) {
+            update();
+        }
     };
-
+ 
     p.draw = function() {
         if (isResizing) {
             return;
@@ -120,23 +47,46 @@ export default function homeAnimation(p) {
                 let col = p.lerpColor(col1, col2, A[r][c]);
                 p.fill(col);
                 p.rect(c * scale, r * scale, scale, scale);
-            }
+            } 
         }
 
-        if (gotDataFromWorker) {
-            updateWorker.postMessage({ A, B, rows, cols, dA, dB, f, k });
-            gotDataFromWorker = false;
+        for (let i = 0; i < 6; i++) {
+            update();
+        }
+
+
+        if (mouseDown) {
+            let mouseR = Math.floor(p.mouseX / scale);
+            let mouseC = Math.floor(p.mouseY / scale);
+            for (let x = -5; x < 6; x++) {
+                for (let y = -5; y < 6; y++) {
+                    if (p.abs(x) + p.abs(y) > 7)
+                        continue;
+                    let valX = p.constrain(mouseR + x, 0, cols-1);
+                    let valY = p.constrain(mouseC + y, 0, rows-1);
+                    A[valY][valX] = 0.0;
+                    B[valY][valX] = 1.0;
+                }
+            }
         }
     };
+
+    p.mousePressed = function() {
+        mouseDown = true;
+    }
+
+    p.mouseReleased = function() {
+        mouseDown = false;
+    }
 
     function getScaleForScreenSize() {
         // return Math.floor(p.width / 215);
         if (p.width < 768) {
-            return 3; // Small
+            return 6; // Small
         } else if (p.width >= 768 && p.width <= 1200) {
-            return 6; // Medium
+            return 10; // Medium
         } else {
-            return 10; //Large
+            return 14; //Large
         }
     }
 
@@ -162,4 +112,62 @@ export default function homeAnimation(p) {
             }
         }
     }
+
+    function update() {
+        // Temporary variables for storing wrapped indices
+        let rN, rS, cE, cW;
+    
+        for (let r = 0; r < rows; r++) {
+            // Compute north and south wrap indices once per row
+            rN = (r - 1 + rows) % rows;
+            rS = (r + 1) % rows;
+    
+            for (let c = 0; c < cols; c++) {
+                // Compute east and west wrap indices once per column
+                cE = (c + 1) % cols;
+                cW = (c - 1 + cols) % cols;
+    
+                // Cache the central cell values
+                let centralA = A[r][c];
+                let centralB = B[r][c];
+    
+                // Compute next values using cached indices and values
+                nextA[r][c] = centralA +
+                              A[rN][cW] * dA * 0.05 +
+                              A[rN][cE] * dA * 0.05 +
+                              A[rS][cW] * dA * 0.05 +
+                              A[rS][cE] * dA * 0.05 +
+                              A[rN][c] * dA * 0.2 +
+                              A[rS][c] * dA * 0.2 +
+                              A[r][cW] * dA * 0.2 +
+                              A[r][cE] * dA * 0.2 +
+                              -centralA * dA -
+                              centralA * centralB * centralB +
+                              f * (1 - centralA);
+    
+                nextB[r][c] = centralB +
+                              B[rN][cW] * dB * 0.05 +
+                              B[rN][cE] * dB * 0.05 +
+                              B[rS][cW] * dB * 0.05 +
+                              B[rS][cE] * dB * 0.05 +
+                              B[rN][c] * dB * 0.2 +
+                              B[rS][c] * dB * 0.2 +
+                              B[r][cW] * dB * 0.2 +
+                              B[r][cE] * dB * 0.2 +
+                              -centralB * dB +
+                              centralA * centralB * centralB -
+                              (f + k) * centralB;
+    
+                // Optionally, you might update A and B here directly
+            }
+        }
+    
+        // Update the actual arrays if not done in the main loop
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                A[r][c] = nextA[r][c];
+                B[r][c] = nextB[r][c];
+            }
+        }
+    }    
 }

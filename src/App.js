@@ -3,9 +3,12 @@ import p5 from 'p5';
 import './App.css';
 import testAnimation from './home_animations/testAnimation.js';
 import reactionDiffusion from './home_animations/reactionDiffusion.js';
+import differetialGrowth from './home_animations/differentialGrowth.js';
+import particleLife from './home_animations/particleLife.js';
+import particleUniverse from './home_animations/particleUniverse.js';
 
 function App() {
-  const animations = [testAnimation, reactionDiffusion];
+  const animations = [differetialGrowth, particleLife, reactionDiffusion, particleUniverse];
   const [animationIndex, setAnimationIndex] = useState(Math.floor(Math.random() * animations.length));
   const [opacity, setOpacity] = useState(1);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
