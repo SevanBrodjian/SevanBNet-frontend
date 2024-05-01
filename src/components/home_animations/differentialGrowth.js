@@ -5,6 +5,7 @@ export default function homeAnimation(p) {
     const repulsionDistance = insertDistance * 15;
     const k = 1;
     const maxParts = 1500;
+    const backHue = Math.floor(p.random(360));
 
     class Particle {
         constructor(x, y) {
@@ -18,7 +19,7 @@ export default function homeAnimation(p) {
             let distance;
 
             particles.forEach(particle => {
-                if (particle != this) {
+                if (particle !== this) {
                     diff = particle.pos.copy();
                     diff.sub(this.pos);
                     distance = diff.mag();
@@ -89,7 +90,7 @@ export default function homeAnimation(p) {
     };
 
     p.draw = () => {
-        p.background(0);
+        p.background(backHue, 50, 5);
 
         for (let i = 0; i < particles.length; i++) {
             let p1 = particles[i];

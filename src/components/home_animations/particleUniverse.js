@@ -2,7 +2,7 @@ export default function homeAnimation(p) {
     let NUM_POINTS = 1000;
     let points = [];
     let numProperties = 6;
-    let t = 0;
+    // let t = 0;
     let epsilon = 0.00001;
     let maxQuadSize = 200;
     let QT;
@@ -10,7 +10,7 @@ export default function homeAnimation(p) {
     // Universal Properties
     let numElementary;
     let G;
-    let R;
+    // let R;
     let densityDistance;
     let maxForce;
     let speedColoring;
@@ -25,7 +25,7 @@ export default function homeAnimation(p) {
       // Initialize Universe
       numElementary = p.round(p.random(2, 10));
       G = p.random(0.01, 0.4);
-      R = p.random(20);
+      // R = p.random(20);
       densityDistance = 20;
       maxForce = 4;
       speedColoring = p.random(3, 15);

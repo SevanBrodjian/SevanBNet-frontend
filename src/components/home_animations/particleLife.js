@@ -18,8 +18,8 @@ export default function homeAnimation(p) {
     const gridSize = 0.1;
     let grid;
     let gridN;
-    const gridPositionsX = new Int32Array(n);
-    const gridPositionsY = new Int32Array(n);
+    // const gridPositionsX = new Int32Array(n);
+    // const gridPositionsY = new Int32Array(n);
 
     const mouseEffectRadius = 0.05;
     const mouseForceStrength = 2;
@@ -94,13 +94,13 @@ export default function homeAnimation(p) {
           for (let curGridY = thisGridY - 1; curGridY <= thisGridY + 1; curGridY++) {
             let wrappedX = curGridX;
             let wrappedY = curGridY;
-            if (wrappedX == -1) wrappedX = gridN - 1;
-            if (wrappedX == gridN) wrappedX = 0;
-            if (wrappedY == -1) wrappedY = gridN - 1;
-            if (wrappedY == gridN) wrappedY = 0;
+            if (wrappedX === -1) wrappedX = gridN - 1;
+            if (wrappedX === gridN) wrappedX = 0;
+            if (wrappedY === -1) wrappedY = gridN - 1;
+            if (wrappedY === gridN) wrappedY = 0;
           
             grid[wrappedX][wrappedY].forEach((j) => {
-              if (j == i) return;
+              if (j === i) return;
               const rxReg = positionsX[j] - positionsX[i];
               const rxRight = positionsX[j] + 1 - positionsX[i];
               const rxLeft = positionsX[j] - 1 - positionsX[i];
