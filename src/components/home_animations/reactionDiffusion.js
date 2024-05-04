@@ -91,8 +91,8 @@ export default function homeAnimation(p) {
     }
 
     function initArrays() {
-        rows = Math.floor(p.height / scale);
-        cols = Math.floor(p.width / scale);
+        rows = Math.floor(p.height / scale) + 1;
+        cols = Math.floor(p.width / scale) + 1;
         A = new Array(rows);
         B = new Array(rows);
         nextA = new Array(rows);

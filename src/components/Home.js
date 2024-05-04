@@ -70,9 +70,9 @@ function Home() {
   return (
     <div className="home">
       <div ref={sketchRef} className="background-animation" style={{opacity: opacity}}></div>
-      <header className="home-header">
+      <div className="home-content">
         <button className="animation-btn" onMouseDown={handleMouseDown}>Change Animation</button>
-      </header>
+      </div>
     </div>
   );
 }
