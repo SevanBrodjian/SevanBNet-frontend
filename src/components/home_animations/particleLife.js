@@ -56,7 +56,7 @@ export default function homeAnimation(p) {
         p.ellipse(positionsX[i] * p.width, positionsY[i] * p.height, 5, 5);
       }
       
-      p.print(p.frameRate());
+      // p.print(p.frameRate());
     };
   
     function makeRandomMatrix() {

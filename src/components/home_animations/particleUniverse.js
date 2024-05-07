@@ -57,7 +57,7 @@ export default function homeAnimation(p) {
   
       QT = new QuadTree(0.0, 0.0, p.width, p.height);
       points.forEach((p) => {
-        QT.insert(p);
+        QT.insert(p); 
       });
     };
   
@@ -81,7 +81,7 @@ export default function homeAnimation(p) {
         p.drawPoint();
       });
   
-      p.print(p.frameRate());
+      // p.print(p.frameRate());
     };
   
     class Point {

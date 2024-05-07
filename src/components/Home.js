@@ -33,10 +33,11 @@ function Home() {
   }, []);
 
   useEffect(() => {
+    console.log(isFirstLoad);
     setOpacity(0);
-    const delayBeforeNewAnimation = isFirstLoad ? 0 : 1500;
+    const delayBeforeNewAnimation = isFirstLoad ? 100 : 1500;
     if (isFirstLoad) {
-      setIsFirstLoad(false);
+      setIsFirstLoad(false); 
     }
     const timeoutIdAnimation = setTimeout(() => {
       if (p5Instance.current) {
@@ -57,7 +58,6 @@ function Home() {
             do {
                 newIndex = Math.floor(Math.random() * animations.length);
             } while (newIndex === currentIndex);
-            setTimeout(() => console.log(newIndex), 0);
             return newIndex;
         });
     }
