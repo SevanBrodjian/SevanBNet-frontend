@@ -2,32 +2,49 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 100%;
     background-color: rgba(0, 0, 0, 0.75);
     padding: 10px 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.25);
     color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     z-index: 1000;
+    min-width: 100vw;
+}
+
+.logoAndDropdown {
+    display: flex;
+    align-items: center;
+    flex: 1;
 }
 
 .logo, .social-links {
     display: flex;
     align-items: center;
+    flex: 1;
 }
 
 .logo {
-    flex: 1;  /* Equal width as the right column */
     text-decoration: none;
 }
 
 .logo img, .logo .site-name {
-    height: 35px;  /* Adjusts the logo and text size */
+    height: 35px;
 }
 
 .site-name {
     color: white;
     font-size: 1.5em;
-    margin-left: 15px;
+    margin-left: 10px;
+}
+
+.menu-icon {
+    display: none; 
+    cursor: pointer;
+    flex-direction: column;
+    width: 30px;
+    height: 25px;
+    color: rgb(200, 200, 200);
+    flex-shrink: 0;
+    transition: all 0.3s;
 }
 
 .nav-links {
@@ -37,30 +54,125 @@
     margin: 0;
     align-items: center;
     justify-content: center;
-    flex: 2;  /* Allows center to grow more */
+    flex: 2;
+    font-size: 1.1em;
 }
 
-.nav-links a {
+.nav-links li a {
     color: white;
     text-decoration: none;
     margin: 0 15px;
-    transition: color 0.2s;
+    transition: color 0.3s;
 }
 
 .nav-links a:hover {
     color: grey;
 }
 
-.nav-links .active {
+.nav-links li a.active {
     font-weight: bold;
 }
 
+.nav-links.open, .social-links.open {
+    flex-direction: column; 
+}
+
 .social-links {
-    flex: 1;  /* Equal width as the left column */
-    justify-content: flex-end;  /* Aligns logos to the right */
+    margin-left: auto;
+    flex: 1;
+    justify-content: flex-end;
 }
 
 .social-links a img {
     height: 30px;
     margin: 0 10px;
+}
+
+.menu-icon div {
+    width: 30px;
+    height: 3px;
+    background-color: rgb(200, 200, 200);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.menu-icon.open div:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+}
+.menu-icon.open div:nth-child(2) {
+    opacity: 0;
+}
+.menu-icon.open div:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -6px);
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        transition: all 0.3s;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    } 
+
+    .logoAndDropdown {
+        display: flex;
+        flex: 1; /* Allows it to take up available space */
+        align-items: center;
+        justify-content: flex-start;
+        width: 100%;
+    }
+
+    .logo {
+        align-items: center; /* Center-align items vertically */
+    }
+
+    .site-name {
+        display: flex;
+        justify-content: flex-start;
+        margin-left: 10px;
+    }
+
+    .spacer {
+        display: flex;
+        flex: 10;
+    }
+
+    .menu-icon {
+        display: flex; /* Shows the menu icon */
+        width: 30px; /* Specific width for menu icon */
+        justify-content: flex-end;
+        cursor: pointer;
+    }
+
+    .logo, .menu-icon {
+        align-items: center;
+        justify-content: space-between; /* Ensures logo and menu icon are spaced appropriately */
+    }
+
+    .nav-links, .social-links {
+        display: flex; /* Hide links by default on small screens */
+        flex: 20;
+        flex-direction: column;
+        width: 100%; /* Takes full width when displayed */
+        overflow: hidden;
+        max-height: 0;
+        transition: max-height 0.5s ease-in-out; /* Adjust timing as needed */
+    }
+
+    .nav-links {
+        font-size: 1.25em;
+    }
+
+    .nav-links.open, .social-links.open {
+        max-height: 1000px;
+        min-height: 250px;;
+    }
+}
+
+
+@media (min-width: 2500px) {
+    .navbar {
+        min-width: 2500px;
+        max-width: 2500px;
+    } 
 }

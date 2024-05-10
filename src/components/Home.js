@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { debounce } from 'lodash';
 import p5 from 'p5';
 import './Home.css';
 import reactionDiffusion from './home_animations/reactionDiffusion.js';
@@ -9,7 +10,7 @@ import particleUniverse from './home_animations/particleUniverse.js';
 function Home() {
   const animations = [differetialGrowth, particleLife, reactionDiffusion, particleUniverse];
   const [animationIndex, setAnimationIndex] = useState(Math.floor(Math.random() * animations.length));
-  const [opacity, setOpacity] = useState(1);
+  const [opacity, setOpacity] = useState(0);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const sketchRef = useRef();
   const p5Instance = useRef(null);
@@ -32,20 +33,24 @@ function Home() {
     }
   }, []);
 
+  const setOpacityDebounced = useRef(debounce(newOpacity => {
+    setOpacity(newOpacity);
+  }, 100)).current;
+  
   useEffect(() => {
-    console.log(isFirstLoad);
-    setOpacity(0);
-    const delayBeforeNewAnimation = isFirstLoad ? 100 : 1500;
+    setOpacityDebounced(0);
+    const delayBeforeNewAnimation = isFirstLoad ? 0 : 1500;
     if (isFirstLoad) {
-      setIsFirstLoad(false); 
+      setIsFirstLoad(false);
     }
     const timeoutIdAnimation = setTimeout(() => {
       if (p5Instance.current) {
         p5Instance.current.remove();
       }
       p5Instance.current = new p5(animations[animationIndex], sketchRef.current);
-      setOpacity(1);
+      setOpacityDebounced(1);
     }, delayBeforeNewAnimation);
+    
     return () => {
       clearTimeout(timeoutIdAnimation);
     }
