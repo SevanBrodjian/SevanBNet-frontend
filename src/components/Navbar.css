@@ -1,22 +1,23 @@
+.navbarContainer {
+    background-color: rgba(0, 0, 0, 0.75);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.75);
     padding: 10px 20px;
     color: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    z-index: 1000;
-    min-width: 100vw;
+    min-width: 100%;
 }
 
-.logoAndDropdown {
-    display: flex;
-    align-items: center;
-    flex: 1;
-}
-
-.logo, .social-links {
+.logoAndDropdown, .logo, .social-links {
     display: flex;
     align-items: center;
     flex: 1;
@@ -37,21 +38,19 @@
 }
 
 .menu-icon {
-    display: none; 
+    display: none;
     cursor: pointer;
     flex-direction: column;
     width: 30px;
     height: 25px;
-    color: rgb(200, 200, 200);
-    flex-shrink: 0;
     transition: all 0.3s;
 }
 
 .nav-links {
     display: flex;
     list-style: none;
-    padding: 0;
     margin: 0;
+    padding: 0;
     align-items: center;
     justify-content: center;
     flex: 2;
@@ -73,13 +72,7 @@
     font-weight: bold;
 }
 
-.nav-links.open, .social-links.open {
-    flex-direction: column; 
-}
-
 .social-links {
-    margin-left: auto;
-    flex: 1;
     justify-content: flex-end;
 }
 
@@ -96,83 +89,114 @@
 }
 
 .menu-icon.open div:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 5px);
+    transform: translateY(11px) rotate(45deg);
 }
 .menu-icon.open div:nth-child(2) {
     opacity: 0;
 }
 .menu-icon.open div:nth-child(3) {
-    transform: rotate(-45deg) translate(7px, -6px);
+    transform: translateY(-11px) rotate(-45deg);
 }
 
 @media (max-width: 768px) {
     .navbar {
         flex-direction: column;
-        transition: all 0.3s;
         align-items: center;
-        justify-content: space-between;
-        width: 100%;
-    } 
-
-    .logoAndDropdown {
-        display: flex;
-        flex: 1; /* Allows it to take up available space */
-        align-items: center;
-        justify-content: flex-start;
         width: 100%;
     }
 
-    .logo {
-        align-items: center; /* Center-align items vertically */
+    .logoAndDropdown, .logo {
+        width: 100%;
+        justify-content: flex-start;
     }
 
     .site-name {
-        display: flex;
-        justify-content: flex-start;
         margin-left: 10px;
     }
 
-    .spacer {
-        display: flex;
-        flex: 10;
-    }
-
     .menu-icon {
-        display: flex; /* Shows the menu icon */
-        width: 30px; /* Specific width for menu icon */
-        justify-content: flex-end;
-        cursor: pointer;
-    }
-
-    .logo, .menu-icon {
-        align-items: center;
-        justify-content: space-between; /* Ensures logo and menu icon are spaced appropriately */
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 25px;
     }
 
     .nav-links, .social-links {
-        display: flex; /* Hide links by default on small screens */
-        flex: 20;
         flex-direction: column;
-        width: 100%; /* Takes full width when displayed */
-        overflow: hidden;
+        width: 100%;
         max-height: 0;
-        transition: max-height 0.5s ease-in-out; /* Adjust timing as needed */
-    }
-
-    .nav-links {
-        font-size: 1.25em;
+        overflow: hidden;
+        transition: max-height 0.5s ease-in-out, margin 0.1s ease-in-out;
+        margin-top: 0px;
+        margin-bottom: 0px;
     }
 
     .nav-links.open, .social-links.open {
-        max-height: 1000px;
-        min-height: 250px;;
+        max-height: 500px;
+    }
+
+    .nav-links.open {
+        margin-top: 10px;
+    }
+
+    .social-links.open {
+        margin-top: 35px;
+        margin-bottom: 10px;
+    }
+
+    .nav-links {
+        width: 60%;
+        align-items: flex-start;
+    }
+
+    .nav-links li {
+        position: relative;
+        margin-bottom: 5px;
+        width: 100%;
+    }
+
+    .social-links {
+        position: relative;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        gap: 50px;
+    }
+
+    .nav-links a {
+        text-decoration: none;
+        color: black;
+        padding: 5px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        position: relative;
+    }
+
+    .nav-links a::before {
+        content: '';
+        position: absolute;
+        left: 0%; /* Center the border by offsetting from the left */
+        bottom: -2px; /* Adjust this value to move the border up or down */
+        width: 100%; /* Make the border only a percentage of the width */
+        border-bottom: 1px dashed #555; /* Dotted or dashed underline */
+    }
+
+    .nav-links a::after {
+        content: '>';
+        position: absolute;
+        right: 15px; /* Add some padding from the right edge */
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.25em;
     }
 }
 
-
-@media (min-width: 2500px) {
+@media (min-width: 2000px) {
     .navbar {
-        min-width: 2500px;
-        max-width: 2500px;
-    } 
+        min-width: 2000px;
+        max-width: 2000px;
+        justify-content: center;
+    }
 }
