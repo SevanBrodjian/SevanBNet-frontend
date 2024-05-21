@@ -1,4 +1,66 @@
 .projects {
-    background-color: white;
-    flex: 1 0 auto;
-}
+    margin: 0 auto;
+    max-width: 80%;
+    text-align: center;
+  }
+  
+  .title {
+    font-size: 3rem;
+    margin: 2rem 0;
+    color: #fff;
+  }
+  
+  .project-card {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 2rem 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  
+  .project-image {
+    flex: 1;
+    max-width: 50%;
+  }
+  
+  .project-image img,
+  .project-image iframe {
+    width: 100%;
+    height: auto;
+    border-radius: 10px 0 0 10px;
+  }
+  
+  .project-details {
+    flex: 1;
+    padding: 1rem;
+    color: #fff;
+    text-align: left;
+  }
+  
+  .project-link {
+    text-decoration: none;
+  }
+  
+  .project-title {
+    font-size: 2rem;
+    color: #17a2b8;
+  }
+  
+  .project-status {
+    font-weight: bold;
+    margin: 1rem 0;
+  }
+  
+  .project-description {
+    font-size: 1rem;
+    white-space: pre-line;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    line-clamp: 5;
+    -webkit-box-orient: vertical;
+  }
+  

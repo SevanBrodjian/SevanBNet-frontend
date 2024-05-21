@@ -45,6 +45,11 @@ export default function homeAnimation(p) {
     };
   
     p.draw = () => {
+      if ((p.width !== p.windowWidth) || (p.height !== p.windowHeight)){
+        p.resizeCanvas(p.windowWidth, p.windowHeight);
+      }
+
+
       p.background(0);
       
       updateGrid();

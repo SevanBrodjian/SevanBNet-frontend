@@ -132,7 +132,7 @@
     }
 
     .nav-links.open, .social-links.open {
-        max-height: 500px;
+        max-height: 300px;
     }
 
     .nav-links.open {
@@ -153,6 +153,7 @@
         position: relative;
         margin-bottom: 5px;
         width: 100%;
+        font-size: large;
     }
 
     .social-links {
@@ -174,14 +175,14 @@
         position: relative;
     }
 
-    .nav-links a::before {
+    /* .nav-links a::before {
         content: '';
         position: absolute;
-        left: 0%; /* Center the border by offsetting from the left */
-        bottom: -2px; /* Adjust this value to move the border up or down */
-        width: 100%; /* Make the border only a percentage of the width */
-        border-bottom: 1px dashed #555; /* Dotted or dashed underline */
-    }
+        left: 0%;
+        bottom: -2px; 
+        width: 100%;
+        border-bottom: 1px dashed #555;
+    } */
 
     .nav-links a::after {
         content: '>';

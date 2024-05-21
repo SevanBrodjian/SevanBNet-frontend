@@ -60,6 +60,13 @@ export default function homeAnimation(p) {
         QT.insert(p); 
       });
     };
+
+    p.windowResized = () => {
+      if ((p.abs(p.windowWidth - p.width) / p.width < 0.2)  && (p.abs(p.windowHeight - p.height) / p.height < 0.2))
+          return;
+
+      p.resizeCanvas(p.windowWidth, p.windowHeight);
+    };
   
     p.draw = () => {
       p.background(0);

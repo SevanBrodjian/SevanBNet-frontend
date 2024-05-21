@@ -1,16 +1,19 @@
 .home {
   display: flex;
   flex: 1 0 auto;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-end; /* Ensures content is pushed to the right */
+  position: relative;
 }
-  
+
 .home-content {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-end;
+  justify-content: flex-start;
   z-index: 10;
+  position: absolute;
+  right: 0;
+  top: 0;
 }
 
 .background-animation {
@@ -24,6 +27,8 @@
 }
 
 .animation-btn {
+  margin-top: 1vh;
+  margin-right: 1vh;
   border: 3px solid white;
   color: white;
   background-color: rgba(0, 0, 0, 0.4);
@@ -43,4 +48,8 @@
 .animation-btn:active {
   transform: scale(0.9);
   transition: transform 0.2s ease;
+}
+
+@media (max-width: 768px) {
+  
 }
