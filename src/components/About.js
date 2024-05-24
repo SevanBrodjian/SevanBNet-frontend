@@ -4,10 +4,9 @@ import headshot from '../assets/rainforest_cropped.JPG';
 
 function About() {
   return (
-    <div className="about">
-      <div className="background-img"></div>
-      <div className="background-overlay"></div>
-      <div className="container">
+    <div className="about cosmic-bg">
+      <div className="bg-overlay"></div>
+      <div className="about-container">
         <div className="outer-flex">
           <div className="inner-1">
             <div className="image-container">
@@ -16,7 +15,7 @@ function About() {
           </div>
           <div className="inner-2">
             <div className="text-container">
-              <h1 className="title">Sevan Brodjian</h1>
+              <h1 className="name">Sevan Brodjian</h1>
               <h3 className="subtitle">Data Science & Neurotechnology</h3>
               <p className="description">
                 Bringing three years of industry experience at the forefront of machine learning, I am currently preparing to begin pursuing a PhD in Computation and Neural Systems at Caltech this Fall. Some of my work includes the development of end-to-end machine learning pipelines utilizing advanced techniques such as deep learning for regression tasks and vision transformers. This website is currently under construction.

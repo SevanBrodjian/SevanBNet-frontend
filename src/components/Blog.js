@@ -12,21 +12,22 @@ function Blog() {
   }, []);
 
   return (
-    <div className="blog">
-      <div className="container-fluid d-flex justify-content-center">
-        <h1 className="display-1"><strong>Blog</strong></h1>
+    <div className="blog cosmic-bg">
+      <div className="bg-overlay"></div>
+      <div className="title">
+        <h1>Blog</h1>
       </div>
-      <div className="container">
+      <div className="posts-container">
         {blogs.length > 0 ? (
           blogs.map(post => (
-            <div className="blog_post" key={post.id}>
+            <div className="blog-post" key={post.id}>
               <h2 className="post-title">{post.title}</h2>
               <p className="post-date">{new Date(post.published_date).toLocaleDateString()}</p>
               <p className="post-description">{post.description}</p>
               {post.image && (
                 <img src={post.image} alt={post.title} className="post-image" />
               )}
-              <a className="read-more" href={post.get_absolute_url}>Read More</a>
+              <a className="post-link" href={post.get_absolute_url}>Read More</a>
             </div>
           ))
         ) : (

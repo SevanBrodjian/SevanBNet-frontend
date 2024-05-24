@@ -1,0 +1,43 @@
+.title {
+    position: relative;
+    margin-bottom: 2rem;
+    font-size: 1rem;
+    color: #fff;
+    z-index: 1;
+}
+
+.cosmic-bg {
+    background-image: url('../assets/cosmicweb_dark.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-position: center center;
+}
+
+.bg-overlay {
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0.4);
+    top: 0;
+    left: 0;
+    min-width: 100%;
+    min-height: 100%;
+    z-index: 0;
+}
+
+
+.custom-scroll::-webkit-scrollbar,
+.custom-scroll *::-webkit-scrollbar {
+    width: 1.5vw;
+}
+
+.custom-scroll::-webkit-scrollbar-track,
+.custom-scroll *::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.15); 
+    border-radius: 10px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb,
+.custom-scroll *::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+}

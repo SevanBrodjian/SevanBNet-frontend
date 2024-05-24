@@ -6,13 +6,14 @@ import Blog from "./components/Blog";
 import About from "./components/About";
 import Navbar from "./components/Navbar";
 import './App.css';
+import './components/common.css';
 
 function App() {
   return (
     <Router>
       <div className="app-container">
         <Navbar />
-        <div className="content">
+        <div className="content custom-scroll">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/projects" element={<Projects />} />

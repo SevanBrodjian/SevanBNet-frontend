@@ -45,9 +45,10 @@ export default function homeAnimation(p) {
     };
   
     p.draw = () => {
-      if ((p.width !== p.windowWidth) || (p.height !== p.windowHeight)){
+      if ((p.width != p.windowWidth) || (p.height != p.windowHeight)){
         p.resizeCanvas(p.windowWidth, p.windowHeight);
       }
+      console.log(p.width, p.windowWidth);
 
 
       p.background(0);
