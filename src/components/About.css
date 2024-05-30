@@ -82,8 +82,9 @@
 
 .description {
     font-size: 1.75rem;
-    font-weight: 375;
+    font-weight: 500;
     margin-top: 2rem;
+    color: #FFFFFF;
 }
 
 @media (max-width: 768px) {

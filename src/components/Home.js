@@ -8,7 +8,7 @@ import particleLife from './home_animations/particleLife.js';
 import particleUniverse from './home_animations/particleUniverse.js';
 
 function Home() {
-  const animations = [differetialGrowth, particleLife, reactionDiffusion, particleUniverse];
+  const animations = [reactionDiffusion, reactionDiffusion];
   const [animationIndex, setAnimationIndex] = useState(Math.floor(Math.random() * animations.length));
   const [opacity, setOpacity] = useState(0);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
