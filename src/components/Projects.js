@@ -68,7 +68,7 @@ function Projects() {
               </div>
             ))
           ) : (
-            <p>Error: No projects found.</p>
+            <h2>Loading...</h2>
           )}
         </div>
       </div>

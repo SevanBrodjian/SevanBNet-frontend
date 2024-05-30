@@ -98,7 +98,7 @@
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 3;
-    line-clamp: 5;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
 }
 
@@ -119,5 +119,15 @@
 
     .project-details {
         padding: 1rem;
+    }
+
+    .projects-section {
+        margin-bottom: 12.5vh;
+    }
+
+    .project-description {
+        font-size: 1.25rem;
+        -webkit-line-clamp: 4;
+        line-clamp: 4;
     }
 }

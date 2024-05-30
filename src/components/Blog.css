@@ -91,3 +91,9 @@
     color: #17a2b8;
     text-decoration: none;
 }
+
+@media (max-width: 768px) {
+    .posts-section {
+        margin-bottom: 12.5vh;
+    }
+}

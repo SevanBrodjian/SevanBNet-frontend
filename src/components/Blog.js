@@ -33,7 +33,7 @@ function Blog() {
               </div>
             ))
           ) : (
-            <p>Error: No blog posts found.</p>
+            <h2>Loading...</h2>
           )}
         </div>
       </div>
