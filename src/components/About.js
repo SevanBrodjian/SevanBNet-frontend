@@ -4,8 +4,8 @@ import headshot from '../assets/rainforest_cropped.JPG';
 
 function About() {
   return (
-    <div className="about cosmic-bg">
-      <div className="bg-overlay"></div>
+    <div className="about cosmic-bw-bg">
+      <div className="bg-overlay-2"></div>
       <div className="about-container">
         <div className="outer-flex">
           <div className="inner-1">
@@ -21,7 +21,7 @@ function About() {
                 Bringing three years of industry experience at the forefront of machine learning, I am currently preparing to begin pursuing a PhD in Computation and Neural Systems at Caltech this Fall. Some of my work includes the development of end-to-end machine learning pipelines utilizing advanced techniques such as deep learning for regression tasks and vision transformers. This website is currently under construction.
                 <br /><br />
                 Explore my portfolio of personal projects and delve into my blog for insights into the applications I'm developing and the philosophical approach that guides my work.
-                <br></br><br></br><br></br>
+                <br></br>
               </p>
             </div>
           </div>

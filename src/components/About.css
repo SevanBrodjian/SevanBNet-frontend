@@ -1,9 +1,17 @@
 .about {
     min-height: 100%;
     height: auto;
-    color: #fff;
+    color: rgb(240, 240, 240);
     position: relative;
     overflow-y: auto;
+}
+
+.cosmic-bg {
+    background-image: url('../assets/cosmicweb_dark.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-position: center center;
 }
 
 .about-container {
@@ -74,7 +82,7 @@
 
 .description {
     font-size: 1.75rem;
-    font-weight: 400;
+    font-weight: 375;
     margin-top: 2rem;
 }
 
@@ -102,6 +110,10 @@
         max-height: 100%;
         margin-top: 0;
         margin-bottom: 3vh;
+    }
+
+    .about-container {
+        margin-bottom: 15vh;
     }
 }
   
