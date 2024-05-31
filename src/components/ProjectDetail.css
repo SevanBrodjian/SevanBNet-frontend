@@ -24,7 +24,7 @@
     align-items: center;
     justify-content: center;
     max-width: min(80%, 1600px);
-    margin-top: 2vh;
+    margin-top: 4vh;
     margin-bottom: 5vh;
 }
 
@@ -125,8 +125,12 @@
 }
 
 @media (max-width: 768px) {
+    .projectd-container {
+        margin-top: 6vh;
+    }
+
     .projectd-title {
-        margin-bottom: 2rem;
+        margin-bottom: 4rem;
         max-width: 95%;
         font-size: 2rem;
         font-weight: 550;

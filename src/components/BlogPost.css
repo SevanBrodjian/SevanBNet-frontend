@@ -23,8 +23,8 @@
 } 
 
 .blog-post-title-container {
-  margin-top: 3vh;
-  margin-bottom: 1vh;
+  margin-top: 5vh;
+  margin-bottom: 2vh;
   max-width: 80%;
   color: black;
 }
@@ -84,7 +84,9 @@
   } 
 
   .blog-post-title-container {
-    max-width: 100%;
+    max-width: 90%;
+    margin-top: 6vh;
+    margin-bottom: 3vh;
   }
 
   .blog-title {
