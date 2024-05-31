@@ -100,14 +100,6 @@
     transform: translateY(-11px) rotate(-45deg);
 }
 
-.bigscreen {
-    display: flex;
-}
-
-.smallscreen {
-    display: none;
-}
-
 .nav-animation-enter {
     max-height: 0;
     opacity: 0;
@@ -193,14 +185,6 @@
         position: absolute;
         right: 15px;
         font-size: 1.25em;
-    }
-
-    .bigscreen {
-        display: none;
-    }
-
-    .smallscreen {
-        display: flex;
     }
 }
 

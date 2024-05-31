@@ -1,7 +1,7 @@
 .title {
     position: relative;
-    margin-top: 1rem;
-    margin-bottom: 3rem;
+    margin-top: 0.8rem;
+    margin-bottom: 1.75rem;
     font-size: 4rem;
     font-weight: 550;
     color: #fff;
@@ -21,7 +21,7 @@
     background-size: cover;
     background-attachment: fixed;
     background-repeat: no-repeat;
-    background-position: center center;
+    background-position: right top;
 }
 
 .cosmic-bg-dark {
@@ -29,7 +29,6 @@
     background-size: cover;
     background-attachment: fixed;
     background-repeat: no-repeat;
-    background-position: center center;
 }
 
 .static-bg {
@@ -46,7 +45,7 @@
 
 .bg-overlay-1 {
     position: fixed;
-    background-color: rgba(0, 0, 0, 0.15);
+    background-color: rgba(0, 0, 0, 0.0);
     top: 0;
     left: 0;
     min-width: 100%;
@@ -57,7 +56,7 @@
 
 .bg-overlay-2 {
     position: fixed;
-    background-color: rgba(0, 0, 0, 0.55);
+    background-color: rgba(0, 0, 0, 0.35);
     top: 0;
     left: 0;
     min-width: 100%;
@@ -115,6 +114,14 @@
     background-color: rgba(255, 255, 255, 0.7);
 }
 
+.bigscreen {
+    display: flex;
+}
+
+.smallscreen {
+    display: none;
+}
+
 
 @media (max-width: 768px) {
     .title {
@@ -129,5 +136,13 @@
 
     .bg-overlay-3 {
         min-width: 100%;
+    }
+
+    .bigscreen {
+        display: none;
+    }
+
+    .smallscreen {
+        display: flex;
     }
 }

@@ -24,14 +24,14 @@
     align-items: center;
     justify-content: center;
     max-width: min(80%, 1600px);
-    margin-top: 4vh;
+    margin-top: 3vh;
     margin-bottom: 5vh;
 }
 
 .projectd-title {
     position: relative;
-    max-width: 75%;
-    margin-bottom: 4rem;
+    max-width: 90%;
+    margin-bottom: 2.5rem;
     font-size: 3rem;
     font-weight: 550;
     color: #fff;
@@ -125,12 +125,7 @@
 }
 
 @media (max-width: 768px) {
-    .projectd-container {
-        margin-top: 6vh;
-    }
-
     .projectd-title {
-        margin-bottom: 4rem;
         max-width: 95%;
         font-size: 2rem;
         font-weight: 550;
