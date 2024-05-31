@@ -23,7 +23,7 @@ function Blog() {
               <p className="post-description">{post.description}</p>
               <div className="post-link-date">
                 <p className="post-date">{new Date(post.published_date).toLocaleDateString()}</p>
-                <a href={`/blog/${post.slug}`}><button className="post-link">Read More</button></a>
+                <a href={`/blog/${post.slug}`}><button className="post-link-btn">Read More</button></a>
               </div>
             </div>
           ))

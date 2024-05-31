@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import './BlogPost.css';
-import backarrow from '../assets/back_arrow_dark.png';
 
 function BlogPost() {
   const { blogId } = useParams();
@@ -15,7 +14,7 @@ function BlogPost() {
   }, [blogId]);
 
   return (
-    <div className="blog-post cosmic-bg-white custom-scroll-dark">
+    <div className="blog-post cosmic-bg-white blog-scroll">
       <div className="bg-overlay-3"></div>
       <div className="static-bg"></div>
       {blog ? (

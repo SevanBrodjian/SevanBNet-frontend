@@ -28,6 +28,7 @@
 
 .logo {
     text-decoration: none;
+    margin-left: 10px;
 }
 
 .logo img {
@@ -138,11 +139,16 @@
         justify-content: flex-start;
     }
 
+    .logo {
+        margin-left: 0;
+    }
+
     .menu-icon {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         height: 25px;
+        margin-left: 20vw;
     }
 
     .nav-links, .social-links {

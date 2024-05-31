@@ -48,7 +48,7 @@
     align-items: center;
 }
 
-.post-link {
+.post-link-btn {
     border: 2px solid rgb(23, 162, 184);
     padding: 0.5rem 1rem;
     background-color: transparent;
@@ -61,11 +61,11 @@
     transition: all 0.2s ease;
 }
 
-.post-link:hover {
+.post-link-btn:hover {
     background-color: rgb(23, 162, 184, 0.2);
 }
 
-.post-link:active {
+.post-link-btn:active {
     transform: scale(0.95);
 }
 
@@ -87,6 +87,10 @@
 
     .post-description {
         font-size: 1.25rem;
+    }
+
+    .post-link-date {
+        margin-top: 3vh;
     }
 
     .post-date {

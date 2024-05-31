@@ -2,7 +2,7 @@ export default function projectAnimation(p) {
   let particles = [];
 
   p.setup = () => {
-    p.createCanvas(p.windowWidth, p.windowHeight);
+    p.createCanvas(p.windowWidth - 15, p.windowHeight);
     p.frameRate(30);
     p.colorMode(p.HSB, 255);
     p.background(0);
