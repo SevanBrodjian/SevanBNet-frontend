@@ -8,20 +8,45 @@
     z-index: 2;
 }
 
-.bg-overlay {
+.cosmic-bg-white {
+    background-image: url('../assets/cosmicweb_bw.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-position: center center;
+}
+
+.cosmic-bg-bright {
+    background-image: url('../assets/cosmicweb_bright.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-position: center center;
+}
+
+.cosmic-bg-dark {
+    background-image: url('../assets/cosmicweb_dark.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-position: center center;
+}
+
+.static-bg {
     position: fixed;
-    background-color: rgba(0, 0, 0, 0.25);
     top: 0;
     left: 0;
-    min-width: 100%;
-    min-height: 100%;
-    z-index: 0;
+    width: 100%;
+    height: 100%;
+    background: url('../assets/static.gif') repeat;
+    opacity: 0.075;
+    z-index: 1;
     pointer-events: none;
 }
 
 .bg-overlay-1 {
     position: fixed;
-    background-color: rgba(0, 0, 0, 0.55);
+    background-color: rgba(0, 0, 0, 0.15);
     top: 0;
     left: 0;
     min-width: 100%;
@@ -32,7 +57,7 @@
 
 .bg-overlay-2 {
     position: fixed;
-    background-color: rgba(0, 0, 0, 0.75);
+    background-color: rgba(0, 0, 0, 0.55);
     top: 0;
     left: 0;
     min-width: 100%;
@@ -40,6 +65,50 @@
     z-index: 0;
     pointer-events: none;
 }
+
+.bg-overlay-3 {
+    position: fixed;
+    background-color: rgba(255, 255, 255, 0.75);
+    left: 0;
+    min-width: 100%;
+    min-height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.loading {
+    display: inline-block;
+    margin-top: 5vh;
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 2px solid #222222;
+    background: rgba(0, 0, 0, 0.55);
+    color: white;
+    z-index: 1;
+    width: auto;
+}
+
+.back-link {
+    position: fixed;
+    top: 75px;
+    left: 20px;
+    display: inline-block;
+    width: 60px;
+    height: 60px;
+    z-index: 10; /* Ensure it is above other elements */
+}
+
+.back-link img {
+    width: 100%;
+    height: 100%;
+    transition: opacity 0.3s;
+    opacity: 1.0;
+}
+
+.back-link:hover img {
+    opacity: 0.5;
+}
+  
 
 .custom-scroll::-webkit-scrollbar,
 .custom-scroll *::-webkit-scrollbar {
@@ -73,5 +142,6 @@
 @media (max-width: 768px) {
     .title {
         font-size: 3rem;
+        margin-bottom: 2rem;
     }
 }

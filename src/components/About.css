@@ -1,86 +1,57 @@
 .about {
     min-height: 100%;
-    height: auto;
     color: rgb(240, 240, 240);
-    position: relative;
     overflow-y: auto;
-}
-
-.cosmic-bg {
-    background-image: url('../assets/cosmicweb_dark.jpg');
-    background-size: cover;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
-    background-position: center center;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
 }
 
 .about-container {
-    min-width: 100%;
     margin-top: 2vh;
     padding: 2rem;
-    width: 100%;
+    max-width: 1400px;
     position: relative;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     justify-content: center;
     align-items: center;
-    z-index: 1;
-    overflow: visible;
 }
 
-.outer-flex {
-    display: flex;
-    flex-wrap: nowrap;
-    flex-direction: row;
-    max-width: 1400px;
-    align-items: flex-start;
-    justify-content: center;
-}
-
-.inner-1 {
+.image-container {
     flex: 2;
     padding: 1rem;
     display: flex;
     justify-content: center;
 }
 
-.inner-2 {
-    flex: 3;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.image-container {
-    display: flex;
-    justify-content: center;
-}
-
 .headshot {
     max-width: 100%;
-    height: auto;
     border-radius: 10px;
     margin-top: 3vh;
 }
 
 .text-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 3;
     text-align: left;
     padding: 1rem;
 }
 
-.name {
+.about-name {
     font-size: 3rem;
     font-weight: 550;
 }
 
-.subtitle {
+.about-subtitle {
     font-size: 2rem;
     font-weight: 550;
     font-style: italic;
 }
 
-.description {
+.about-description {
     font-size: 1.75rem;
     font-weight: 500;
     margin-top: 2rem;
@@ -88,18 +59,10 @@
 }
 
 @media (max-width: 768px) {
-    .outer-flex {
+    .about-container {
         flex-direction: column;
-    }
-
-    .inner-1, .inner-2 {
-        align-items: flex-start;
-        justify-content: flex-start;
+        margin-bottom: 15vh;
         margin-top: 0;
-    }
-    
-    .inner-2 {
-        margin-top: -4vh;
     }
 
     .image-container {
@@ -113,8 +76,8 @@
         margin-bottom: 3vh;
     }
 
-    .about-container {
-        margin-bottom: 15vh;
+    .text-container {
+        margin-top: -1vh;
     }
 }
   

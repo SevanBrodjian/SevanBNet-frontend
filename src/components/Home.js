@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Link } from "react-router-dom";
 import { debounce } from 'lodash';
 import p5 from 'p5';
 import './Home.css';
-import reactionDiffusion from './home_animations/reactionDiffusion.js';
-import differetialGrowth from './home_animations/differentialGrowth.js';
-import particleLife from './home_animations/particleLife.js';
-import particleUniverse from './home_animations/particleUniverse.js';
+import logo from '../assets/favicon.ico';
+import reactionDiffusion from './bg_animations/reactionDiffusion.js';
+import differetialGrowth from './bg_animations/differentialGrowth.js';
+import particleLife from './bg_animations/particleLife.js';
+import particleUniverse from './bg_animations/particleUniverse.js';
 
 function Home() {
   const animations = [reactionDiffusion, reactionDiffusion];
@@ -14,23 +16,16 @@ function Home() {
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const sketchRef = useRef();
   const p5Instance = useRef(null);
-  const buttonPressedRef = useRef(false);
 
   useEffect(() => {
-    const handleMouseUp = () => {
-      if (buttonPressedRef.current) {
-        buttonPressedRef.current = false;
-        changeAnimation();
-      }
-    };
-    document.addEventListener('mouseup', handleMouseUp);
-
-    return () => {
-      document.removeEventListener('mouseup', handleMouseUp);
+    const cleanupP5 = () => {
       if (p5Instance.current) {
         p5Instance.current.remove();
+        p5Instance.current = null;
       }
-    }
+    };
+
+    return cleanupP5;
   }, []);
 
   const setOpacityDebounced = useRef(debounce(newOpacity => {
@@ -38,45 +33,60 @@ function Home() {
   }, 100)).current;
   
   useEffect(() => {
+    const setupP5 = () => {
+      cleanupP5();
+      p5Instance.current = new p5(animations[animationIndex], sketchRef.current);
+      setOpacityDebounced(1);
+    };
+
+    const cleanupP5 = () => {
+      if (p5Instance.current) {
+        p5Instance.current.remove();
+        p5Instance.current = null;
+      }
+    };
+
     setOpacityDebounced(0);
     const delayBeforeNewAnimation = isFirstLoad ? 0 : 1500;
+
     if (isFirstLoad) {
       setIsFirstLoad(false);
     }
-    const timeoutIdAnimation = setTimeout(() => {
-      if (p5Instance.current) {
-        p5Instance.current.remove();
-      }
-      p5Instance.current = new p5(animations[animationIndex], sketchRef.current);
-      setOpacityDebounced(1);
-    }, delayBeforeNewAnimation);
+
+    const timeoutIdAnimation = setTimeout(setupP5, delayBeforeNewAnimation);
     
     return () => {
       clearTimeout(timeoutIdAnimation);
     }
-  }, [animationIndex]);
+  }, [animationIndex, setOpacityDebounced, isFirstLoad]);
+  
 
   const changeAnimation = () => {
     if (animations.length > 1) {
-        setAnimationIndex(currentIndex => {
-            let newIndex;
-            do {
-                newIndex = Math.floor(Math.random() * animations.length);
-            } while (newIndex === currentIndex);
-            return newIndex;
-        });
+      setAnimationIndex(currentIndex => {
+        let newIndex;
+        do {
+          newIndex = Math.floor(Math.random() * animations.length);
+        } while (newIndex === currentIndex);
+        return newIndex;
+      });
     }
-  };
-
-  const handleMouseDown = () => {
-    buttonPressedRef.current = true;
   };
 
   return (
     <div className="home">
-      <div ref={sketchRef} className="background-animation" style={{opacity: opacity}}></div>
+      <div ref={sketchRef} className="background-animation" style={{ opacity: opacity }}></div>
       <div className="home-content">
-        <button className="animation-btn" onMouseDown={handleMouseDown}>Change Animation</button>
+        <div className="welcome-box">
+          <img className="homepage-logo" src={logo} alt="Logo" />
+          <span className="homepage-msg">Welcome to SevanB.net</span>
+        </div>
+        <div className="buttons-container">
+          <Link to="/projects"><button className="home-btn">Projects</button></Link>
+          <Link to="/blog"><button className="home-btn">Blog</button></Link>
+          <Link to="/about"><button className="home-btn">About Me</button></Link>
+          <button className="home-btn animation-btn" onClick={changeAnimation}>Change Animation</button>
+        </div>
       </div>
     </div>
   );

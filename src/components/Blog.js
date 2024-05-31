@@ -12,30 +12,24 @@ function Blog() {
   }, []);
 
   return (
-    <div className="blog cosmic-bw-bg">
-      <div className="static-bg"></div>
-      <div className="bg-overlay-1"></div>
-      <div className="title">
-        <p>Blog</p>
-      </div>
-      <div className="posts-section">
-        <div className="posts-container">
-          {blogs.length > 0 ? (
-            blogs.map(post => (
-              <div className="blog-post" key={post.id}>
-                <h2 className="post-title">{post.title}</h2>
+    <div className="blog cosmic-bg-bright">
+      <div className="bg-overlay-2"></div>
+      <div className="title">Blog</div>
+      <div className="blog-container">
+        {blogs.length > 0 ? (
+          blogs.map(post => (
+            <div className="blog-post-card" key={post.id}>
+              <h2 className="post-title">{post.title}</h2>
+              <p className="post-description">{post.description}</p>
+              <div className="post-link-date">
                 <p className="post-date">{new Date(post.published_date).toLocaleDateString()}</p>
-                <p className="post-description">{post.description}</p>
-                {post.image && (
-                  <img src={post.image} alt={post.title} className="post-image" />
-                )}
-                <a className="post-link" href={post.get_absolute_url}>Read More</a>
+                <a href={`/blog/${post.slug}`}><button className="post-link">Read More</button></a>
               </div>
-            ))
-          ) : (
-            <h2>Loading...</h2>
-          )}
-        </div>
+            </div>
+          ))
+        ) : (
+          <h2 className="loading">Loading...</h2>
+        )}
       </div>
     </div>
   );

@@ -1,0 +1,125 @@
+.project-detail {
+    background: transparent;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.projectd-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transition: opacity 1.5s ease;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.projectd-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.projectd-title {
+    position: relative;
+    max-width: 70%;
+    margin-top: 1rem;
+    margin-bottom: 3rem;
+    font-size: 3rem;
+    font-weight: 550;
+    color: #fff;
+    z-index: 2;
+    text-align: center;
+}
+
+.projectd-content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    position: relative;
+}
+
+.projectd-media {
+    flex: 1;
+    min-width: 300px;
+    position: relative;
+}
+
+.projectd-image {
+    width: 100%;
+    border: 1px solid #333;
+    border-radius: 10px;
+}
+
+.projectd-info {
+    flex: 1;
+    min-width: 300px;
+    position: relative;
+}
+
+.info-box {
+    background-color: rgba(0, 0, 0, 0.85);
+    padding: 20px;
+    border-radius: 10px;
+    position: relative;
+}
+
+.projectd-link {
+    color: #17a2b8;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.projectd-link:hover {
+    text-decoration: underline;
+}
+
+.projectd-dates {
+    margin-top: 10px;
+    font-size: 1.2rem;
+}
+
+.projectd-topics,
+.projectd-associations {
+    margin-top: 20px;
+}
+
+.projectd-topics strong,
+.projectd-associations strong {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.projectd-topics ul,
+.projectd-associations ul {
+    list-style: none;
+    padding: 0;
+}
+
+.projectd-topics li,
+.projectd-associations li {
+    margin: 5px 0;
+}
+
+.projectd-description {
+    background-color: rgba(0, 0, 0, 0.65);
+    color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+    text-align: justify;
+    position: relative;
+    white-space: pre-wrap;
+}
+
+.projectd-description h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 2rem;
+}
