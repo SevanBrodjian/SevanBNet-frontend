@@ -87,18 +87,14 @@ function Home() {
     const height = 60;
     const wobble = 12;
     const points = [
-      [width * 1 / 8 + Math.random() * wobble, height / 2 + Math.random() * wobble],
-      [width * 2 / 8 + Math.random() * wobble, height / 4 + Math.random() * wobble],
-      [width * 3 / 8 + Math.random() * wobble, Math.random() * wobble],
-      [width * 4 / 8 + Math.random() * wobble, height / 8 + Math.random() * wobble],
-      [width * 5 / 8 + Math.random() * wobble, Math.random() * wobble],
-      [width * 6 / 8 + Math.random() * wobble, height / 4 + Math.random() * wobble],
-      [width * 7 / 8 + Math.random() * wobble, height / 2 + Math.random() * wobble],
-      [width * 6 / 8 + Math.random() * wobble, height * 3 / 4 + Math.random() * wobble],
-      [width * 5 / 8 + Math.random() * wobble, height + Math.random() * wobble],
-      [width * 4 / 8 + Math.random() * wobble, height * 7 / 8 + Math.random() * wobble],
-      [width * 3 / 8 + Math.random() * wobble, height + Math.random() * wobble],
-      [width * 2 / 8 + Math.random() * wobble, height * 3 / 4 + Math.random() * wobble],
+      [Math.random() * wobble, height / 2 + Math.random() * wobble],
+      [width / 6 + Math.random() * wobble, height / 6 + Math.random() * wobble],
+      [width / 2 + Math.random() * wobble, Math.random() * wobble],
+      [width * 5 / 6 + Math.random() * wobble, height / 6 + Math.random() * wobble],
+      [width + Math.random() * wobble, height / 2 + Math.random() * wobble],
+      [width * 5 / 6 + Math.random() * wobble, height * 5 / 6 + Math.random() * wobble],
+      [width / 2 + Math.random() * wobble, height + Math.random() * wobble],
+      [width * 1 / 6 + Math.random() * wobble, height * 5 / 6 + Math.random() * wobble],
     ];
 
     let path = `M ${points[0][0]},${points[0][1]}`;
