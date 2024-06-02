@@ -50,17 +50,17 @@ function ProjectDetail() {
           </div>
           <div className="projectd-info">
             <div className="projectd-dates bigscreen">
-              {project.ongoing ? (
-                <em>{project.start} - Present (ongoing)</em>
-              ) : (
+              {project.end ? (
                 <em>{project.start} - {project.end}</em>
+              ) : (
+                <em>{project.start} - Present (ongoing)</em>
               )}
             </div>
             <div className="projectd-dates smallscreen">
-              {project.ongoing ? (
-                <em>{project.start} - <br></br>Present (ongoing)</em>
-              ) : (
+              {project.end ? (
                 <em>{project.start} - <br></br>{project.end}</em>
+              ) : (
+                <em>{project.start} - <br></br>Present (ongoing)</em>
               )}
             </div>
             {project.link && (

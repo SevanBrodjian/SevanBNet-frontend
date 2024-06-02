@@ -36,7 +36,7 @@ function Projects() {
               <div className="project-details">
                 <a className="project-title" href={`/projects/${project.slug}`}>{project.title}</a>
                 <p className="project-status">
-                  {project.ongoing ? "Ongoing Project" : `Project closed on ${project.end}`}
+                  {project.end ? `Project closed on ${project.end}` : "Ongoing Project"}
                 </p>
                 {project.description && (
                   <p className="project-description">{project.description}</p>

@@ -32,13 +32,12 @@
   border-radius: 15px;
   padding: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  margin-bottom: 20px;
-  border: 3px solid white;
+  margin-bottom: 0px;
   transition: all 0.8s ease;
 }
 
 .homepage-logo {
-  height: 70px;
+  height: 128px;
 }
 
 .homepage-msg {
@@ -51,7 +50,7 @@
 .buttons-container {
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  align-items: center;
   width: max-content;
 }
 
@@ -84,14 +83,26 @@
   background-color: rgba(10, 10, 0, 0.5);
 }
 
+.animated-path {
+  width: 200px;
+  height: 60px;
+  margin-top: 2vh;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.animated-path path {
+  fill: rgba(0, 0, 0, 0.6);
+}
+
+.animated-path:hover path {
+  fill: white;
+}
+
 @media (max-width: 768px) {
   .home-btn {
     border: 2px solid white;
     padding: 10px 20px;
     font-size: 17.5px;
-  }
-
-  .animation-btn {
-    border: 2px solid rgb(255, 255, 200);
   }
 }
