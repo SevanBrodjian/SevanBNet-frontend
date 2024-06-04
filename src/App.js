@@ -25,6 +25,7 @@ function App() {
         <div className="content custom-scroll">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/home" element={<Navigate to="/" replace />} />
             <Route path="/projects" element={<Projects />} />
             <Route path="/projects/:projectId" element={<ProjectDetail />} />
             <Route path="/blog" element={<Blog />} />
