@@ -64,41 +64,67 @@ function Home() {
 
   useEffect(() => {
     const animatePaths = () => {
-      document.querySelectorAll('.animated-path path').forEach(path => {
+      document.querySelectorAll('.animated-path').forEach(svg => {
+        const path = svg.querySelector('path');
+        const width = svg.clientWidth;
+        const height = svg.clientHeight;
+        
+        // Set an initial path
+        path.setAttribute('d', generateRandomCurvedPath(width, height));
+  
         const animatePath = () => {
-          const newPath = generateRandomCurvedPath();
+          const newPath = generateRandomCurvedPath(width, height);
+          const duration = Math.random() * 4000 + 4000;
           anime({
             targets: path,
             d: newPath,
             easing: 'easeInOutSine',
-            duration: 4000, // Increased duration for smoother transition
-            complete: animatePath, // Recursively call the animation for continuous effect
+            duration: duration,
+            complete: animatePath,
           });
         };
         animatePath();
       });
+  
+      document.querySelectorAll('.animated-path text').forEach(text => {
+        const svg = text.closest('.animated-path');
+        const width = svg.clientWidth;
+        const height = svg.clientHeight;
+        const floatX = 0.05 * width;
+        const floatY = 0.05 * height;
+        const randomX = `${Math.random() * floatX - (floatX / 2)}px`;
+        const randomY = `${Math.random() * floatY - (floatY / 2)}px`;
+        text.style.setProperty('--random-x', randomX);
+        text.style.setProperty('--random-y', randomY);
+  
+        const duration = `${Math.random() * 4000 + 4000}ms`;
+        text.style.setProperty('--duration', duration);
+      });
     };
-
+  
     animatePaths();
   }, []);
+  
 
-  const generateRandomCurvedPath = () => {
-    const width = 200;
-    const height = 60;
-    const wobble = 12;
+  const generateRandomCurvedPath = (fullWidth, fullHeight) => {
+    const width = 1.0 * fullWidth;
+    const height = 1.0 * fullHeight;
+    const offX = (fullWidth - width) / 2;
+    const offY = (fullHeight - height) / 2;
+    const wobble = Math.min(1 / 5 * height, 1 / 5 * width);
     const points = [
-      [Math.random() * wobble, height / 2 + Math.random() * wobble],
-      [width / 6 + Math.random() * wobble, height / 6 + Math.random() * wobble],
-      [width / 2 + Math.random() * wobble, Math.random() * wobble],
-      [width * 5 / 6 + Math.random() * wobble, height / 6 + Math.random() * wobble],
-      [width + Math.random() * wobble, height / 2 + Math.random() * wobble],
-      [width * 5 / 6 + Math.random() * wobble, height * 5 / 6 + Math.random() * wobble],
-      [width / 2 + Math.random() * wobble, height + Math.random() * wobble],
-      [width * 1 / 6 + Math.random() * wobble, height * 5 / 6 + Math.random() * wobble],
+      [offX + Math.random() * wobble,                   offY + height / 2 + Math.random() * wobble],
+      [offX + width / 6 + Math.random() * wobble,       offY + height / 6 + Math.random() * wobble],
+      [offX + width / 2 + Math.random() * wobble,       offY + Math.random() * wobble],
+      [offX + width * 5 / 6 + Math.random() * wobble,   offY + height / 6 + Math.random() * wobble],
+      [offX + width + Math.random() * wobble,           offY + height / 2 + Math.random() * wobble],
+      [offX + width * 5 / 6 + Math.random() * wobble,   offY + height * 5 / 6 + Math.random() * wobble],
+      [offX + width / 2 + Math.random() * wobble,       offY + height + Math.random() * wobble],
+      [offX + width * 1 / 6 + Math.random() * wobble,   offY + height * 5 / 6 + Math.random() * wobble],
     ];
-
+  
     let path = `M ${points[0][0]},${points[0][1]}`;
-
+  
     for (let i = 0; i < points.length + 1; i++) {
       const current = points[i % points.length];
       const next = points[(i + 1) % points.length];
@@ -108,9 +134,9 @@ function Home() {
       ];
       path += ` Q ${current[0]},${current[1]} ${midPoint[0]},${midPoint[1]}`;
     }
-
+  
     path += ' Z';
-
+  
     return path;
   };
 
@@ -130,32 +156,39 @@ function Home() {
     <div className="home">
       <div ref={sketchRef} className="background-animation" style={{ opacity: opacity }}></div>
       <div className="home-content">
-        <div className="welcome-box">
-          <img className="homepage-logo" src={logo} alt="Logo" />
-          {/* <span className="homepage-msg">SevanB.net</span> */}
-        </div>
+        <img className="homepage-logo" src={logo} alt="Logo" />
         <div className="buttons-container">
-          <Link to="/projects">
-            <svg className="animated-path">
-              <path d={generateRandomCurvedPath()} />
-              <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fill="white" fontSize="20">Projects</text>
-            </svg>
-          </Link>
-          <Link to="/blog">
-            <svg className="animated-path">
-              <path d={generateRandomCurvedPath()} />
-              <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fill="white" fontSize="20">Blog</text>
-            </svg>
-          </Link>
-          <Link to="/about">
-            <svg className="animated-path">
-              <path d={generateRandomCurvedPath()} />
-              <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fill="white" fontSize="20">About Me</text>
-            </svg>
-          </Link>
-          <button className="home-btn animation-btn" onClick={changeAnimation}>Change Animation</button>
+          <div className="buttons-row">
+            <Link to="/projects">
+              <svg className="animated-path">
+                <path d={generateRandomCurvedPath()} />
+                <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" className="text-drift">Projects</text>
+              </svg>
+            </Link>
+            <Link to="/blog">
+              <svg className="animated-path">
+                <path d={generateRandomCurvedPath()} />
+                <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" className="text-drift">Blog</text>
+              </svg>
+            </Link>
+          </div>
+          <div className="buttons-row">
+            <Link to="/about">
+              <svg className="animated-path">
+                <path d={generateRandomCurvedPath()} />
+                <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" className="text-drift">About Me</text>
+              </svg>
+            </Link>
+            <Link to="#">
+              <svg className="animated-path gold" onClick={changeAnimation}>
+                <path d={generateRandomCurvedPath()} />
+                <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" className="text-drift">Change Animation</text>
+              </svg>
+            </Link>
+          </div>
         </div>
       </div>
+      <span className="homepage-msg">SevanB.net</span>
     </div>
   );
 }

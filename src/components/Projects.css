@@ -19,7 +19,7 @@
 .project-card {
     display: flex;
     margin: 2rem 0;
-    background-color: rgba(0, 0, 0, 0.625);
+    background-color: rgba(0, 0, 0, 0.65);
     border-radius: 25px;
     border: 2px solid #222222;
     z-index: 1;

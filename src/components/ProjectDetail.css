@@ -81,12 +81,13 @@
     border-radius: 10px;
     font-size: 1.5rem;
     font-weight: 550;
-    color: #17a2b8;
+    color: #2bc1d8;
+    background-color: rgb(23, 162, 184, 0.1);
     transition: all 0.2s ease;
 }
 
 .proj-link-btn:hover {
-    background-color: rgb(23, 162, 184, 0.2);
+    background-color: rgba(15, 95, 107, 0.35);
 }
 
 .proj-link-btn:active {

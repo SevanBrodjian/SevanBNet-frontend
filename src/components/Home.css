@@ -1,9 +1,11 @@
 .home {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  height: 90%;
+  min-height: 100%;
   overflow: hidden;
+  padding: 2vh 0;
 }
 
 .background-animation {
@@ -18,91 +20,385 @@
 
 .home-content {
   display: flex;
+  flex: 3;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   z-index: 10;
-}
-
-.welcome-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: rgba(0, 0, 0, 0.4);
-  border-radius: 15px;
-  padding: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  margin-bottom: 0px;
-  transition: all 0.8s ease;
+  min-width: 100%;
+  margin-bottom: 3vh;
 }
 
 .homepage-logo {
-  height: 128px;
-}
-
-.homepage-msg {
-  color: white;
-  font-size: 2rem;
-  text-align: center;
-  margin-top: 10px;
+  margin: 2vh 0;
+  max-width: min(30vh, 30vw, 450px);
 }
 
 .buttons-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: max-content;
-}
-
-.home-btn {
-  margin-top: 2vh;
-  border: 3px solid white;
-  color: white;
-  background-color: rgba(0, 0, 0, 0.4);
-  padding: 15px 30px;
-  font-size: 30px;
-  font-weight: bold;
-  cursor: pointer;
-  border-radius: 10px;
+  justify-content: center;
+  max-width: min(100%, 1800px);
   width: 100%;
-  transition: all 0.2s ease;
+  padding-bottom: 5vh;
+  overflow: hidden;
+  gap: 5vh;
 }
 
-.home-btn:hover {
-  background-color: white;
-  color: black;
+.buttons-container a {
+  width: 80%;
+  display: flex;
+  justify-content: center;
 }
 
-.home-btn:active {
-  transform: scale(0.9);
-}
-
-.animation-btn {
-  color: rgb(255, 255, 200);
-  border: 3px solid rgb(255, 255, 200);
-  background-color: rgba(10, 10, 0, 0.5);
+.buttons-row {
+  min-width: 100%;
+  display: flex;
+  flex-direction: row;
 }
 
 .animated-path {
-  width: 200px;
-  height: 60px;
-  margin-top: 2vh;
+  min-width: 90%;
+  height: 20vh;
+  margin-top: 0vh;
+  padding: 0;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.4s ease;
+  overflow: visible;
 }
 
 .animated-path path {
-  fill: rgba(0, 0, 0, 0.6);
+  fill: rgba(0, 0, 0, 0.65);
 }
 
 .animated-path:hover path {
-  fill: white;
+  fill: rgba(220, 220, 220, 0.9);
 }
 
-@media (max-width: 768px) {
-  .home-btn {
-    border: 2px solid white;
-    padding: 10px 20px;
-    font-size: 17.5px;
+.animated-path:active path {
+  fill: rgba(255, 255, 255, 0.95);
+}
+
+.animated-path:hover .text-drift {
+  fill: black;
+  color: black;
+}
+
+.gold path {
+  fill: rgba(20, 20, 0, 0.65);
+}
+
+.gold .text-drift {
+  fill: rgb(255, 255, 235);
+  font-size: 3rem;
+}
+
+.gold:hover path {
+  fill: rgba(225, 225, 200, 0.9);
+}
+
+.gold:active path {
+  fill: rgba(255, 255, 235, 0.95);
+}
+
+.gold:hover .text-drift {
+  fill: rgb(20, 20, 0);
+  color: rgb(20, 20, 0);
+}
+
+@keyframes drift {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(var(--random-x), var(--random-y)); }
+}
+
+.text-drift {
+  animation: drift var(--duration) infinite ease-in-out alternate;
+  font-size: 3rem;
+  color: white;
+  fill: white;
+  transition: fill 0.3s ease, color 0.3s ease; 
+}
+
+.homepage-msg {
+  font-size: 1.2rem;
+  letter-spacing: 0.1em; 
+  color: #ffffff;
+  text-align: center;
+  margin: 1vh 0;
+  padding: 0.1em 0.4em 0.2em 0.4em;
+  background: linear-gradient(90deg, rgba(0, 23, 25, 0.65), rgba(0, 0, 0, 0.65));
+  border-radius: 10px;
+  display: inline-block;
+  z-index: 10;
+}
+
+.homepage-msg::before {
+  content: '{ ';
+}
+
+.homepage-msg::after {
+  content: ' }';
+}
+
+/* Mobile Phones (Portrait) */
+@media (max-width: 480px) {
+  .homepage-logo {
+    max-width: min(40vh, 40vw, 450px);
+    margin-top: 4vh;
+  }
+
+  .buttons-container {
+    max-width: min(100%, 767px);
+    gap: 2vh;
+    padding-bottom: 3vh;
+  }
+
+  .buttons-row {
+    min-width: 100%;
+    flex-direction: column;
+    align-items: center;
+    gap: 3vh;
+  }
+
+  .animated-path {
+    min-width: 90%;
+    height: 9vh;
+  }
+
+  .text-drift {
+    font-size: 1.35rem;
+  }
+
+  .gold .text-drift {
+    font-size: 1.15rem;
+  }
+
+  .homepage-msg {
+    font-size: 0.8rem;
+    margin-bottom: 10vh !important;
+  }
+
+  .home-content {
+    margin-bottom: 5vh;
+    flex: none;
+  }
+
+  .home {
+    justify-content: flex-start;
   }
 }
+
+/* Mobile Phones (Landscape) */
+@media (max-width: 767px) and (min-width: 481px) {
+  .homepage-logo {
+    max-width: min(30vh, 30vw, 450px);
+    margin-top: 0vh;
+  }
+
+  .buttons-container {
+    max-width: min(90%, 767px);
+    gap: 5vh;
+  }
+
+  .buttons-row {
+    min-width: 100%;
+    flex-direction: row;
+  }
+
+  .animated-path {
+    min-width: 90%;
+    height: 12.5vh;
+  }
+
+  .text-drift {
+    font-size: 1.35rem;
+  }
+
+  .gold .text-drift {
+    font-size: 1.15rem;
+  }
+
+  .homepage-msg {
+    font-size: 1rem;
+    margin-bottom: 10vh;
+  }
+}
+
+/* Tablets (Portrait) */
+@media (max-width: 1024px) and (min-width: 768px) {
+  .homepage-logo {
+    max-width: 35vw;
+    margin-top: 1vh;
+  }
+
+  .buttons-container {
+    max-width: min(90%, 1024px);
+    gap: 5vh;
+  }
+
+  .buttons-row {
+    min-width: 100%;
+    flex-direction: row;
+  }
+
+  .animated-path {
+    min-width: 90%;
+    height: 12.5vh;
+  }
+
+  .text-drift {
+    font-size: 2rem;
+  }
+
+  .gold .text-drift {
+    font-size: 1.75rem;
+  }
+
+  .homepage-msg {
+    font-size: 1.4rem;
+    margin-bottom: 10vh;
+  }
+}
+
+/* Tablets (Landscape) */
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .homepage-logo {
+    max-width: 22.5vw;
+    margin-top: 1vh;
+  }
+
+  .buttons-container {
+    max-width: min(100%, 900px);
+    gap: 5vh;
+  }
+
+  .buttons-row {
+    min-width: 100%;
+    flex-direction: row;
+  }
+
+  .animated-path {
+    min-width: 80%;
+    height: 15vh;
+  }
+
+  .text-drift {
+    font-size: 2.25rem;
+  }
+
+  .gold .text-drift {
+    font-size: 1.75rem;
+  }
+
+  .homepage-msg {
+    font-size: 1.4rem;
+    margin-bottom: 10vh;
+  }
+}
+
+/* Small Desktops / Laptops */
+@media (min-width: 1281px) and (max-width: 1440px) {
+  .homepage-logo {
+    max-width: 18vw;
+    margin-top: 1vh;
+  }
+
+  .buttons-container {
+    max-width: min(100%, 1200px);
+    gap: 5vh;
+  }
+
+  .buttons-row {
+    min-width: 100%;
+    flex-direction: row;
+  }
+
+  .animated-path {
+    min-width: 80%;
+    height: 15vh;
+  }
+
+  .text-drift {
+    font-size: 2.5rem;
+  }
+
+  .gold .text-drift {
+    font-size: 2rem;
+  }
+
+  .homepage-msg {
+    font-size: 1.7rem;
+  }
+}
+
+/* Standard Desktops / Large Laptops */
+@media (min-width: 1441px) and (max-width: 1920px) {
+  .homepage-logo {
+    max-width: 20vw;
+    margin-top: 1vh;
+  }
+
+  .buttons-container {
+    max-width: min(100%, 1441px);
+    gap: 5vh;
+  }
+
+  .buttons-row {
+    min-width: 100%;
+    flex-direction: row;
+  }
+
+  .animated-path {
+    min-width: 80%;
+    height: 15vh;
+  }
+
+  .text-drift {
+    font-size: 3rem;
+  }
+
+  .gold .text-drift {
+    font-size: 2.75rem;
+  }
+
+  .homepage-msg {
+    font-size: 1.7rem;
+  }
+}
+
+/* Large Desktops / 4K Monitors */
+@media (min-width: 1921px) {
+  .homepage-logo {
+    max-width: 18vw;
+    margin-top: 1vh;
+  }
+
+  .buttons-container {
+    max-width: min(100%, 1800px);
+    gap: 5vh;
+  }
+
+  .buttons-row {
+    min-width: 100%;
+    flex-direction: row;
+  }
+
+  .animated-path {
+    min-width: 90%;
+    height: 18vh;
+  }
+
+  .text-drift {
+    font-size: 3.5rem;
+  }
+
+  .gold .text-drift {
+    font-size: 3.25rem;
+  }
+
+  .homepage-msg {
+    font-size: 1.8rem;
+  }
+}
+
