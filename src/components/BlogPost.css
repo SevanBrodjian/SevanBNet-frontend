@@ -1,0 +1,111 @@
+.blog-post {
+  min-height: 100%;
+  min-width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow-y: auto;
+}
+
+.blog-post-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: black;
+  text-align: center;
+  max-width: min(90%, 1600px);
+  position: relative;
+  width: 100%;
+  margin-bottom: 2rem;
+} 
+
+.blog-post-title-container {
+  margin-top: 5vh;
+  margin-bottom: 2vh;
+  max-width: 80%;
+  color: black;
+}
+
+.blog-title {
+  font-size: 3rem;
+  font-weight: bold;
+}
+
+.blog-content-container {
+  text-align: justify;
+  overflow-x: hidden;
+  margin-bottom: 1vh;
+  border-radius: 10px;
+  padding: 40px;
+  font-weight: 550;
+}
+
+.blog-content {
+  font-size: 1.5rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  margin-bottom: 2vh;
+}
+
+.blog-scroll.blog-post::-webkit-scrollbar,
+.blog-scroll.blog-post *::-webkit-scrollbar {
+  max-width: 12.5px !important;
+}
+
+.blog-scroll.blog-post::-webkit-scrollbar-track,
+.blog-scroll.blog-post *::-webkit-scrollbar-track {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  border-radius: 0px !important;
+}
+
+.blog-scroll.blog-post::-webkit-scrollbar-thumb,
+.blog-scroll.blog-post *::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+  border-radius: 10px !important;
+}
+
+.blog-scroll.blog-post::-webkit-scrollbar-thumb:hover,
+.blog-scroll.blog-post *::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+.blog-scroll.blog-post::-webkit-scrollbar-thumb:active,
+.blog-scroll.blog-post *::-webkit-scrollbar-thumb:active {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+}
+
+body.ios .blog-content-container {
+  margin-bottom: 15vh;
+}
+
+@media (max-width: 768px) {
+  
+  .blog-post-container {
+    max-width: 95%;
+  } 
+
+  .blog-post-title-container {
+    max-width: 90%;
+    margin-top: 7vh;
+    margin-bottom: 3vh;
+  }
+
+  .blog-title {
+    font-size: 2.25rem;
+  }
+
+  .blog-content-container {
+    margin-bottom: 15vh;
+    padding: 20px;
+    border: none;
+  }
+
+  .blog-content {
+    font-size: 1.25rem;
+    line-height: 1.4;
+    margin-bottom: 0;
+  }
+}

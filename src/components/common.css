@@ -1,0 +1,148 @@
+.title {
+    position: relative;
+    margin-top: 0.8rem;
+    margin-bottom: 1.75rem;
+    font-size: 4rem;
+    font-weight: 550;
+    color: #fff;
+    z-index: 2;
+}
+
+.cosmic-bg-white {
+    background-image: url('../assets/cosmicweb_bw.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-position: right top;
+}
+
+.cosmic-bg-bright {
+    background-image: url('../assets/cosmicweb_bright.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-position: right top;
+}
+
+.cosmic-bg-dark {
+    background-image: url('../assets/cosmicweb_dark.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+}
+
+.static-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('../assets/static.gif') repeat;
+    opacity: 0.065;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.bg-overlay-1 {
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0.0);
+    top: 0;
+    left: 0;
+    min-width: 100%;
+    min-height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.bg-overlay-2 {
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0.35);
+    top: 0;
+    left: 0;
+    min-width: 100%;
+    min-height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.bg-overlay-3 {
+    position: fixed;
+    background-color: rgba(255, 255, 255, 0.8);
+    left: 0;
+    min-width: calc(100% - 12.5px);
+    min-height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.loading {
+    display: inline-block;
+    margin-top: 5vh;
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 2px solid #222222;
+    background: rgba(0, 0, 0, 0.55);
+    color: white;
+    z-index: 1;
+    width: auto;
+}
+
+.custom-scroll::-webkit-scrollbar,
+.custom-scroll *::-webkit-scrollbar {
+    max-width: 15px;
+}
+
+.custom-scroll::-webkit-scrollbar-track,
+.custom-scroll *::-webkit-scrollbar-track {
+    background-color: rgba(255, 255, 255, 0.15); 
+    border-radius: 10px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb,
+.custom-scroll *::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:hover,
+.custom-scroll *::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:active,
+.custom-scroll *::-webkit-scrollbar-thumb:active {
+    background-color: rgba(255, 255, 255, 0.7);
+}
+
+.bigscreen {
+    display: flex;
+}
+
+.smallscreen {
+    display: none;
+}
+
+
+@media (max-width: 768px) {
+    .title {
+        font-size: 3rem;
+        margin-bottom: 2rem;
+    }
+
+    .custom-scroll::-webkit-scrollbar,
+    .custom-scroll *::-webkit-scrollbar {
+        max-width: 12.5px;
+    }
+
+    .bg-overlay-3 {
+        min-width: 100%;
+    }
+
+    .bigscreen {
+        display: none;
+    }
+
+    .smallscreen {
+        display: flex;
+    }
+}

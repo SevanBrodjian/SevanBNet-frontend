@@ -1,0 +1,162 @@
+.project-detail {
+    background: transparent;
+    min-width: 100%;
+    min-height: 100%;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+}
+
+.projectd-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.projectd-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-width: min(80%, 1600px);
+    margin-top: 3vh;
+    margin-bottom: 5vh;
+}
+
+.projectd-title {
+    position: relative;
+    max-width: 90%;
+    margin-bottom: 2.5rem;
+    font-size: 3rem;
+    font-weight: 550;
+    color: #fff;
+    text-align: center;
+}
+
+.projectd-content {
+    width: 100%;
+    max-width: 1000px;
+}
+
+.projectd-img {
+    position: relative;
+    border-radius: 10px;
+    border: 2px solid #333;
+    width: 100%;
+    border-radius: 10px;
+}
+
+.projectd-media {
+    position: relative;
+    max-width: 1000px;
+    padding-bottom: 56.25%;
+}
+
+.projectd-media iframe {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+}
+
+.projectd-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 100%;
+    gap: calc(10%);
+    margin-top: 2vh;
+}
+
+.proj-link-btn {
+    border: 2px solid rgb(23, 162, 184);
+    padding: 0.5rem 1rem;
+    background-color: transparent;
+    cursor: pointer;
+    border-radius: 10px;
+    font-size: 1.5rem;
+    font-weight: 550;
+    color: #2bc1d8;
+    background-color: rgb(23, 162, 184, 0.1);
+    transition: all 0.2s ease;
+}
+
+.proj-link-btn:hover {
+    background-color: rgba(15, 95, 107, 0.35);
+}
+
+.proj-link-btn:active {
+    transform: scale(0.95);
+}
+
+.projectd-dates {
+    font-size: 1.4rem;
+    color: white;
+}
+
+.projectd-description {
+    background-color: rgba(0, 0, 0, 0.75);
+    color: #eee;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 2.5vh;
+    text-align: justify;
+    white-space: pre-wrap;
+    margin-bottom: 5vh;
+}
+
+.desc-header {
+    margin-bottom: 3vh;
+    font-size: 3rem;
+    font-weight: 450;
+    color: #fff;
+    text-align: center;
+}
+
+.desc-text {
+    font-size: 1.5rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    margin-bottom: 2vh;
+}
+
+body.ios .projectd-description {
+    margin-bottom: 15vh;
+}
+
+@media (max-width: 768px) {
+    .projectd-title {
+        max-width: 95%;
+        font-size: 2rem;
+        font-weight: 550;
+    }
+
+    .projectd-dates {
+        font-size: 1rem;
+    }
+
+    .proj-link-btn {
+        font-size: 1rem;
+        padding: 0.5rem 0.5rem;
+    }
+
+    .projectd-description {
+        margin-bottom: 15vh;
+        padding: 20px 0;
+    }
+
+    .desc-header {
+        margin-bottom: 3vh;
+        font-size: 2rem;
+    }
+
+    .desc-text {
+        font-size: 1.15rem;
+        line-height: 1.4;
+    }
+}

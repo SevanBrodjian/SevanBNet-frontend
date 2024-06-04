@@ -1,36 +1,39 @@
-import React, { useEffect, useState } from 'react';
-import logo from './logo.svg';
+import React, { useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Home from "./components/Home";
+import Projects from "./components/Projects";
+import Blog from "./components/Blog";
+import About from "./components/About";
+import Navbar from "./components/Navbar";
+import ProjectDetail from "./components/ProjectDetail";
+import BlogPost from "./components/BlogPost";
 import './App.css';
+import './components/common.css';
 
 function App() {
-  const [numBlogPosts, setNumBlogPosts] = useState(0);
-  console.log(process.env.REACT_APP_API_URL);
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL}/api/blogposts/`)
-      .then(response => response.json())
-      .then(data => {
-        setNumBlogPosts(data.length);
-      })
-      .catch(error => console.error("There was an error fetching the blog posts:", error));
+    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (iOS) {
+      document.body.classList.add('ios');
+    }
   }, []);
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          TEST - Hello World! There are {numBlogPosts} blog posts.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="app-container">
+        <Navbar />
+        <div className="content custom-scroll">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/projects" element={<Projects />} />
+            <Route path="/projects/:projectId" element={<ProjectDetail />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:blogId" element={<BlogPost />} />
+            <Route path="/about" element={<About />} />
+          </Routes>
+        </div>
+      </div>
+    </Router>
   );
 }
 
