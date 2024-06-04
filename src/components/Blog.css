@@ -76,6 +76,10 @@
     color: #bbb;
 }
 
+body.ios .blog-container {
+    margin-bottom: 12.5vh;
+}
+
 @media (max-width: 768px) {
     .blog-container {
         margin-bottom: 12.5vh;

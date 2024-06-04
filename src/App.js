@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./components/Home";
 import Projects from "./components/Projects";
@@ -11,6 +11,13 @@ import './App.css';
 import './components/common.css';
 
 function App() {
+  useEffect(() => {
+    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (iOS) {
+      document.body.classList.add('ios');
+    }
+  }, []);
+
   return (
     <Router>
       <div className="app-container">

@@ -70,6 +70,10 @@
     -webkit-box-orient: vertical;
 }
 
+body.ios .project-cards-container {
+    margin-bottom: 12.5vh;
+}
+
 @media (max-width: 768px) {
     .project-cards-container {
         margin-bottom: 12.5vh;
