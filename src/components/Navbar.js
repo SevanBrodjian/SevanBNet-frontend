@@ -34,8 +34,8 @@ function Navbar() {
           <li><Link to="/about" onClick={() => setIsNavExpanded(false)} className={location.pathname === "/about" ? "active" : ""}>About Me</Link></li>
         </ul>
         <div className="social-links bigscreen">
-          <Link to="https://github.com/SevanBrodjian" target="_blank"><img src={gitLogo} alt="GitHub" /></Link>
-          <Link to="https://www.linkedin.com/in/sevan-b/" target="_blank"><img src={liLogo} alt="LinkedIn" /></Link>
+          <a href="https://github.com/SevanBrodjian" target="_blank" rel="noopener noreferrer"><img src={gitLogo} alt="GitHub" /></a>
+          <a href="https://www.linkedin.com/in/sevan-b/" target="_blank" rel="noopener noreferrer"><img src={liLogo} alt="LinkedIn" /></a>
         </div>
         <CSSTransition
           in={isNavExpanded}
@@ -57,8 +57,8 @@ function Navbar() {
           unmountOnExit
         >
           <div className="social-links smallscreen">
-            <Link to="https://github.com/SevanBrodjian" target="_blank"><img src={gitLogo} alt="GitHub" /></Link>
-            <Link to="https://www.linkedin.com/in/sevan-b/" target="_blank"><img src={liLogo} alt="LinkedIn" /></Link>
+            <a href="https://github.com/SevanBrodjian" target="_blank" rel="noopener noreferrer"><img src={gitLogo} alt="GitHub" /></a>
+            <a href="https://www.linkedin.com/in/sevan-b/" target="_blank" rel="noopener noreferrer"><img src={liLogo} alt="LinkedIn" /></a>
           </div>
         </CSSTransition>
       </nav>
