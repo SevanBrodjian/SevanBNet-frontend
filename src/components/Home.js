@@ -4,7 +4,7 @@ import { debounce } from 'lodash';
 import p5 from 'p5';
 import anime from 'animejs/lib/anime.es.js';
 import './Home.css';
-import logo from '../assets/site-logo.png';
+// import logo from '../assets/site-logo.png';
 import reactionDiffusion from './bg_animations/reactionDiffusion.js';
 import differentialGrowth from './bg_animations/differentialGrowth.js';
 import particleLife from './bg_animations/particleLife.js';
@@ -74,7 +74,7 @@ function Home() {
   
         const animatePath = () => {
           const newPath = generateRandomCurvedPath(width, height);
-          const duration = Math.random() * 4000 + 4000;
+          const duration = Math.random() * 3500 + 3500;
           anime({
             targets: path,
             d: newPath,
@@ -90,8 +90,8 @@ function Home() {
         const svg = text.closest('.animated-path');
         const width = svg.clientWidth;
         const height = svg.clientHeight;
-        const floatX = 0.05 * width;
-        const floatY = 0.05 * height;
+        const floatX = 0.065 * width;
+        const floatY = 0.065 * height;
         const randomX = `${Math.random() * floatX - (floatX / 2)}px`;
         const randomY = `${Math.random() * floatY - (floatY / 2)}px`;
         text.style.setProperty('--random-x', randomX);
@@ -156,7 +156,7 @@ function Home() {
     <div className="home">
       <div ref={sketchRef} className="background-animation" style={{ opacity: opacity }}></div>
       <div className="home-content">
-        <img className="homepage-logo" src={logo} alt="Logo" />
+        <img className="homepage-logo" src="https://imgur.com/PBnrS8i.png" alt="Logo" />
         <div className="buttons-container">
           <div className="buttons-row">
             <Link to="/projects">

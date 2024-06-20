@@ -144,7 +144,7 @@
 /* Mobile Phones (Portrait) */
 @media (max-width: 480px) {
   .homepage-logo {
-    max-width: min(40vh, 40vw, 450px);
+    max-width: min(37.5vh, 37.5vw, 450px);
     margin-top: 4vh;
   }
 
@@ -163,7 +163,7 @@
 
   .animated-path {
     min-width: 90%;
-    height: 9vh;
+    height: 9.75vh;
   }
 
   .text-drift {
