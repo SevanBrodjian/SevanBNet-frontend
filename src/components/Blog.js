@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import './Blog.css';
 
 function Blog() {
@@ -23,7 +24,9 @@ function Blog() {
               <p className="post-description">{post.description}</p>
               <div className="post-link-date">
                 <p className="post-date">{new Date(post.published_date).toLocaleDateString()}</p>
-                <a href={`/blog/${post.slug}`}><button className="post-link-btn">Read More</button></a>
+                <Link to={`/blog/${post.slug}`}>
+                  <button className="post-link-btn">Read More</button>
+                </Link>
               </div>
             </div>
           ))

@@ -43,7 +43,7 @@ function ProjectDetail() {
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
                 ></iframe>
-                </div>
+              </div>
             ) : (
               <img className="projectd-img" src={project.img} alt={project.title} />
             )}
@@ -64,7 +64,9 @@ function ProjectDetail() {
               )}
             </div>
             {project.link && (
-              <a href={project.link}><button className="proj-link-btn">Project Source</button></a>
+              <a href={project.link} target="_blank" rel="noopener noreferrer">
+                <button className="proj-link-btn">Project Source</button>
+              </a>
             )}
           </div>
           <div className="projectd-description">

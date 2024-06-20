@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import './Projects.css';
 
 function Projects() {
@@ -18,9 +19,9 @@ function Projects() {
       <div className="project-cards-container">
         {projects.length > 0 ? (
           projects.map(project => (
-            <div className="project-card">
+            <div className="project-card" key={project.slug}>
               <div className="project-image">
-                <a href={`/projects/${project.slug}`} className="project-link">
+                <Link to={`/projects/${project.slug}`} className="project-link">
                   {project.img && project.img.includes('youtube') ? (
                     <iframe
                       src={project.img}
@@ -31,10 +32,10 @@ function Projects() {
                   ) : (
                     <img src={project.img} alt={project.title} />
                   )}
-                </a>
+                </Link>
               </div>
               <div className="project-details">
-                <a className="project-title" href={`/projects/${project.slug}`}>{project.title}</a>
+                <Link className="project-title" to={`/projects/${project.slug}`}>{project.title}</Link>
                 <p className="project-status">
                   {project.end ? `Project closed on ${project.end}` : "Ongoing Project"}
                 </p>
