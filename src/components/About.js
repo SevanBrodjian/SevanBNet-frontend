@@ -1,8 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import './About.css';
 import headshot from '../assets/rainforest_cropped.JPG';
 
 function About() {
+  const [isCVOpen, setIsCVOpen] = useState(false);
+  const [isResumeOpen, setIsResumeOpen] = useState(false);
+
+  const toggleCVPopup = () => setIsCVOpen(!isCVOpen);
+  const toggleResumePopup = () => setIsResumeOpen(!isResumeOpen);
+  const closePopup = () => {
+    setIsCVOpen(false);
+    setIsResumeOpen(false);
+  };
+
   return (
     <div className="about cosmic-bg-dark">
       <div className="bg-overlay-1"></div>
@@ -12,15 +22,35 @@ function About() {
         </div>
         <div className="text-container">
           <h1 className="about-name">Sevan Brodjian</h1>
-          <h3 className="about-subtitle">Data Science & Neurotechnology</h3>
+          <h3 className="about-subtitle">Computation and Neural Systems</h3>
+          <div className="links-container">
+            <button onClick={toggleCVPopup} className="about-link-btn">CV</button>
+            <button onClick={toggleResumePopup} className="about-link-btn">Resume</button>
+          </div>
           <p className="about-description">
-            Bringing three years of industry experience at the forefront of machine learning, I am currently preparing to pursue a PhD in Computation and Neural Systems at Caltech this Fall. Some of my work includes the development of end-to-end machine learning pipelines utilizing advanced techniques such as deep learning for regression tasks and vision transformers.
+            Coming from industry applications of machine learning, primarily in power grid optimization through load forecasting, I am now beginning to pursue a Ph.D. at Caltech this Fall. With a general love for the sciences, I am most interested in interdisciplinary work, drawing inspiration from neuroscience, physics, biology, philosophy, and beyond.
             <br /><br />
-            Explore my portfolio of personal projects and delve into my blog for insights into the applications I'm developing and the philosophical approach that guides my work.
+            Explore my portfolio of personal projects and dive into my blog for insights into what I'm working on and the philosophical grounding that guides my work.
             <br></br>
           </p>
         </div>
       </div>
+      {isCVOpen && (
+        <div className="popup-overlay" onClick={closePopup}>
+          <div className="popup-content" onClick={(e) => e.stopPropagation()}>
+            <button className="pdf-close-btn" onClick={toggleCVPopup}>X</button>
+            <iframe src="https://drive.google.com/file/d/1-Vxy1hyLh5NeTWmCb3i-T4X0nr1gIdD6/preview" className="popup-iframe" type="application/pdf" />
+          </div>
+        </div>
+      )}
+      {isResumeOpen && (
+        <div className="popup-overlay" onClick={closePopup}>
+          <div className="popup-content" onClick={(e) => e.stopPropagation()}>
+            <button className="pdf-close-btn" onClick={toggleResumePopup}>X</button>
+            <iframe src="https://drive.google.com/file/d/1i_i-cfGA80DceD8W69wgLDuAupEtMVI7/preview" className="popup-iframe" type="application/pdf" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
