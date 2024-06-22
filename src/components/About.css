@@ -140,11 +140,28 @@
     height: 100%;
     border: 5px solid #888888;
     border-radius: 20px;
+    transition: opacity 0.05s ease;
 }
 
 body.ios .about-container {
     margin-bottom: 15vh;
 }
+
+.loading-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 1.75rem;
+    text-align: center;
+    margin: auto;
+}
+
+.hidden {
+    display: none;
+}
+  
 
 @media (max-width: 768px) {
     .about-container {
@@ -175,5 +192,9 @@ body.ios .about-container {
     .pdf-close-btn {
         font-size: 1rem;
         padding: 7.5px 15px;
+    }
+
+    .loading-text {
+        font-size: 1.25rem;
     }
 }

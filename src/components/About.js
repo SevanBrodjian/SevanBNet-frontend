@@ -5,12 +5,30 @@ import headshot from '../assets/rainforest_cropped.JPG';
 function About() {
   const [isCVOpen, setIsCVOpen] = useState(false);
   const [isResumeOpen, setIsResumeOpen] = useState(false);
+  const [isCVLoading, setIsCVLoading] = useState(true);
+  const [isResumeLoading, setIsResumeLoading] = useState(true);
 
-  const toggleCVPopup = () => setIsCVOpen(!isCVOpen);
-  const toggleResumePopup = () => setIsResumeOpen(!isResumeOpen);
+  const toggleCVPopup = () => {
+    setIsCVOpen(!isCVOpen);
+    setIsCVLoading(true); // Set loading to true when opening the popup
+  };
+
+  const toggleResumePopup = () => {
+    setIsResumeOpen(!isResumeOpen);
+    setIsResumeLoading(true); // Set loading to true when opening the popup
+  };
+
   const closePopup = () => {
     setIsCVOpen(false);
     setIsResumeOpen(false);
+  };
+
+  const handleCVLoad = () => {
+    setIsCVLoading(false); // Set loading to false when PDF is loaded
+  };
+
+  const handleResumeLoad = () => {
+    setIsResumeLoading(false); // Set loading to false when PDF is loaded
   };
 
   return (
@@ -39,7 +57,14 @@ function About() {
         <div className="popup-overlay" onClick={closePopup}>
           <div className="popup-content" onClick={(e) => e.stopPropagation()}>
             <button className="pdf-close-btn" onClick={toggleCVPopup}>X</button>
-            <iframe src="https://drive.google.com/file/d/1-Vxy1hyLh5NeTWmCb3i-T4X0nr1gIdD6/preview" className="popup-iframe" type="application/pdf" />
+            <div className={`loading-text ${isCVLoading ? '' : 'hidden'}`}>Loading...</div>
+            <iframe
+              src="https://drive.google.com/file/d/1-Vxy1hyLh5NeTWmCb3i-T4X0nr1gIdD6/preview"
+              className="popup-iframe"
+              type="application/pdf"
+              onLoad={handleCVLoad}
+              style={{ opacity: isCVLoading ? 0 : 1 }}
+            />
           </div>
         </div>
       )}
@@ -47,7 +72,14 @@ function About() {
         <div className="popup-overlay" onClick={closePopup}>
           <div className="popup-content" onClick={(e) => e.stopPropagation()}>
             <button className="pdf-close-btn" onClick={toggleResumePopup}>X</button>
-            <iframe src="https://drive.google.com/file/d/1i_i-cfGA80DceD8W69wgLDuAupEtMVI7/preview" className="popup-iframe" type="application/pdf" />
+            <div className={`loading-text ${isResumeLoading ? '' : 'hidden'}`}>Loading...</div>
+            <iframe
+              src="https://drive.google.com/file/d/1i_i-cfGA80DceD8W69wgLDuAupEtMVI7/preview"
+              className="popup-iframe"
+              type="application/pdf"
+              onLoad={handleResumeLoad}
+              style={{ opacity: isResumeLoading ? 0 : 1 }}
+            />
           </div>
         </div>
       )}
