@@ -120,6 +120,28 @@
   transition: fill 0.3s ease, color 0.3s ease; 
 }
 
+.homepage-tag {
+  font-size: 2.2rem;
+  letter-spacing: 0.1em; 
+  color: #ffffff;
+  text-align: center;
+  margin: 8vh 0;
+  padding: 0.5em 1em 0.5em 1em;
+  background: linear-gradient(90deg, rgba(0, 23, 25, 0.65), rgba(0, 0, 0, 0.65));
+  border-radius: 20px;
+  display: inline-block;
+  z-index: 10;
+  max-width: 80vw;
+}
+
+/* .homepage-tag::before {
+  content: '{ ';
+}
+
+.homepage-tag::after {
+  content: ' }';
+} */
+
 .homepage-msg {
   font-size: 1.2rem;
   letter-spacing: 0.1em; 
@@ -401,4 +423,3 @@
     font-size: 1.8rem;
   }
 }
-
