@@ -156,7 +156,7 @@ function Home() {
     <div className="home">
       <div ref={sketchRef} className="background-animation" style={{ opacity: opacity }}></div>
       <div className="home-content">
-        <img className="homepage-logo" src="https://imgur.com/PBnrS8i.png" alt="Logo" />
+        <span className="homepage-tag">Perception as generation:<br></br>modeling experience through neural rendering</span>
         <div className="buttons-container">
           <div className="buttons-row">
             <Link to="/projects">

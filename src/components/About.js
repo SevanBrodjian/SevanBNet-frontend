@@ -32,8 +32,8 @@ function About() {
   };
 
   return (
-    <div className="about cosmic-bg-dark">
-      <div className="bg-overlay-1"></div>
+    <div className="about cosmic-bg-bright">
+      <div className="bg-overlay-2"></div>
       <div className="about-container">
         <div className="image-container">
           <img className="headshot" src={headshot} alt="Headshot" />
