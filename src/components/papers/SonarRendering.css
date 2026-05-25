@@ -1,22 +1,41 @@
-/* Scoped to .sr-page — no global selectors, no element selectors outside the root. */
+/* ═══════════════════════════════════════════════════════════════
+   SonarRendering.css
+   Scoped to .sr-page — no global selectors outside the root.
+   Dark mode: add .sr-dark to .sr-page; variables cascade.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Light theme (default) ───────────────────────────────────── */
 
 .sr-page {
-    --sr-bg: #f4f1ea;
-    --sr-surface: #ffffff;
-    --sr-ink: #1a1c1f;
-    --sr-ink-soft: #4a4f57;
-    --sr-rule: #d6d0c4;
-    --sr-rule-soft: #e4dfd4;
-    --sr-accent: #0e4a59;          /* deep sonar teal */
+    /* Core palette */
+    --sr-bg:          #f4f1ea;
+    --sr-ink:         #1a1c1f;
+    --sr-ink-soft:    #4a4f57;
+    --sr-rule:        #d6d0c4;
+    --sr-rule-soft:   #e4dfd4;
+    --sr-accent:      #0e4a59;
     --sr-accent-soft: #d0dee1;
-    --sr-warm: #a85a2a;             /* CRT-amber retro accent */
-    --sr-warm-soft: #ecdcc8;
-    --sr-grid: rgba(20, 20, 20, 0.055);
+    --sr-warm:        #a85a2a;
+    --sr-warm-soft:   #ecdcc8;
 
+    /* Surface / card tokens — override in .sr-dark */
+    --sr-card:            rgba(255, 255, 255, 0.72);
+    --sr-btn-bg:          rgba(255, 255, 255, 0.65);
+    --sr-eyebrow-bg:      rgba(14, 74, 89, 0.07);
+    --sr-eyebrow-border:  rgba(14, 74, 89, 0.20);
+    --sr-placeholder-bg:  rgba(14, 74, 89, 0.025);
+
+    /* Elevation */
+    --sr-shadow-sm: 0 1px 8px rgba(20, 18, 14, 0.07);
+    --sr-shadow:    0 2px 20px rgba(20, 18, 14, 0.09);
+    --sr-shadow-lg: 0 4px 32px rgba(20, 18, 14, 0.11);
+
+    /* Fonts */
     --sr-serif: "Iowan Old Style", "Charter", "Source Serif Pro", "Georgia", "Cambria", serif;
-    --sr-sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-    --sr-mono: "JetBrains Mono", "IBM Plex Mono", "SF Mono", "SFMono-Regular", "Menlo", "Consolas", monospace;
-    --sr-measure: 44rem;
+    --sr-sans:  -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --sr-mono:  "JetBrains Mono", "IBM Plex Mono", "SF Mono", "SFMono-Regular", "Menlo", "Consolas", monospace;
+
+    --sr-measure: min(140rem, 92vw);
 
     position: fixed;
     inset: 0;
@@ -25,8 +44,9 @@
     background: var(--sr-bg);
     color: var(--sr-ink);
     font-family: var(--sr-serif);
-    font-size: 1.05rem;
+    font-size: clamp(1.13rem, 0.5rem + 0.7vw, 1.6rem);
     line-height: 1.65;
+    transition: background 200ms ease, color 200ms ease;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -38,26 +58,120 @@
     box-sizing: border-box;
 }
 
-/* Subtle dotted blueprint/plot-paper grid. Fixed so it reads as the substrate. */
+/* ── Dark theme ──────────────────────────────────────────────── */
+
+/*
+ * Variable overrides only — structural rules stay in the light theme.
+ * Colors are adapted from the example's dark scheme to our teal/amber palette.
+ */
+.sr-dark {
+    --sr-bg:          #0d0e13;
+    --sr-ink:         #dedad3;
+    --sr-ink-soft:    #8a867e;
+    --sr-rule:        #26241f;
+    --sr-rule-soft:   #1c1b18;
+    --sr-accent:      #5bbccc;        /* lighter teal — readable on dark */
+    --sr-accent-soft: rgba(91, 188, 204, 0.14);
+    --sr-warm:        #d4823c;        /* brighter amber on dark */
+    --sr-warm-soft:   rgba(212, 130, 60, 0.12);
+
+    --sr-card:            rgba(18, 20, 28, 0.92);
+    --sr-btn-bg:          rgba(255, 255, 255, 0.055);
+    --sr-eyebrow-bg:      rgba(91, 188, 204, 0.10);
+    --sr-eyebrow-border:  rgba(91, 188, 204, 0.22);
+    --sr-placeholder-bg:  rgba(91, 188, 204, 0.04);
+
+    --sr-shadow-sm: 0 1px 8px rgba(0, 0, 0, 0.35);
+    --sr-shadow:    0 2px 20px rgba(0, 0, 0, 0.45);
+    --sr-shadow-lg: 0 4px 36px rgba(0, 0, 0, 0.60);
+}
+
+/* Dot grid: lighter dots against the dark bg */
+.sr-dark .sr-grid {
+    background-image: radial-gradient(circle, rgba(210, 200, 185, 0.05) 1px, transparent 1px);
+}
+
+/* Transparent-background figures need a light surface behind them in dark mode
+   so the (black) figure content remains visible. Cream backing matches the
+   light-mode page background, so figures look consistent across modes. */
+.sr-dark .sr-figure {
+    background: #edeae2;
+    border: 1px solid rgba(20, 18, 14, 0.10);
+    box-shadow: 0 4px 32px rgba(0, 0, 0, 0.50);
+}
+
+/* The image renders cleanly on the cream backing — no extra shadow needed. */
+.sr-dark .sr-fig-img {
+    box-shadow: none;
+}
+
+/* ── Signature top bar ───────────────────────────────────────── */
+
+.sr-topbar {
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--sr-accent);
+    z-index: 10;
+    pointer-events: none;
+    flex-shrink: 0;
+}
+
+/* ── Background dot grid ─────────────────────────────────────── */
+
 .sr-grid {
     position: fixed;
     inset: 0;
     pointer-events: none;
-    background-image: radial-gradient(circle, var(--sr-grid) 1px, transparent 1px);
+    z-index: 0;
+    background-image: radial-gradient(circle, rgba(20, 20, 20, 0.065) 1px, transparent 1px);
     background-size: 26px 26px;
-    background-position: 0 0;
     mask-image: radial-gradient(ellipse at center, #000 60%, transparent 100%);
     -webkit-mask-image: radial-gradient(ellipse at center, #000 60%, transparent 100%);
-    z-index: 0;
 }
+
+/* ── Dark mode toggle ────────────────────────────────────────── */
+
+.sr-theme-btn {
+    position: fixed;
+    top: 0.8rem;
+    right: 1.25rem;
+    z-index: 20;
+    width: 2.1rem;
+    height: 2.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--sr-btn-bg);
+    border: 1px solid var(--sr-rule);
+    border-radius: 6px;
+    color: var(--sr-ink-soft);
+    cursor: pointer;
+    box-shadow: var(--sr-shadow-sm);
+    transition: color 150ms ease, border-color 150ms ease, background 150ms ease;
+}
+
+.sr-theme-btn:hover,
+.sr-theme-btn:focus-visible {
+    color: var(--sr-accent);
+    border-color: var(--sr-accent);
+    background: var(--sr-accent-soft);
+    outline: none;
+}
+
+/* ── Layout ──────────────────────────────────────────────────── */
 
 .sr-container {
     position: relative;
     z-index: 1;
     max-width: var(--sr-measure);
     margin: 0 auto;
-    padding: 4.5rem 1.5rem 6rem;
+    padding: 5rem 3.5rem 8rem;
 }
+
+/* ── Global link style ───────────────────────────────────────── */
 
 .sr-page a {
     color: var(--sr-accent);
@@ -77,18 +191,30 @@
     border-radius: 2px;
 }
 
-/* ---------- Header block ---------- */
+/* ── Header block ────────────────────────────────────────────── */
 
+.sr-header {
+    margin-bottom: 4rem;
+}
+
+/*
+ * Venue badge — pill with a teal wash. Matches the example's badge
+ * style but in our palette.
+ */
 .sr-eyebrow {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.65rem;
     font-family: var(--sr-mono);
     font-size: 0.72rem;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.13em;
     text-transform: uppercase;
-    color: var(--sr-ink-soft);
-    margin-bottom: 1.75rem;
+    color: var(--sr-accent);
+    background: var(--sr-eyebrow-bg);
+    border: 1px solid var(--sr-eyebrow-border);
+    border-radius: 100px;
+    padding: 0.45rem 1rem 0.45rem 0.75rem;
+    margin-bottom: 2rem;
 }
 
 .sr-pulse {
@@ -100,12 +226,13 @@
 .sr-title {
     font-family: var(--sr-serif);
     font-weight: 600;
-    font-size: clamp(1.95rem, 4.4vw, 2.7rem);
-    line-height: 1.15;
-    letter-spacing: -0.01em;
-    margin-bottom: 1.5rem;
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.75rem;
     color: var(--sr-ink);
     text-wrap: balance;
+    max-width: 26ch;
 }
 
 .sr-authors {
@@ -120,142 +247,242 @@
     font-size: 0.92rem;
     color: var(--sr-ink-soft);
     font-style: italic;
-    margin-bottom: 1.5rem;
+    margin-bottom: 2.25rem;
 }
 
-.sr-tags {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 2.25rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem 0.55rem;
-    font-family: var(--sr-mono);
-    font-size: 0.72rem;
-    color: var(--sr-ink-soft);
-    letter-spacing: 0.04em;
-}
-
-.sr-tags li {
-    padding: 0.18rem 0.55rem;
-    border: 1px solid var(--sr-rule);
-    border-radius: 3px;
-    background: rgba(255, 255, 255, 0.5);
-}
-
-.sr-tags li::before {
-    content: "#";
-    color: var(--sr-warm);
-    margin-right: 0.2rem;
-}
-
-/* ---------- Resource buttons ---------- */
+/* ── Resource buttons ────────────────────────────────────────── */
 
 .sr-links {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.55rem;
-    margin-bottom: 3.5rem;
+    gap: 0.65rem;
 }
 
 .sr-link-btn {
     font-family: var(--sr-mono);
-    font-size: 0.78rem;
-    letter-spacing: 0.06em;
+    font-size: 0.75rem;
+    letter-spacing: 0.07em;
     text-transform: uppercase;
-    padding: 0.5rem 0.95rem;
-    border: 1px solid var(--sr-rule);
-    border-radius: 3px;
-    color: var(--sr-ink);
-    background: var(--sr-surface);
-    transition: border-color 120ms ease, color 120ms ease, background-color 120ms ease;
+    padding: 0.65rem 1.4rem;
+    border: 1px solid var(--sr-rule) !important;
+    border-bottom: 1px solid var(--sr-rule) !important;
+    border-radius: 6px;
+    color: var(--sr-ink-soft);
+    background: var(--sr-btn-bg);
+    box-shadow: var(--sr-shadow-sm);
+    transition: border-color 150ms ease, color 150ms ease,
+                background 150ms ease, box-shadow 150ms ease, transform 150ms ease;
 }
 
 .sr-link-btn[aria-disabled="true"] {
-    color: var(--sr-ink-soft);
-    opacity: 0.6;
+    opacity: 0.4;
     cursor: not-allowed;
-    border-color: var(--sr-rule-soft);
-    border-bottom: 1px solid var(--sr-rule-soft);
+    box-shadow: none;
 }
 
 .sr-link-btn:not([aria-disabled="true"]):hover,
 .sr-link-btn:not([aria-disabled="true"]):focus-visible {
-    border-color: var(--sr-accent);
+    border-color: var(--sr-accent) !important;
+    border-bottom-color: var(--sr-accent) !important;
     color: var(--sr-accent);
     background: var(--sr-accent-soft);
+    box-shadow: 0 4px 16px rgba(14, 74, 89, 0.15);
+    transform: translateY(-1px);
 }
 
-/* ---------- Sections ---------- */
+.sr-dark .sr-link-btn:not([aria-disabled="true"]):hover,
+.sr-dark .sr-link-btn:not([aria-disabled="true"]):focus-visible {
+    box-shadow: 0 4px 16px rgba(91, 188, 204, 0.18);
+}
+
+/* ── Demo animation section ──────────────────────────────────── */
+
+.sr-demo {
+    margin: 0 0 5rem;
+}
+
+.sr-demo-frame {
+    /* No card — video fills its natural width at full resolution */
+    border-radius: 7px;
+    overflow: hidden;
+    box-shadow:
+        0 1px 4px  rgba(20, 18, 14, 0.06),
+        0 3px 18px rgba(20, 18, 14, 0.10),
+        0 0 0 1px  rgba(20, 18, 14, 0.07);
+}
+
+.sr-dark .sr-demo-frame {
+    box-shadow:
+        0 2px 8px  rgba(0, 0, 0, 0.35),
+        0 6px 28px rgba(0, 0, 0, 0.50),
+        0 0 0 1px  rgba(255, 255, 255, 0.06);
+}
+
+.sr-demo-video {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* ── Sections ────────────────────────────────────────────────── */
 
 .sr-section {
-    margin-top: 2.75rem;
+    margin-top: 6rem;
 }
 
+/*
+ * Two-level heading: sr-secnum is its own line (the small mono label);
+ * the bare text node below it is the serif section title.
+ * flex-direction: column achieves the stack without touching the JSX.
+ */
 .sr-section h2 {
-    font-family: var(--sr-mono);
-    font-size: 0.78rem;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--sr-ink);
-    margin-bottom: 0.9rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--sr-rule);
     display: flex;
-    align-items: baseline;
-    gap: 0.75rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    margin-bottom: 1.75rem;
+    padding-bottom: 1.1rem;
+    border-bottom: 1px solid var(--sr-rule);
+    font-family: var(--sr-serif);
+    font-size: clamp(1.35rem, 2.2vw, 1.8rem);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--sr-ink);
 }
 
 .sr-secnum {
+    font-family: var(--sr-mono);
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
     color: var(--sr-warm);
-    font-weight: 500;
-    letter-spacing: 0.08em;
 }
 
 .sr-section p {
-    margin-bottom: 1rem;
+    margin-bottom: 1.1rem;
 }
 
 .sr-section p:last-child {
     margin-bottom: 0;
 }
 
-.sr-lede {
-    font-size: 1.15rem;
-    line-height: 1.55;
-    color: var(--sr-ink);
-}
+/* ── Math ────────────────────────────────────────────────────── */
 
-/* ---------- Math ---------- */
-
+/*
+ * Display equations: transparent, centered, no box. Larger font than
+ * body text so equations don't feel shrunken relative to prose.
+ */
 .sr-math-block {
     display: block;
     margin: 1.25rem 0 1.5rem;
-    padding: 0.9rem 1rem;
-    background: rgba(255, 255, 255, 0.55);
-    border-left: 2px solid var(--sr-accent);
+    background: transparent;
     overflow-x: auto;
     overflow-y: hidden;
-    font-size: 1rem;
+    text-align: center;
+    font-size: 1.15rem;
+}
+
+.sr-math-block .katex-display,
+.sr-math-block .katex,
+.sr-math-block .katex-html {
+    background: transparent !important;
 }
 
 .sr-math-inline {
-    /* Inherit color from surrounding ink. */
     color: var(--sr-ink);
+    font-size: 1.04em;
 }
 
-/* Keep KaTeX layout stable; just nudge font color into our palette. */
 .sr-math .katex {
     color: inherit;
-    font-size: 1.02em;
+    background: transparent;
 }
 
-/* ---------- Table ---------- */
+/* ── Figures ─────────────────────────────────────────────────── */
+
+/*
+ * Figures sit directly on the page background in light mode (transparent PNGs
+ * render on cream — no double-white). Padding gives breathing room around the
+ * image without any visible background behind it.
+ * In dark mode, .sr-dark .sr-figure adds a cream backing (see above).
+ */
+.sr-figure {
+    margin: 2.5rem 0;
+    padding: 0.9rem 0.9rem 0.65rem;
+    border-radius: 8px;
+}
+
+.sr-fig-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 7px;
+    /* Three-layer shadow: ambient fill, soft depth, hairline edge ring */
+    box-shadow:
+        0 1px 4px  rgba(20, 18, 14, 0.06),
+        0 3px 18px rgba(20, 18, 14, 0.10),
+        0 0 0 1px  rgba(20, 18, 14, 0.07);
+}
+
+.sr-fig-img--constrained {
+    max-width: 800px;
+    margin: 0 auto;
+    display: block;
+}
+
+/*
+ * Constrains the <figure> itself to match the image's max-width so the
+ * caption doesn't extend far wider than the image.
+ */
+.sr-figure--constrained {
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.sr-fig-caption {
+    margin-top: 0.85rem;
+    font-family: var(--sr-sans);
+    font-size: 0.93rem;
+    color: var(--sr-ink-soft);
+    line-height: 1.55;
+}
+
+.sr-demo .sr-fig-caption {
+    margin-top: 0.75rem;
+}
+
+/*
+ * Development placeholder — dashed box. Remove <FigPlaceholder>
+ * elements once real assets are in public/media/.
+ */
+.sr-fig-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 150px;
+    padding: 1.5rem 1.25rem;
+    background: var(--sr-placeholder-bg);
+    border: 1px dashed var(--sr-rule);
+    border-radius: 6px;
+    font-family: var(--sr-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    color: var(--sr-ink-soft);
+    text-align: center;
+}
+
+/* ── Table ───────────────────────────────────────────────────── */
 
 .sr-table-wrap {
-    margin: 1.25rem 0 1.25rem;
+    margin: 1.75rem 0;
     overflow-x: auto;
+    background: var(--sr-card);
+    border: 1px solid var(--sr-rule);
+    border-radius: 10px;
+    box-shadow: var(--sr-shadow-sm);
 }
 
 .sr-table {
@@ -263,40 +490,39 @@
     border-collapse: collapse;
     font-family: var(--sr-sans);
     font-size: 0.92rem;
-    background: rgba(255, 255, 255, 0.55);
+    background: transparent;
 }
 
 .sr-caption {
     text-align: left;
     font-family: var(--sr-mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.06em;
+    font-size: 0.68rem;
+    letter-spacing: 0.07em;
     text-transform: uppercase;
     color: var(--sr-ink-soft);
-    padding: 0 0 0.6rem;
+    padding: 0.9rem 1rem 0.5rem;
     caption-side: top;
 }
 
 .sr-table th,
 .sr-table td {
-    padding: 0.55rem 0.75rem;
+    padding: 0.65rem 1rem;
     border-bottom: 1px solid var(--sr-rule-soft);
-    text-align: right;
     font-variant-numeric: tabular-nums;
+    text-align: left;
 }
 
 .sr-table thead th {
     font-family: var(--sr-mono);
-    font-size: 0.7rem;
+    font-size: 0.67rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     color: var(--sr-ink-soft);
     border-bottom: 1px solid var(--sr-rule);
     font-weight: 500;
 }
 
 .sr-table th[scope="row"] {
-    text-align: left;
     font-family: var(--sr-sans);
     font-weight: 500;
     color: var(--sr-ink);
@@ -313,20 +539,31 @@
     font-weight: 600;
 }
 
-/* ---------- BibTeX ---------- */
+/* ── BibTeX / Citation ───────────────────────────────────────── */
+
+.sr-bibtex-wrap {
+    position: relative;
+    margin-top: 0.75rem;
+    background: var(--sr-card);
+    border: 1px solid var(--sr-rule);
+    border-radius: 10px;
+    box-shadow: var(--sr-shadow);
+    overflow: hidden;
+}
 
 .sr-bibtex {
     font-family: var(--sr-mono);
     font-size: 0.82rem;
-    line-height: 1.5;
-    background: #1a1c1f;
-    color: #e8e2d3;
-    padding: 1rem 1.1rem;
-    border-radius: 4px;
+    line-height: 1.6;
+    background: transparent;
+    color: var(--sr-ink);
+    padding: 1.25rem;
+    padding-right: 3rem;
+    border: none;
+    border-left: 3px solid var(--sr-warm);
     overflow-x: auto;
     white-space: pre;
-    margin: 0.5rem 0 0;
-    border-left: 2px solid var(--sr-warm);
+    margin: 0;
 }
 
 .sr-bibtex code {
@@ -336,15 +573,42 @@
     padding: 0;
 }
 
-/* ---------- Footer ---------- */
+.sr-copy-btn {
+    position: absolute;
+    top: 0.65rem;
+    right: 0.65rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.85rem;
+    height: 1.85rem;
+    padding: 0;
+    background: var(--sr-bg);
+    border: 1px solid var(--sr-rule);
+    border-radius: 5px;
+    color: var(--sr-ink-soft);
+    cursor: pointer;
+    transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+    font-family: inherit;
+}
+
+.sr-copy-btn:hover,
+.sr-copy-btn:focus-visible {
+    color: var(--sr-accent);
+    border-color: var(--sr-accent);
+    background: var(--sr-accent-soft);
+    outline: none;
+}
+
+/* ── Footer ──────────────────────────────────────────────────── */
 
 .sr-footer {
-    margin-top: 5rem;
-    padding-top: 1.25rem;
+    margin-top: 7rem;
+    padding-top: 1.5rem;
     border-top: 1px solid var(--sr-rule);
     font-family: var(--sr-mono);
     font-size: 0.72rem;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--sr-ink-soft);
     display: flex;
@@ -358,37 +622,65 @@
 }
 
 .sr-footer a {
-    border-bottom: none;
+    border-bottom: none !important;
     color: var(--sr-ink-soft);
+    transition: color 120ms ease;
 }
 
 .sr-footer a:hover {
     color: var(--sr-accent);
-    border-bottom: 1px solid var(--sr-accent);
 }
 
-/* ---------- Responsive ---------- */
+/* ── Scroll fade-in ──────────────────────────────────────────── */
 
-@media (max-width: 640px) {
+.sr-fade {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.sr-fade.sr-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+
+@media (max-width: 760px) {
     .sr-container {
-        padding: 3rem 1.15rem 4rem;
+        padding: 3.5rem 0.75rem 5rem;
     }
 
-    .sr-page {
-        font-size: 1rem;
-    }
-
-    .sr-lede {
-        font-size: 1.05rem;
+    .sr-section {
+        margin-top: 4rem;
     }
 
     .sr-section h2 {
-        gap: 0.5rem;
+        font-size: clamp(1.2rem, 5vw, 1.5rem);
     }
 
     .sr-bibtex,
     .sr-math-block {
-        font-size: 0.78rem;
+        font-size: 0.9rem;
+    }
+
+    .sr-fig-caption {
+        font-size: 0.86rem;
+    }
+
+    .sr-figure {
+        margin: 1.75rem 0;
+        padding: 0.55rem 0.55rem 0.5rem;
+        border-radius: 6px;
+    }
+
+    .sr-link-btn {
+        padding: 0.55rem 1.1rem;
+    }
+
+    .sr-theme-btn {
+        top: 0.6rem;
+        right: 0.85rem;
     }
 }
 
@@ -396,5 +688,10 @@
     .sr-page * {
         transition: none !important;
         animation: none !important;
+    }
+
+    .sr-fade {
+        opacity: 1 !important;
+        transform: none !important;
     }
 }
