@@ -46,10 +46,11 @@ function About() {
             <button onClick={toggleResumePopup} className="about-link-btn">Resume</button>
           </div>
           <p className="about-description">
-            Coming from industry applications of machine learning, primarily in power grid optimization through load forecasting, I am now beginning to pursue a Ph.D. at Caltech this Fall. With a general love for the sciences, I am most interested in interdisciplinary work, drawing inspiration from neuroscience, physics, biology, philosophy, and beyond.
-            <br /><br />
-            Explore my portfolio of personal projects and dive into my blog for insights into what I'm working on and the philosophical grounding that guides my work.
-            <br></br>
+            I study perception as an active, generative process, building machines that perceive by synthesizing multimodal representations grounded in physical interaction. Drawing from phenomenology (the study of lived, embodied experience) I explore how experience emerges through construction, not passive reception.
+            <br></br><br></br>
+            My current research focuses on sonar-to-3D inverse rendering: reconstructing geometric environments from sparse acoustic data using custom differentiable simulators grounded in physical sensor models. This work investigates how generative models informed by sensor physics can unify perception and generation, producing interpretable systems that both sense and synthesize environments.
+            <br></br><br></br>
+            Long-term, I aim to develop real-time generative models that integrate vision, audition, and neural signals (brain-computer interfaces), leading to immersive technologies that co-perceive the world with users. My work bridges generative machine learning, physically-based simulation, and real-time graphics, paving the way for experiential computing in areas like assistive communication, sparse-signal reconstruction, and guided learning environments.
           </p>
         </div>
       </div>

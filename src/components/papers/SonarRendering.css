@@ -1,0 +1,400 @@
+/* Scoped to .sr-page — no global selectors, no element selectors outside the root. */
+
+.sr-page {
+    --sr-bg: #f4f1ea;
+    --sr-surface: #ffffff;
+    --sr-ink: #1a1c1f;
+    --sr-ink-soft: #4a4f57;
+    --sr-rule: #d6d0c4;
+    --sr-rule-soft: #e4dfd4;
+    --sr-accent: #0e4a59;          /* deep sonar teal */
+    --sr-accent-soft: #d0dee1;
+    --sr-warm: #a85a2a;             /* CRT-amber retro accent */
+    --sr-warm-soft: #ecdcc8;
+    --sr-grid: rgba(20, 20, 20, 0.055);
+
+    --sr-serif: "Iowan Old Style", "Charter", "Source Serif Pro", "Georgia", "Cambria", serif;
+    --sr-sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --sr-mono: "JetBrains Mono", "IBM Plex Mono", "SF Mono", "SFMono-Regular", "Menlo", "Consolas", monospace;
+    --sr-measure: 44rem;
+
+    position: fixed;
+    inset: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: var(--sr-bg);
+    color: var(--sr-ink);
+    font-family: var(--sr-serif);
+    font-size: 1.05rem;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+.sr-page *,
+.sr-page *::before,
+.sr-page *::after {
+    box-sizing: border-box;
+}
+
+/* Subtle dotted blueprint/plot-paper grid. Fixed so it reads as the substrate. */
+.sr-grid {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, var(--sr-grid) 1px, transparent 1px);
+    background-size: 26px 26px;
+    background-position: 0 0;
+    mask-image: radial-gradient(ellipse at center, #000 60%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse at center, #000 60%, transparent 100%);
+    z-index: 0;
+}
+
+.sr-container {
+    position: relative;
+    z-index: 1;
+    max-width: var(--sr-measure);
+    margin: 0 auto;
+    padding: 4.5rem 1.5rem 6rem;
+}
+
+.sr-page a {
+    color: var(--sr-accent);
+    text-decoration: none;
+    border-bottom: 1px solid var(--sr-accent-soft);
+    transition: border-color 120ms ease, color 120ms ease;
+}
+
+.sr-page a:hover,
+.sr-page a:focus-visible {
+    border-bottom-color: var(--sr-accent);
+}
+
+.sr-page a:focus-visible {
+    outline: 2px solid var(--sr-accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* ---------- Header block ---------- */
+
+.sr-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--sr-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sr-ink-soft);
+    margin-bottom: 1.75rem;
+}
+
+.sr-pulse {
+    display: block;
+    color: var(--sr-accent);
+    flex-shrink: 0;
+}
+
+.sr-title {
+    font-family: var(--sr-serif);
+    font-weight: 600;
+    font-size: clamp(1.95rem, 4.4vw, 2.7rem);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin-bottom: 1.5rem;
+    color: var(--sr-ink);
+    text-wrap: balance;
+}
+
+.sr-authors {
+    font-family: var(--sr-sans);
+    font-size: 1rem;
+    color: var(--sr-ink);
+    margin-bottom: 0.25rem;
+}
+
+.sr-affil {
+    font-family: var(--sr-sans);
+    font-size: 0.92rem;
+    color: var(--sr-ink-soft);
+    font-style: italic;
+    margin-bottom: 1.5rem;
+}
+
+.sr-tags {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.55rem;
+    font-family: var(--sr-mono);
+    font-size: 0.72rem;
+    color: var(--sr-ink-soft);
+    letter-spacing: 0.04em;
+}
+
+.sr-tags li {
+    padding: 0.18rem 0.55rem;
+    border: 1px solid var(--sr-rule);
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.sr-tags li::before {
+    content: "#";
+    color: var(--sr-warm);
+    margin-right: 0.2rem;
+}
+
+/* ---------- Resource buttons ---------- */
+
+.sr-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin-bottom: 3.5rem;
+}
+
+.sr-link-btn {
+    font-family: var(--sr-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.5rem 0.95rem;
+    border: 1px solid var(--sr-rule);
+    border-radius: 3px;
+    color: var(--sr-ink);
+    background: var(--sr-surface);
+    transition: border-color 120ms ease, color 120ms ease, background-color 120ms ease;
+}
+
+.sr-link-btn[aria-disabled="true"] {
+    color: var(--sr-ink-soft);
+    opacity: 0.6;
+    cursor: not-allowed;
+    border-color: var(--sr-rule-soft);
+    border-bottom: 1px solid var(--sr-rule-soft);
+}
+
+.sr-link-btn:not([aria-disabled="true"]):hover,
+.sr-link-btn:not([aria-disabled="true"]):focus-visible {
+    border-color: var(--sr-accent);
+    color: var(--sr-accent);
+    background: var(--sr-accent-soft);
+}
+
+/* ---------- Sections ---------- */
+
+.sr-section {
+    margin-top: 2.75rem;
+}
+
+.sr-section h2 {
+    font-family: var(--sr-mono);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sr-ink);
+    margin-bottom: 0.9rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--sr-rule);
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+}
+
+.sr-secnum {
+    color: var(--sr-warm);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+}
+
+.sr-section p {
+    margin-bottom: 1rem;
+}
+
+.sr-section p:last-child {
+    margin-bottom: 0;
+}
+
+.sr-lede {
+    font-size: 1.15rem;
+    line-height: 1.55;
+    color: var(--sr-ink);
+}
+
+/* ---------- Math ---------- */
+
+.sr-math-block {
+    display: block;
+    margin: 1.25rem 0 1.5rem;
+    padding: 0.9rem 1rem;
+    background: rgba(255, 255, 255, 0.55);
+    border-left: 2px solid var(--sr-accent);
+    overflow-x: auto;
+    overflow-y: hidden;
+    font-size: 1rem;
+}
+
+.sr-math-inline {
+    /* Inherit color from surrounding ink. */
+    color: var(--sr-ink);
+}
+
+/* Keep KaTeX layout stable; just nudge font color into our palette. */
+.sr-math .katex {
+    color: inherit;
+    font-size: 1.02em;
+}
+
+/* ---------- Table ---------- */
+
+.sr-table-wrap {
+    margin: 1.25rem 0 1.25rem;
+    overflow-x: auto;
+}
+
+.sr-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--sr-sans);
+    font-size: 0.92rem;
+    background: rgba(255, 255, 255, 0.55);
+}
+
+.sr-caption {
+    text-align: left;
+    font-family: var(--sr-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--sr-ink-soft);
+    padding: 0 0 0.6rem;
+    caption-side: top;
+}
+
+.sr-table th,
+.sr-table td {
+    padding: 0.55rem 0.75rem;
+    border-bottom: 1px solid var(--sr-rule-soft);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.sr-table thead th {
+    font-family: var(--sr-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--sr-ink-soft);
+    border-bottom: 1px solid var(--sr-rule);
+    font-weight: 500;
+}
+
+.sr-table th[scope="row"] {
+    text-align: left;
+    font-family: var(--sr-sans);
+    font-weight: 500;
+    color: var(--sr-ink);
+}
+
+.sr-table tbody tr:last-child th,
+.sr-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.sr-row-ours th,
+.sr-row-ours td {
+    color: var(--sr-accent);
+    font-weight: 600;
+}
+
+/* ---------- BibTeX ---------- */
+
+.sr-bibtex {
+    font-family: var(--sr-mono);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    background: #1a1c1f;
+    color: #e8e2d3;
+    padding: 1rem 1.1rem;
+    border-radius: 4px;
+    overflow-x: auto;
+    white-space: pre;
+    margin: 0.5rem 0 0;
+    border-left: 2px solid var(--sr-warm);
+}
+
+.sr-bibtex code {
+    font-family: inherit;
+    color: inherit;
+    background: transparent;
+    padding: 0;
+}
+
+/* ---------- Footer ---------- */
+
+.sr-footer {
+    margin-top: 5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--sr-rule);
+    font-family: var(--sr-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--sr-ink-soft);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.sr-footer-meta {
+    color: var(--sr-ink-soft);
+}
+
+.sr-footer a {
+    border-bottom: none;
+    color: var(--sr-ink-soft);
+}
+
+.sr-footer a:hover {
+    color: var(--sr-accent);
+    border-bottom: 1px solid var(--sr-accent);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 640px) {
+    .sr-container {
+        padding: 3rem 1.15rem 4rem;
+    }
+
+    .sr-page {
+        font-size: 1rem;
+    }
+
+    .sr-lede {
+        font-size: 1.05rem;
+    }
+
+    .sr-section h2 {
+        gap: 0.5rem;
+    }
+
+    .sr-bibtex,
+    .sr-math-block {
+        font-size: 0.78rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sr-page * {
+        transition: none !important;
+        animation: none !important;
+    }
+}
