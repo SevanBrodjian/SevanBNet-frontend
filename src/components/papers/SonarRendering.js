@@ -188,8 +188,9 @@ function SonarRendering() {
 
           <nav className="sr-links" aria-label="Paper resources">
             {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-            <a className="sr-link-btn" href="#" aria-disabled="true"
-              onClick={(e) => e.preventDefault()}>Paper</a>
+            <a className="sr-link-btn" 
+              href="https://arxiv.org/abs/2605.24195"
+              target="_blank" rel="noreferrer">Paper</a>
             <a className="sr-link-btn"
               href="https://github.com/SevanBrodjian/sonar-inverse-rendering"
               target="_blank" rel="noreferrer">Code</a>
