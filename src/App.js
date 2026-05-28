@@ -2,6 +2,7 @@ import React, { useEffect, useState, Suspense, lazy } from "react";
 import { BrowserRouter, HashRouter, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./components/Home";
 import Projects from "./components/Projects";
+import Research from "./components/Research";
 import Blog from "./components/Blog";
 import About from "./components/About";
 import Navbar from "./components/Navbar";
@@ -53,6 +54,7 @@ function App() {
                     <Route path="/home" element={<Navigate to="/" replace />} />
                     <Route path="/projects" element={<Projects />} />
                     <Route path="/projects/:projectId" element={<ProjectDetail />} />
+                    <Route path="/research" element={<Research />} />
                     <Route path="/blog" element={<Blog />} />
                     <Route path="/blog/:blogId" element={<BlogPost />} />
                     <Route path="/about" element={<About />} />

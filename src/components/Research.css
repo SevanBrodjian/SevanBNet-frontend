@@ -1,0 +1,142 @@
+.research {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    min-width: 100%;
+    min-height: 100%;
+    text-align: center;
+    padding: 2rem 0;
+    overflow-y: auto;
+}
+
+.research-container {
+    max-width: min(80%, 1200px);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+.research-card {
+    min-width: 100%;
+    padding: 2rem;
+    margin: 2rem 0;
+    background-color: rgba(0, 0, 0, 0.65);
+    border-radius: 25px;
+    text-align: left;
+    border: 2px solid #222222;
+}
+
+.research-title {
+    font-size: 2.25rem;
+    color: rgb(240, 240, 240);
+    margin-bottom: 0.5rem;
+}
+
+.research-authors {
+    font-size: 1rem;
+    color: #aaa;
+    margin-bottom: 0.75rem;
+    font-style: italic;
+}
+
+.research-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.research-status {
+    font-size: 0.875rem;
+    color: #17a2b8;
+    border: 1px solid #17a2b8;
+    border-radius: 6px;
+    padding: 0.2rem 0.6rem;
+    white-space: nowrap;
+}
+
+.research-journal {
+    font-size: 0.95rem;
+    color: #ccc;
+    font-style: italic;
+}
+
+.research-date {
+    font-size: 0.95rem;
+    color: #bbb;
+    margin-left: auto;
+}
+
+.research-description {
+    font-size: 1.25rem;
+    color: #ddd;
+    margin-bottom: 1.5rem;
+    margin-top: 0.5rem;
+    line-height: 1.6;
+}
+
+.research-links {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.research-btn {
+    border: 2px solid;
+    padding: 0.5rem 1rem;
+    background-color: transparent;
+    cursor: pointer;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 550;
+    transition: all 0.2s ease;
+}
+
+.research-btn:active {
+    transform: scale(0.95);
+}
+
+.research-btn-site {
+    border-color: rgb(23, 162, 184);
+    color: #17a2b8;
+}
+
+.research-btn-site:hover {
+    background-color: rgba(23, 162, 184, 0.2);
+}
+
+.research-btn-paper {
+    border-color: rgb(150, 130, 220);
+    color: rgb(150, 130, 220);
+}
+
+.research-btn-paper:hover {
+    background-color: rgba(150, 130, 220, 0.2);
+}
+
+body.ios .research-container {
+    margin-bottom: 12.5vh;
+}
+
+@media (max-width: 768px) {
+    .research-container {
+        margin-bottom: 12.5vh;
+    }
+
+    .research-title {
+        font-size: 2rem;
+    }
+
+    .research-description {
+        font-size: 1.1rem;
+    }
+
+    .research-date {
+        margin-left: 0;
+    }
+}

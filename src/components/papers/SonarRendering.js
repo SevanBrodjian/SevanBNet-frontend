@@ -20,12 +20,22 @@ function Math({ tex, block = false }) {
 
 /* ─── BibTeX ────────────────────────────────────────────────────────────── */
 
-const BIBTEX = `@inproceedings{brodjian2026sonar,
-  title     = {Single-View Seafloor Recovery from Imaging Sonar
-               via Differentiable Rendering},
-  author    = {Brodjian, Sevan and Hobley, Michael and Perona, Pietro},
-  booktitle = {CVPR Workshops (PBVS)},
-  year      = {2026}
+// const BIBTEX = `@inproceedings{brodjian2026sonar,
+//   title     = {Single-View Seafloor Recovery from Imaging Sonar
+//                via Differentiable Rendering},
+//   author    = {Brodjian, Sevan and Hobley, Michael and Perona, Pietro},
+//   booktitle = {CVPR Workshops (PBVS)},
+//   year      = {2026}
+// }`;
+
+const BIBTEX = `@misc{brodjian2026singleviewseafloorrecovery,
+      title={Single View Seafloor Recovery from Imaging Sonar via Differentiable Rendering}, 
+      author={Sevan Brodjian and Michael Hobley and Pietro Perona},
+      year={2026},
+      eprint={2605.24195},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2605.24195}, 
 }`;
 
 /* ─── Icons ─────────────────────────────────────────────────────────────── */
