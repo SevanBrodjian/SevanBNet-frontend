@@ -12,7 +12,7 @@ import particleUniverse from './bg_animations/particleUniverse.js';
 
 function Home() {
   const animations = [reactionDiffusion, reactionDiffusion];
-  const [animationIndex, setAnimationIndex] = useState(Math.floor(Math.random() * animations.length));
+  const [animationIndex] = useState(Math.floor(Math.random() * animations.length));
   const [opacity, setOpacity] = useState(0);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const sketchRef = useRef();

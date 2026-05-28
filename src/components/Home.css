@@ -201,6 +201,10 @@
     margin-bottom: 10vh !important;
   }
 
+  .homepage-tag {
+    font-size: 1.25rem;
+  }
+
   .home-content {
     margin-bottom: 5vh;
     flex: none;
@@ -244,6 +248,10 @@
   .homepage-msg {
     font-size: 1rem;
     margin-bottom: 10vh;
+  }
+
+  .homepage-tag {
+    font-size: 1.5rem;
   }
 }
 

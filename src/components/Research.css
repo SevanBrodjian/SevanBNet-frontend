@@ -10,7 +10,7 @@
 }
 
 .research-container {
-    max-width: min(80%, 1200px);
+    max-width: min(80%, 1000px);
     display: flex;
     flex-direction: column;
     position: relative;
@@ -21,12 +21,33 @@
 
 .research-card {
     min-width: 100%;
-    padding: 2rem;
+    display: flex;
+    flex-direction: row;
     margin: 2rem 0;
     background-color: rgba(0, 0, 0, 0.65);
     border-radius: 25px;
-    text-align: left;
     border: 2px solid #222222;
+}
+
+.research-image {
+    flex: 1;
+    position: relative;
+}
+
+.research-image img,
+.research-image iframe,
+.research-image video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 23px 5px 5px 23px;
+    display: block;
+}
+
+.research-content {
+    flex: 1;
+    padding: 2rem;
+    text-align: left;
 }
 
 .research-title {
@@ -36,7 +57,7 @@
 }
 
 .research-authors {
-    font-size: 1rem;
+    font-size: 1.15rem;
     color: #aaa;
     margin-bottom: 0.75rem;
     font-style: italic;
@@ -51,7 +72,7 @@
 }
 
 .research-status {
-    font-size: 0.875rem;
+    font-size: 1rem;
     color: #17a2b8;
     border: 1px solid #17a2b8;
     border-radius: 6px;
@@ -60,16 +81,17 @@
 }
 
 .research-journal {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #ccc;
     font-style: italic;
 }
 
 .research-date {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #bbb;
     margin-left: auto;
 }
+
 
 .research-description {
     font-size: 1.25rem;
@@ -123,9 +145,19 @@ body.ios .research-container {
     margin-bottom: 12.5vh;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 7680px) {
     .research-container {
         margin-bottom: 12.5vh;
+    }
+
+    .research-card {
+        flex-direction: column;
+    }
+
+    .research-image img,
+    .research-image iframe,
+    .research-image video {
+        border-radius: 23px 23px 5px 5px;
     }
 
     .research-title {

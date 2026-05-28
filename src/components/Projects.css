@@ -31,7 +31,8 @@
 }
 
 .project-image img,
-.project-image iframe {
+.project-image iframe,
+.project-image video {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -84,7 +85,8 @@ body.ios .project-cards-container {
     }
 
     .project-image img,
-    .project-image iframe {
+    .project-image iframe,
+    .project-image video {
         border-radius: 25px 25px 5px 5px;
     }
 

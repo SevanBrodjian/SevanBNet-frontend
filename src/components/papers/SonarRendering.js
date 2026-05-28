@@ -273,11 +273,7 @@ function SonarRendering() {
           <h2 id="sr-method-h"><span className="sr-secnum">§ 02</span> How It Works</h2>
 
           <p>
-            Forward-looking sonar sweeps a horizontal arc of acoustic beams across the scene.
-            Each beam is a dense vertical fan of rays. The sensor records how far each ray
-            travels before hitting the seafloor, but not the elevation. Everything above
-            the floor collapses into a flat range-azimuth image. Distance and angle come for
-            free. Height does not.
+            Forward-looking sonar sweeps a horizontal arc of acoustic beams across a scene. Each beam fans out vertically, covering a wide range of elevation angles. The sensor records the range and azimuth of each return, but elevation is lost in the process. Various geometries with different heights can collapse into the same flat range-azimuth image. Distance and angle are recovered directly from the signal, but height is not.
           </p>
 
           {/*
@@ -294,19 +290,12 @@ function SonarRendering() {
             />
             {/* <FigPlaceholder label="fig_sonar_layout.png: Figure 2 (sonar geometry overview)" /> */}
             <figcaption className="sr-fig-caption">
-              Sonar geometry. Each beam is a vertical fan of rays (left). The sensor sweeps
-              discrete beams across a horizontal arc (center). Together they define a
-              range-azimuth sampling grid in which elevation is lost (right).
+              <>Overview of the sonar geometric layout</> from (a) side, (b) top-down, and (c) isometric views. The forward-looking sonar (FLS) emits discrete azimuthal beams with continuous elevation extent, and returns are projected onto the horizontal plane, introducing elevation ambiguity. (d) The sonar image shown in polar and Cartesian coordinates, where pixel brightness encodes return intensity and range encodes two-way acoustic travel time.
             </figcaption>
           </figure>
 
           <p>
-            Our method inverts this. We represent the seafloor as an explicit height field
-            aligned to the sonar's polar sampling grid, then simulate the full ray-casting
-            process in PyTorch. Every beam, every intersection, every reflectance calculation
-            is differentiable. We run the renderer, compare against the real sensor reading,
-            and backpropagate. After around 150 steps, the height field reproduces the
-            observed image.
+            Our method recovers the seafloor geometry from sonar images through differentiable inverse rendering. We represent the seafloor as an explicit height field aligned to the sonar's polar sampling grid and simulate the full ray-casting process in PyTorch. Every beam, every intersection, and every reflectance calculation is differentiable. We run the renderer, compare its output against the real sensor reading, and backpropagate through the entire pipeline. After around 150 optimization steps, the recovered height field reproduces the observed image.
           </p>
 
           <p>
@@ -322,7 +311,7 @@ function SonarRendering() {
             where <Math tex={String.raw`\mu = \max(0,\,\mathbf{n}_{r,\theta}\!\cdot\!\boldsymbol{\omega}_{\theta,\phi})`} />{' '}
             controls diffuse falloff based on surface normal and{' '}
             <Math tex={String.raw`\sigma_{\text{spec}}`} /> sets the specular lobe width.
-            Gaussian binning distributes returns across range bins; the result is compressed
+            Gaussian binning distributes returns across range bins, and the result is compressed
             to log-amplitudes, matching standard sonar processing.
           </p>
 
@@ -363,8 +352,8 @@ function SonarRendering() {
           <p>
             On synthetic in-distribution data, a supervised U-Net trained on 10,000 labeled
             frames achieves lower error. Supervised learning has the advantage when training
-            and test distributions match. Out of distribution,
-            the result reverses. Our method outperforms the CNN on the standard HoloOcean
+            and test distributions match as it can learn statistical priors of the dataset. Out of distribution,
+            the situation changes considerably. Our method outperforms the CNN on the standard HoloOcean
             benchmark across all metrics and stays close on rough terrain, without accessing
             those conditions during development.
           </p>
@@ -417,7 +406,7 @@ function SonarRendering() {
               CNN error on three test sets as a function of training set size. Solid lines
               are means over five independent runs; shaded regions are 95% confidence
               intervals. Our training-free method (dashed) stays constant. The supervised
-              model approaches our out-of-distribution error only beyond 100–1,000 samples.
+              model beats our method only beyond roughly 100–1,000 labelled samples.
             </figcaption>
           </figure>
 

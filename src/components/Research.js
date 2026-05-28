@@ -34,6 +34,48 @@ function Research() {
     return null;
   };
 
+  const youtubeAutoplay = (src) => {
+    try {
+      const u = new URL(src);
+      u.searchParams.set('autoplay', '1');
+      u.searchParams.set('mute', '1');
+      u.searchParams.set('loop', '1');
+      const videoId = u.pathname.split('/').filter(Boolean).pop();
+      if (videoId) u.searchParams.set('playlist', videoId);
+      return u.toString();
+    } catch {
+      return src;
+    }
+  };
+
+  const renderMedia = (pub) => {
+    if (!pub.img) return null;
+    if (pub.img.includes('youtube')) {
+      return (
+        <iframe
+          src={youtubeAutoplay(pub.img)}
+          title={pub.title}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />
+      );
+    }
+    if (/\.(mp4|webm|ogg)$/i.test(pub.img)) {
+      return (
+        <video
+          ref={el => { if (el) { el.muted = true; el.play().catch(() => {}); } }}
+          autoPlay
+          loop
+          playsInline
+          preload="metadata"
+        >
+          <source src={pub.img} type="video/mp4" />
+        </video>
+      );
+    }
+    return <img src={pub.img} alt={pub.title} />;
+  };
+
   return (
     <div className="research cosmic-bg-bright">
       <div className="bg-overlay-2"></div>
@@ -43,30 +85,41 @@ function Research() {
           <h2 className="loading">Loading...</h2>
         ) : publications.length === 0 ? (
           <h2 className="loading">No publications yet.</h2>
-        ) : publications.map(pub => (
-            <div className="research-card" key={pub.id}>
-              <h2 className="research-title">{pub.title}</h2>
-              {pub.authors_str && <p className="research-authors">{pub.authors_str}</p>}
-              <div className="research-meta">
-                <span className="research-status">{pub.status}</span>
-                {pub.journal_name && <span className="research-journal">{pub.journal_name}</span>}
-                {formatDate(pub) && <span className="research-date">{formatDate(pub)}</span>}
+        ) : publications.map(pub => {
+            const media = renderMedia(pub);
+            return (
+              <div className="research-card" key={pub.id}>
+                {media && <div className="research-image">{media}</div>}
+                <div className="research-content">
+                  <h2 className="research-title">{pub.title}</h2>
+                  {pub.authors_str && <p className="research-authors">{pub.authors_str}</p>}
+                  <div className="research-meta">
+                    <span className="research-status">{pub.status}</span>
+                    {pub.journal_name && <span className="research-journal">{pub.journal_name}</span>}
+                    {formatDate(pub) && <span className="research-date">{formatDate(pub)}</span>}
+                  </div>
+                  {pub.description && <p className="research-description">{pub.description}</p>}
+                  <div className="research-links">
+                    {paperUrl(pub) && (
+                      <a href={paperUrl(pub)} target="_blank" rel="noopener noreferrer">
+                        <button className="research-btn research-btn-paper">Paper</button>
+                      </a>
+                    )}
+                    {pub.project_url && (
+                      <a href={pub.project_url} target="_blank" rel="noopener noreferrer">
+                        <button className="research-btn research-btn-site">Project Page</button>
+                      </a>
+                    )}
+                    {pub.site_path && (
+                      <Link to={pub.site_path}>
+                        <button className="research-btn research-btn-site">View on Site</button>
+                      </Link>
+                    )}
+                  </div>
+                </div>
               </div>
-              {pub.description && <p className="research-description">{pub.description}</p>}
-              <div className="research-links">
-                {pub.site_path && (
-                  <Link to={pub.site_path}>
-                    <button className="research-btn research-btn-site">View Site</button>
-                  </Link>
-                )}
-                {paperUrl(pub) && (
-                  <a href={paperUrl(pub)} target="_blank" rel="noopener noreferrer">
-                    <button className="research-btn research-btn-paper">Read Paper</button>
-                  </a>
-                )}
-              </div>
-            </div>
-          ))
+            );
+          })
         }
       </div>
     </div>
