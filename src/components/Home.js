@@ -14,7 +14,20 @@ import particleUniverse from './bg_animations/particleUniverse.js';
 function Home() {
   const animations = [reactionDiffusion, reactionDiffusion];
   const [animationIndex] = useState(Math.floor(Math.random() * animations.length));
-  const [tagline] = useState(taglines[Math.floor(Math.random() * taglines.length)]);
+  const [taglineIndex, setTaglineIndex] = useState(Math.floor(Math.random() * taglines.length));
+  const [taglineVisible, setTaglineVisible] = useState(true);
+
+  const cycleTagline = () => {
+    setTaglineVisible(false);
+    setTimeout(() => {
+      setTaglineIndex(i => {
+        let next;
+        do { next = Math.floor(Math.random() * taglines.length); } while (next === i && taglines.length > 1);
+        return next;
+      });
+      setTaglineVisible(true);
+    }, 350);
+  };
   const [opacity, setOpacity] = useState(0);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const sketchRef = useRef();
@@ -146,9 +159,14 @@ function Home() {
     <div className="home">
       <div ref={sketchRef} className="background-animation" style={{ opacity: opacity }}></div>
       <div className="home-content">
-        <span className="homepage-tag">{tagline.split('\n').map((line, i, arr) => (
-          <React.Fragment key={i}>{line}{i < arr.length - 1 && <br />}</React.Fragment>
-        ))}</span>
+        <span
+          className={`homepage-tag${taglineVisible ? '' : ' tagline-hidden'}`}
+          onClick={cycleTagline}
+        >
+          {taglines[taglineIndex].split('\n').map((line, i, arr) => (
+            <React.Fragment key={i}>{line}{i < arr.length - 1 && <br />}</React.Fragment>
+          ))}
+        </span>
         <div className="buttons-container">
           <div className="buttons-row">
             <Link to="/projects">
