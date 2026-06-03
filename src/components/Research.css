@@ -10,7 +10,7 @@
 }
 
 .research-container {
-    max-width: min(80%, 1000px);
+    max-width: min(80%, 800px);
     display: flex;
     flex-direction: column;
     position: relative;

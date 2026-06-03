@@ -6,6 +6,7 @@ import anime from 'animejs/lib/anime.es.js';
 import './Home.css';
 // import logo from '../assets/site-logo.png';
 import reactionDiffusion from './bg_animations/reactionDiffusion.js';
+import taglines from '../data/taglines.js';
 import differentialGrowth from './bg_animations/differentialGrowth.js';
 import particleLife from './bg_animations/particleLife.js';
 import particleUniverse from './bg_animations/particleUniverse.js';
@@ -13,6 +14,20 @@ import particleUniverse from './bg_animations/particleUniverse.js';
 function Home() {
   const animations = [reactionDiffusion, reactionDiffusion];
   const [animationIndex] = useState(Math.floor(Math.random() * animations.length));
+  const [taglineIndex, setTaglineIndex] = useState(Math.floor(Math.random() * taglines.length));
+  const [taglineVisible, setTaglineVisible] = useState(true);
+
+  const cycleTagline = () => {
+    setTaglineVisible(false);
+    setTimeout(() => {
+      setTaglineIndex(i => {
+        let next;
+        do { next = Math.floor(Math.random() * taglines.length); } while (next === i && taglines.length > 1);
+        return next;
+      });
+      setTaglineVisible(true);
+    }, 350);
+  };
   const [opacity, setOpacity] = useState(0);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const sketchRef = useRef();
@@ -144,7 +159,14 @@ function Home() {
     <div className="home">
       <div ref={sketchRef} className="background-animation" style={{ opacity: opacity }}></div>
       <div className="home-content">
-        <span className="homepage-tag">Perception as generation:<br></br>modeling experience through neural rendering</span>
+        <span
+          className={`homepage-tag${taglineVisible ? '' : ' tagline-hidden'}`}
+          onClick={cycleTagline}
+        >
+          {taglines[taglineIndex].split('\n').map((line, i, arr) => (
+            <React.Fragment key={i}>{line}{i < arr.length - 1 && <br />}</React.Fragment>
+          ))}
+        </span>
         <div className="buttons-container">
           <div className="buttons-row">
             <Link to="/projects">
