@@ -52,6 +52,13 @@ function About() {
             <br></br><br></br>
             Long-term, I aim to develop real-time generative models that integrate vision, audition, and neural signals (brain-computer interfaces), leading to immersive technologies that co-perceive the world with users. My work bridges generative machine learning, physically-based simulation, and real-time graphics, paving the way for experiential computing in areas like assistive communication, sparse-signal reconstruction, and guided learning environments.
           </p>
+          {/* <p className="about-description">
+              I study perception as an active, generative process — building machines that construct a world rather than passively receive one. The framing borrows from phenomenology: experience as something synthesized through embodied commitment, not delivered ready-made.
+          <br></br><br></br>
+              My current work diagnoses world models — the latent simulators that sit inside agents and generative systems — asking what makes their internal states identifiable, causally editable, and coherent over long rollouts. Alongside this I build interactive pieces at the seam of differentiable simulation, diffusion, and real-time graphics, where perception and generation start to look like the same operation viewed from different angles.
+          <br></br><br></br>
+              Longer term, I want generative systems that co-perceive alongside a person — full-dive VR as a near-term substrate, brain-computer interfaces as the eventual one. Ideally these open doors of reality rather than offer a way out of it.
+          </p> */}
         </div>
       </div>
       {isCVOpen && (

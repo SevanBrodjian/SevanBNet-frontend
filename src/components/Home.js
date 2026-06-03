@@ -12,7 +12,7 @@ import particleUniverse from './bg_animations/particleUniverse.js';
 
 function Home() {
   const animations = [reactionDiffusion, reactionDiffusion];
-  const [animationIndex, setAnimationIndex] = useState(Math.floor(Math.random() * animations.length));
+  const [animationIndex] = useState(Math.floor(Math.random() * animations.length));
   const [opacity, setOpacity] = useState(0);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const sketchRef = useRef();
@@ -140,18 +140,6 @@ function Home() {
     return path;
   };
 
-  const changeAnimation = () => {
-    if (animations.length > 1) {
-      setAnimationIndex(currentIndex => {
-        let newIndex;
-        do {
-          newIndex = Math.floor(Math.random() * animations.length);
-        } while (newIndex === currentIndex);
-        return newIndex;
-      });
-    }
-  };
-
   return (
     <div className="home">
       <div ref={sketchRef} className="background-animation" style={{ opacity: opacity }}></div>
@@ -165,24 +153,24 @@ function Home() {
                 <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" className="text-drift">Projects</text>
               </svg>
             </Link>
+            <Link to="/research">
+              <svg className="animated-path">
+                <path d={generateRandomCurvedPath()} />
+                <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" className="text-drift">Research</text>
+              </svg>
+            </Link>
+          </div>
+          <div className="buttons-row">
             <Link to="/blog">
               <svg className="animated-path">
                 <path d={generateRandomCurvedPath()} />
                 <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" className="text-drift">Blog</text>
               </svg>
             </Link>
-          </div>
-          <div className="buttons-row">
             <Link to="/about">
               <svg className="animated-path">
                 <path d={generateRandomCurvedPath()} />
                 <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" className="text-drift">About Me</text>
-              </svg>
-            </Link>
-            <Link to="#">
-              <svg className="animated-path gold" onClick={changeAnimation}>
-                <path d={generateRandomCurvedPath()} />
-                <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" className="text-drift">Change Animation</text>
               </svg>
             </Link>
           </div>

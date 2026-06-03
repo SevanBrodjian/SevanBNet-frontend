@@ -96,11 +96,8 @@
    light-mode page background, so figures look consistent across modes. */
 .sr-dark .sr-figure {
     background: #edeae2;
-    border: 1px solid rgba(20, 18, 14, 0.10);
-    box-shadow: 0 4px 32px rgba(0, 0, 0, 0.50);
 }
 
-/* The image renders cleanly on the cream backing — no extra shadow needed. */
 .sr-dark .sr-fig-img {
     box-shadow: none;
 }
@@ -232,19 +229,19 @@
     margin-bottom: 1.75rem;
     color: var(--sr-ink);
     text-wrap: balance;
-    max-width: 26ch;
+    /* max-width: 26ch; */
 }
 
 .sr-authors {
     font-family: var(--sr-sans);
-    font-size: 1rem;
+    font-size: 1.025rem;
     color: var(--sr-ink);
     margin-bottom: 0.25rem;
 }
 
 .sr-affil {
     font-family: var(--sr-sans);
-    font-size: 0.92rem;
+    font-size: 0.98rem;
     color: var(--sr-ink-soft);
     font-style: italic;
     margin-bottom: 2.25rem;
@@ -352,7 +349,7 @@
 
 .sr-secnum {
     font-family: var(--sr-mono);
-    font-size: 0.82rem;
+    font-size: 1.0rem;
     font-weight: 600;
     letter-spacing: 0.16em;
     text-transform: uppercase;
@@ -408,8 +405,8 @@
  * In dark mode, .sr-dark .sr-figure adds a cream backing (see above).
  */
 .sr-figure {
-    margin: 2.5rem 0;
-    padding: 0.9rem 0.9rem 0.65rem;
+    margin: 3.75rem 0;
+    padding: 1.35rem 1.35rem 1rem;
     border-radius: 8px;
 }
 
@@ -418,11 +415,6 @@
     width: 100%;
     height: auto;
     border-radius: 7px;
-    /* Three-layer shadow: ambient fill, soft depth, hairline edge ring */
-    box-shadow:
-        0 1px 4px  rgba(20, 18, 14, 0.06),
-        0 3px 18px rgba(20, 18, 14, 0.10),
-        0 0 0 1px  rgba(20, 18, 14, 0.07);
 }
 
 .sr-fig-img--constrained {
@@ -444,7 +436,7 @@
 .sr-fig-caption {
     margin-top: 0.85rem;
     font-family: var(--sr-sans);
-    font-size: 0.93rem;
+    font-size: 1.05rem;
     color: var(--sr-ink-soft);
     line-height: 1.55;
 }
@@ -669,7 +661,7 @@
     }
 
     .sr-figure {
-        margin: 1.75rem 0;
+        margin: 2.5rem 0;
         padding: 0.55rem 0.55rem 0.5rem;
         border-radius: 6px;
     }

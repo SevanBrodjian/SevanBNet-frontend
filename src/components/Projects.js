@@ -29,6 +29,10 @@ function Projects() {
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                       allowFullScreen
                     ></iframe>
+                  ) : project.img && /\.mp4$/i.test(project.img) ? (
+                    <video autoPlay loop muted playsInline>
+                      <source src={project.img} type="video/mp4" />
+                    </video>
                   ) : (
                     <img src={project.img} alt={project.title} />
                   )}

@@ -44,6 +44,18 @@ function ProjectDetail() {
                   allowFullScreen
                 ></iframe>
               </div>
+            ) : project.img && /\.mp4$/i.test(project.img) ? (
+              <video
+                className="projectd-video"
+                autoPlay
+                loop
+                muted
+                playsInline
+                controls
+                preload="metadata"
+              >
+                <source src={project.img} type="video/mp4" />
+              </video>
             ) : (
               <img className="projectd-img" src={project.img} alt={project.title} />
             )}

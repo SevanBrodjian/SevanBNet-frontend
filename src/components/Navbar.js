@@ -30,6 +30,7 @@ function Navbar() {
         <ul className="nav-links bigscreen">
           <li><Link to="/" onClick={() => setIsNavExpanded(false)} className={location.pathname === "/" ? "active" : ""}>Home</Link></li>
           <li><Link to="/projects" onClick={() => setIsNavExpanded(false)} className={location.pathname === "/projects" ? "active" : ""}>Projects</Link></li>
+          <li><Link to="/research" onClick={() => setIsNavExpanded(false)} className={location.pathname === "/research" ? "active" : ""}>Research</Link></li>
           <li><Link to="/blog" onClick={() => setIsNavExpanded(false)} className={location.pathname === "/blog" ? "active" : ""}>Blog</Link></li>
           <li><Link to="/about" onClick={() => setIsNavExpanded(false)} className={location.pathname === "/about" ? "active" : ""}>About Me</Link></li>
         </ul>
@@ -46,6 +47,7 @@ function Navbar() {
           <ul className="nav-links smallscreen">
             <li><Link to="/" onClick={() => setIsNavExpanded(false)} className={location.pathname === "/" ? "active" : ""}>Home</Link></li>
             <li><Link to="/projects" onClick={() => setIsNavExpanded(false)} className={location.pathname === "/projects" ? "active" : ""}>Projects</Link></li>
+            <li><Link to="/research" onClick={() => setIsNavExpanded(false)} className={location.pathname === "/research" ? "active" : ""}>Research</Link></li>
             <li><Link to="/blog" onClick={() => setIsNavExpanded(false)} className={location.pathname === "/blog" ? "active" : ""}>Blog</Link></li>
             <li><Link to="/about" onClick={() => setIsNavExpanded(false)} className={location.pathname === "/about" ? "active" : ""}>About Me</Link></li>
           </ul>
