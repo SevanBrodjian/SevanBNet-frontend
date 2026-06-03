@@ -300,6 +300,10 @@
     font-size: 1.4rem;
     margin-bottom: 10vh;
   }
+
+  .homepage-tag {
+    font-size: 2rem;
+  }
 }
 
 /* Tablets (Landscape) */
@@ -310,7 +314,7 @@
   }
 
   .buttons-container {
-    max-width: min(100%, 700px);
+    max-width: min(100%, 1025px);
     gap: 5vh;
   }
 
@@ -335,6 +339,10 @@
   .homepage-msg {
     font-size: 1.4rem;
     margin-bottom: 10vh;
+  }
+
+  .homepage-tag {
+    font-size: 2rem;
   }
 }
 
@@ -361,7 +369,7 @@
   }
 
   .text-drift {
-    font-size: 2.5rem;
+    font-size: 2.25rem;
   }
 
   .gold .text-drift {
@@ -370,6 +378,10 @@
 
   .homepage-msg {
     font-size: 1.7rem;
+  }
+
+  .homepage-tag {
+    font-size: 2.25rem;
   }
 }
 
@@ -381,7 +393,7 @@
   }
 
   .buttons-container {
-    max-width: min(100%, 1241px);
+    max-width: min(100%, 1541px);
     gap: 5vh;
   }
 
@@ -406,6 +418,10 @@
   .homepage-msg {
     font-size: 1.7rem;
   }
+  
+  .homepage-tag {
+    font-size: 2.25rem;
+  }
 }
 
 /* Large Desktops / 4K Monitors */
@@ -416,7 +432,7 @@
   }
 
   .buttons-container {
-    max-width: min(100%, 1800px);
+    max-width: min(100%, 1921px);
     gap: 5vh;
   }
 
@@ -440,5 +456,9 @@
 
   .homepage-msg {
     font-size: 1.8rem;
+  }
+
+  .homepage-tag {
+    font-size: 3.5rem;
   }
 }

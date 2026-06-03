@@ -31,7 +31,7 @@ const taglines = [
   "Grounding generation in the physics of observation",
   // "Differentiable physics for systems that imagine forward",
   "Continuity, commitment, and the structure of a world model",
-  "Reasoning about the world by generating it",
+  // "Reasoning about the world by generating it",
   // "Immersive computing as a scientific problem",
   // "The phenomenology of the forward pass",
   // "Where generative modeling meets the theory of mind",
