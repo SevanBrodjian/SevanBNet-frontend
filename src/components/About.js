@@ -50,7 +50,7 @@ function About() {
             <br></br><br></br>
             My current research focuses on sonar-to-3D inverse rendering: reconstructing geometric environments from sparse acoustic data using custom differentiable simulators grounded in physical sensor models. This work investigates how generative models informed by sensor physics can unify perception and generation, producing interpretable systems that both sense and synthesize environments.
             <br></br><br></br>
-            Long-term, I aim to develop real-time generative models that integrate vision, audition, and neural signals (brain-computer interfaces), leading to immersive technologies that co-perceive the world with users. My work bridges generative machine learning, physically-based simulation, and real-time graphics, paving the way for experiential computing in areas like assistive communication, sparse-signal reconstruction, and guided learning environments.
+            Long-term, I aim to develop real-time generative models that integrate vision, audition, and neural signals (brain-computer interfaces), leading to immersive technologies that co-perceive the world with users. My work bridges generative machine learning, physically-based simulation, and real-time graphics, paving the way for experiential computing in areas like robotics, embodied intelligence, and interactive media.
           </p>
           {/* <p className="about-description">
               I study perception as an active, generative process — building machines that construct a world rather than passively receive one. The framing borrows from phenomenology: experience as something synthesized through embodied commitment, not delivered ready-made.

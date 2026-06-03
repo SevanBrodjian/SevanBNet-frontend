@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { CSSTransition } from "react-transition-group";
 import "./Navbar.css";
 import logo from '../assets/site-logo-small.png';
+// import logo from '../assets/snakelogo.png';
 import gitLogo from '../assets/gitlogo.png';
 import liLogo from '../assets/lilogo.png';
 
