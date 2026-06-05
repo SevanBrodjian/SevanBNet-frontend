@@ -2,9 +2,33 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Research.css';
 
+const CopyIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+  </svg>
+);
+
+const ChevronIcon = ({ open }) => (
+  <svg viewBox="-1 -1 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="12" height="12"
+    style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease', display: 'inline-block', verticalAlign: 'middle', marginLeft: '0.3em' }}>
+    <polyline points="1 2.5 6 6.5 11 2.5"/>
+    <polyline points="1 6 6 10 11 6"/>
+  </svg>
+);
+
 function Research() {
   const [publications, setPublications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [openBibtex, setOpenBibtex] = useState(null);
+  const [copied, setCopied] = useState(null);
+
+  const copyToClipboard = (text, id) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(id);
+      setTimeout(() => setCopied(null), 2000);
+    });
+  };
 
   useEffect(() => {
     fetch(`${process.env.REACT_APP_API_URL}/api/publications/`)
@@ -115,7 +139,28 @@ function Research() {
                         <button className="research-btn research-btn-site">View on Site</button>
                       </Link>
                     )}
+                    {pub.citation && (
+                      <button
+                        className={`research-btn-bibtex${openBibtex === pub.id ? ' active' : ''}`}
+                        onClick={() => setOpenBibtex(openBibtex === pub.id ? null : pub.id)}
+                      >
+                        BibTeX<ChevronIcon open={openBibtex === pub.id} />
+                      </button>
+                    )}
                   </div>
+                  {pub.citation && openBibtex === pub.id && (
+                    <div className="bibtex-panel">
+                      <button
+                        className="bibtex-copy"
+                        onClick={() => copyToClipboard(pub.citation, pub.id)}
+                        title="Copy to clipboard"
+                      >
+                        <CopyIcon />
+                        <span>{copied === pub.id ? 'Copied!' : 'Copy'}</span>
+                      </button>
+                      <pre className="bibtex-text">{pub.citation}</pre>
+                    </div>
+                  )}
                 </div>
               </div>
             );

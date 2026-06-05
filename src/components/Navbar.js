@@ -6,6 +6,7 @@ import logo from '../assets/site-logo-small.png';
 // import logo from '../assets/snakelogo.png';
 import gitLogo from '../assets/gitlogo.png';
 import liLogo from '../assets/lilogo.png';
+import scholarLogo from '../assets/scholarlogo.png';
 
 function Navbar() {
   const [isNavExpanded, setIsNavExpanded] = useState(false);
@@ -38,6 +39,7 @@ function Navbar() {
         <div className="social-links bigscreen">
           <a href="https://github.com/SevanBrodjian" target="_blank" rel="noopener noreferrer"><img src={gitLogo} alt="GitHub" /></a>
           <a href="https://www.linkedin.com/in/sevan-b/" target="_blank" rel="noopener noreferrer"><img src={liLogo} alt="LinkedIn" /></a>
+          <a href="https://scholar.google.com/citations?user=bla3rA8AAAAJ" target="_blank" rel="noopener noreferrer"><img src={scholarLogo} alt="Google Scholar" /></a>
         </div>
         <CSSTransition
           in={isNavExpanded}
@@ -45,23 +47,19 @@ function Navbar() {
           classNames="nav-animation"
           unmountOnExit
         >
-          <ul className="nav-links smallscreen">
-            <li><Link to="/" onClick={() => setIsNavExpanded(false)} className={location.pathname === "/" ? "active" : ""}>Home</Link></li>
-            <li><Link to="/projects" onClick={() => setIsNavExpanded(false)} className={location.pathname === "/projects" ? "active" : ""}>Projects</Link></li>
-            <li><Link to="/research" onClick={() => setIsNavExpanded(false)} className={location.pathname === "/research" ? "active" : ""}>Research</Link></li>
-            <li><Link to="/blog" onClick={() => setIsNavExpanded(false)} className={location.pathname === "/blog" ? "active" : ""}>Blog</Link></li>
-            <li><Link to="/about" onClick={() => setIsNavExpanded(false)} className={location.pathname === "/about" ? "active" : ""}>About Me</Link></li>
-          </ul>
-        </CSSTransition>
-        <CSSTransition
-          in={isNavExpanded}
-          timeout={300}
-          classNames="nav-animation"
-          unmountOnExit
-        >
-          <div className="social-links smallscreen">
-            <a href="https://github.com/SevanBrodjian" target="_blank" rel="noopener noreferrer"><img src={gitLogo} alt="GitHub" /></a>
-            <a href="https://www.linkedin.com/in/sevan-b/" target="_blank" rel="noopener noreferrer"><img src={liLogo} alt="LinkedIn" /></a>
+          <div className="nav-dropdown">
+            <ul className="nav-links smallscreen">
+              <li><Link to="/" onClick={() => setIsNavExpanded(false)} className={location.pathname === "/" ? "active" : ""}>Home</Link></li>
+              <li><Link to="/projects" onClick={() => setIsNavExpanded(false)} className={location.pathname === "/projects" ? "active" : ""}>Projects</Link></li>
+              <li><Link to="/research" onClick={() => setIsNavExpanded(false)} className={location.pathname === "/research" ? "active" : ""}>Research</Link></li>
+              <li><Link to="/blog" onClick={() => setIsNavExpanded(false)} className={location.pathname === "/blog" ? "active" : ""}>Blog</Link></li>
+              <li><Link to="/about" onClick={() => setIsNavExpanded(false)} className={location.pathname === "/about" ? "active" : ""}>About Me</Link></li>
+            </ul>
+            <div className="social-links smallscreen">
+              <a href="https://github.com/SevanBrodjian" target="_blank" rel="noopener noreferrer"><img src={gitLogo} alt="GitHub" /></a>
+              <a href="https://www.linkedin.com/in/sevan-b/" target="_blank" rel="noopener noreferrer"><img src={liLogo} alt="LinkedIn" /></a>
+              <a href="https://scholar.google.com/citations?user=bla3rA8AAAAJ" target="_blank" rel="noopener noreferrer"><img src={scholarLogo} alt="Google Scholar" /></a>
+            </div>
           </div>
         </CSSTransition>
       </nav>
