@@ -1,18 +1,18 @@
-import React, { useEffect, useState, useRef, useMemo } from 'react';
-import katex from 'katex';
-import 'katex/dist/katex.min.css';
-import './SonarRendering.css';
+import katex from "katex";
+import { useEffect, useMemo, useRef, useState } from "react";
+import "katex/dist/katex.min.css";
+import "./SonarRendering.css";
 
 /* ─── KaTeX helper ─────────────────────────────────────────────────────── */
 
 function Math({ tex, block = false }) {
   const html = useMemo(
-    () => katex.renderToString(tex, { displayMode: block, throwOnError: false, output: 'html' }),
-    [tex, block]
+    () => katex.renderToString(tex, { displayMode: block, throwOnError: false, output: "html" }),
+    [tex, block],
   );
   return (
     <span
-      className={block ? 'sr-math sr-math-block' : 'sr-math sr-math-inline'}
+      className={block ? "sr-math sr-math-block" : "sr-math sr-math-inline"}
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
@@ -42,8 +42,17 @@ const BIBTEX = `@misc{brodjian2026singleviewseafloorrecovery,
 
 function CopyIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor"
-      strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <path d="M1 10 L1 1 L10 1" />
       <rect x="4" y="4" width="9" height="9" rx="1" />
     </svg>
@@ -52,8 +61,17 @@ function CopyIcon() {
 
 function CheckIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor"
-      strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <polyline points="1.5 7 4.5 10.5 11.5 2.5" />
     </svg>
   );
@@ -61,8 +79,17 @@ function CheckIcon() {
 
 function MoonIcon() {
   return (
-    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor"
-      strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 15 15"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <path d="M13 9.5A6.5 6.5 0 1 1 5.5 2a4.5 4.5 0 0 0 7.5 7.5z" />
     </svg>
   );
@@ -70,8 +97,17 @@ function MoonIcon() {
 
 function SunIcon() {
   return (
-    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor"
-      strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 15 15"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <circle cx="7.5" cy="7.5" r="2.75" />
       <line x1="7.5" y1="0.75" x2="7.5" y2="2.5" />
       <line x1="7.5" y1="12.5" x2="7.5" y2="14.25" />
@@ -100,28 +136,31 @@ function FigPlaceholder({ label }) {
 function SonarRendering() {
   const [copied, setCopied] = useState(false);
   const [darkMode, setDarkMode] = useState(() => {
-    try { return localStorage.getItem('sr-dark') === '1'; } catch { return false; }
+    try {
+      return localStorage.getItem("sr-dark") === "1";
+    } catch {
+      return false;
+    }
   });
   const videoRef = useRef(null);
 
   const toggleDark = () => {
-    setDarkMode(prev => {
+    setDarkMode((prev) => {
       const next = !prev;
-      try { localStorage.setItem('sr-dark', next ? '1' : '0'); } catch {}
+      try {
+        localStorage.setItem("sr-dark", next ? "1" : "0");
+      } catch {}
       return next;
     });
   };
 
-  /* Page title & scroll unlock */
+  /* Scroll unlock (the site shell locks page scrolling) */
   useEffect(() => {
-    const prevTitle = document.title;
     const prevBody = document.body.style.overflow;
     const prevHtml = document.documentElement.style.overflow;
-    document.title = 'Single-View Seafloor Recovery from Imaging Sonar';
-    document.body.style.overflow = 'auto';
-    document.documentElement.style.overflow = 'auto';
+    document.body.style.overflow = "auto";
+    document.documentElement.style.overflow = "auto";
     return () => {
-      document.title = prevTitle;
       document.body.style.overflow = prevBody;
       document.documentElement.style.overflow = prevHtml;
     };
@@ -133,14 +172,14 @@ function SonarRendering() {
       (entries) => {
         entries.forEach((e) => {
           if (e.isIntersecting) {
-            e.target.classList.add('sr-visible');
+            e.target.classList.add("sr-visible");
             obs.unobserve(e.target);
           }
         });
       },
-      { threshold: 0.08, rootMargin: '0px 0px -30px 0px' }
+      { threshold: 0.08, rootMargin: "0px 0px -30px 0px" },
     );
-    document.querySelectorAll('.sr-fade').forEach((el) => obs.observe(el));
+    document.querySelectorAll(".sr-fade").forEach((el) => obs.observe(el));
     return () => obs.disconnect();
   }, []);
 
@@ -153,7 +192,8 @@ function SonarRendering() {
   }, []);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(BIBTEX)
+    navigator.clipboard
+      .writeText(BIBTEX)
       .then(() => {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
@@ -162,26 +202,34 @@ function SonarRendering() {
   };
 
   return (
-    <main className={`sr-page${darkMode ? ' sr-dark' : ''}`}>
+    <main className={`sr-page${darkMode ? " sr-dark" : ""}`}>
+      <title>Single-View Seafloor Recovery from Imaging Sonar</title>
       <div className="sr-topbar" aria-hidden="true" />
       <div className="sr-grid" aria-hidden="true" />
       <button
         className="sr-theme-btn"
         onClick={toggleDark}
-        aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-        title={darkMode ? 'Light mode' : 'Dark mode'}
+        aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+        title={darkMode ? "Light mode" : "Dark mode"}
       >
         {darkMode ? <SunIcon /> : <MoonIcon />}
       </button>
 
       <div className="sr-container">
-
         {/* ══ Header ══════════════════════════════════════════════════════ */}
         <header className="sr-header sr-fade">
           <div className="sr-eyebrow">
-            <svg className="sr-pulse" width="44" height="14" viewBox="0 0 44 14"
-              fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"
-              aria-hidden="true">
+            <svg
+              className="sr-pulse"
+              width="44"
+              height="14"
+              viewBox="0 0 44 14"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.25"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
               <path d="M0 7 L8 7 L11 2 L14 12 L17 4 L20 10 L23 7 L44 7" />
             </svg>
             <span>PBVS Workshop · CVPR 2026</span>
@@ -198,13 +246,25 @@ function SonarRendering() {
 
           <nav className="sr-links" aria-label="Paper resources">
             {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-            <a className="sr-link-btn" 
+            <a
+              className="sr-link-btn"
               href="https://arxiv.org/abs/2605.24195"
-              target="_blank" rel="noreferrer">Paper</a>
-            <a className="sr-link-btn"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Paper
+            </a>
+            <a
+              className="sr-link-btn"
               href="https://github.com/SevanBrodjian/sonar-inverse-rendering"
-              target="_blank" rel="noreferrer">Code</a>
-            <a className="sr-link-btn" href="#sr-cite-h">BibTeX</a>
+              target="_blank"
+              rel="noreferrer"
+            >
+              Code
+            </a>
+            <a className="sr-link-btn" href="#sr-cite-h">
+              BibTeX
+            </a>
           </nav>
         </header>
 
@@ -220,10 +280,10 @@ function SonarRendering() {
             <video
               ref={videoRef}
               className="sr-demo-video"
-              autoPlay
-              loop
-              playsInline
-              controls
+              autoPlay={true}
+              loop={true}
+              playsInline={true}
+              controls={true}
               preload="metadata"
               aria-label="Sonar reconstruction animation"
             >
@@ -236,9 +296,9 @@ function SonarRendering() {
           </div>
 
           <p className="sr-fig-caption">
-            Our differentiable renderer matches a target sonar image by optimizing a 3D height
-            field via gradient descent. In the second half the terrain is frozen and a sphere
-            is initialized near a target. Gradient flow through the renderer localizes the sphere
+            Our differentiable renderer matches a target sonar image by optimizing a 3D height field
+            via gradient descent. In the second half the terrain is frozen and a sphere is
+            initialized near a target. Gradient flow through the renderer localizes the sphere
             position. This bonus clip demonstrates the renderer's differentiability beyond height
             fields. Sphere fitting is not part of the paper.
           </p>
@@ -246,34 +306,40 @@ function SonarRendering() {
 
         {/* ══ § 01 Abstract ═══════════════════════════════════════════════ */}
         <section className="sr-section sr-fade" aria-labelledby="sr-abstract-h">
-          <h2 id="sr-abstract-h"><span className="sr-secnum">§ 01</span> Abstract</h2>
+          <h2 id="sr-abstract-h">
+            <span className="sr-secnum">§ 01</span> Abstract
+          </h2>
           <p>
-            Forward-looking sonar (FLS) is often the only imaging modality available
-            underwater. Each frame collapses vertical structure into a flat range-azimuth
-            image, leaving scene elevation ambiguous. Existing 3D recovery pipelines
-            typically require many views, multi-sensor rigs, or large quantities of labeled
-            training data.
+            Forward-looking sonar (FLS) is often the only imaging modality available underwater.
+            Each frame collapses vertical structure into a flat range-azimuth image, leaving scene
+            elevation ambiguous. Existing 3D recovery pipelines typically require many views,
+            multi-sensor rigs, or large quantities of labeled training data.
           </p>
           <p>
-            We present a differentiable rendering system for forward-looking imaging sonar.
-            The renderer models the full acquisition physics: acoustic ray casting through a
-            3D scene, beam geometry, surface reflectance, Gaussian range binning, and
-            log-amplitude compression, all differentiable. This makes the system usable as a
-            component in any gradient-based optimization or learning pipeline. We demonstrate
-            it on recovering riverbed and seafloor geometry from a <em>single</em> sonar frame
-            with no training data. Scene geometry is parameterized as an explicit height field
-            and gradient descent drives the simulated image to match the real sensor reading.
-            The system is grounded in real sensor parameters and transfers across hardware and
-            environments without modification.
+            We present a differentiable rendering system for forward-looking imaging sonar. The
+            renderer models the full acquisition physics: acoustic ray casting through a 3D scene,
+            beam geometry, surface reflectance, Gaussian range binning, and log-amplitude
+            compression, all differentiable. This makes the system usable as a component in any
+            gradient-based optimization or learning pipeline. We demonstrate it on recovering
+            riverbed and seafloor geometry from a <em>single</em> sonar frame with no training data.
+            Scene geometry is parameterized as an explicit height field and gradient descent drives
+            the simulated image to match the real sensor reading. The system is grounded in real
+            sensor parameters and transfers across hardware and environments without modification.
           </p>
         </section>
 
         {/* ══ § 02 How It Works ═══════════════════════════════════════════ */}
         <section className="sr-section sr-fade" aria-labelledby="sr-method-h">
-          <h2 id="sr-method-h"><span className="sr-secnum">§ 02</span> How It Works</h2>
+          <h2 id="sr-method-h">
+            <span className="sr-secnum">§ 02</span> How It Works
+          </h2>
 
           <p>
-            Forward-looking sonar sweeps a horizontal arc of acoustic beams across a scene. Each beam fans out vertically, covering a wide range of elevation angles. The sensor records the range and azimuth of each return, but elevation is lost in the process. Various geometries with different heights can collapse into the same flat range-azimuth image. Distance and angle are recovered directly from the signal, but height is not.
+            Forward-looking sonar sweeps a horizontal arc of acoustic beams across a scene. Each
+            beam fans out vertically, covering a wide range of elevation angles. The sensor records
+            the range and azimuth of each return, but elevation is lost in the process. Various
+            geometries with different heights can collapse into the same flat range-azimuth image.
+            Distance and angle are recovered directly from the signal, but height is not.
           </p>
 
           {/*
@@ -286,16 +352,29 @@ function SonarRendering() {
               src="/papers/sonar-rendering/sonar_overview_tp.png"
               alt="Three-panel diagram of the forward-looking sonar sampling geometry: side view showing the vertical elevation fan, top view showing discrete azimuthal beams, and isometric view of the full 3D layout."
               className="sr-fig-img"
-              onError={(e) => { e.target.style.display = 'none'; }}
+              onError={(e) => {
+                e.target.style.display = "none";
+              }}
             />
             {/* <FigPlaceholder label="fig_sonar_layout.png: Figure 2 (sonar geometry overview)" /> */}
             <figcaption className="sr-fig-caption">
-              <>Overview of the sonar geometric layout</> from (a) side, (b) top-down, and (c) isometric views. The forward-looking sonar (FLS) emits discrete azimuthal beams with continuous elevation extent, and returns are projected onto the horizontal plane, introducing elevation ambiguity. (d) The sonar image shown in polar and Cartesian coordinates, where pixel brightness encodes return intensity and range encodes two-way acoustic travel time.
+              <>Overview of the sonar geometric layout</> from (a) side, (b) top-down, and (c)
+              isometric views. The forward-looking sonar (FLS) emits discrete azimuthal beams with
+              continuous elevation extent, and returns are projected onto the horizontal plane,
+              introducing elevation ambiguity. (d) The sonar image shown in polar and Cartesian
+              coordinates, where pixel brightness encodes return intensity and range encodes two-way
+              acoustic travel time.
             </figcaption>
           </figure>
 
           <p>
-            Our method recovers the seafloor geometry from sonar images through differentiable inverse rendering. We represent the seafloor as an explicit height field aligned to the sonar's polar sampling grid and simulate the full ray-casting process in PyTorch. Every beam, every intersection, and every reflectance calculation is differentiable. We run the renderer, compare its output against the real sensor reading, and backpropagate through the entire pipeline. After around 150 optimization steps, the recovered height field reproduces the observed image.
+            Our method recovers the seafloor geometry from sonar images through differentiable
+            inverse rendering. We represent the seafloor as an explicit height field aligned to the
+            sonar's polar sampling grid and simulate the full ray-casting process in PyTorch. Every
+            beam, every intersection, and every reflectance calculation is differentiable. We run
+            the renderer, compare its output against the real sensor reading, and backpropagate
+            through the entire pipeline. After around 150 optimization steps, the recovered height
+            field reproduces the observed image.
           </p>
 
           <p>
@@ -303,31 +382,36 @@ function SonarRendering() {
           </p>
 
           <Math
-            block
+            block={true}
             tex={String.raw`f(r,\theta,\phi) = \Big[\, \mu^{\gamma} \;+\; \exp\!\Big(\!-\tfrac{1 - \boldsymbol{\omega}_{\text{refl}}\cdot\boldsymbol{\omega}_{\theta,\phi}}{\sigma_{\text{spec}}^{2}}\Big) \,\Big]\, J,`}
           />
 
           <p>
-            where <Math tex={String.raw`\mu = \max(0,\,\mathbf{n}_{r,\theta}\!\cdot\!\boldsymbol{\omega}_{\theta,\phi})`} />{' '}
-            controls diffuse falloff based on surface normal and{' '}
-            <Math tex={String.raw`\sigma_{\text{spec}}`} /> sets the specular lobe width.
-            Gaussian binning distributes returns across range bins, and the result is compressed
-            to log-amplitudes, matching standard sonar processing.
+            where{" "}
+            <Math
+              tex={String.raw`\mu = \max(0,\,\mathbf{n}_{r,\theta}\!\cdot\!\boldsymbol{\omega}_{\theta,\phi})`}
+            />{" "}
+            controls diffuse falloff based on surface normal and{" "}
+            <Math tex={String.raw`\sigma_{\text{spec}}`} /> sets the specular lobe width. Gaussian
+            binning distributes returns across range bins, and the result is compressed to
+            log-amplitudes, matching standard sonar processing.
           </p>
 
           <p>
-            Recovering geometry from a single view risks producing solutions that fit the
-            sensor image but reflect view-specific artifacts rather than real structure.
-            We condition on a known base-plane tilt and apply the generic viewpoint
-            assumption, which regularizes the optimization to prefer geometry consistent
-            with a range of natural viewpoints, not solutions tuned to the exact observation
-            angle. A total-variation prior additionally encourages smooth surfaces.
+            Recovering geometry from a single view risks producing solutions that fit the sensor
+            image but reflect view-specific artifacts rather than real structure. We condition on a
+            known base-plane tilt and apply the generic viewpoint assumption, which regularizes the
+            optimization to prefer geometry consistent with a range of natural viewpoints, not
+            solutions tuned to the exact observation angle. A total-variation prior additionally
+            encourages smooth surfaces.
           </p>
         </section>
 
         {/* ══ § 03 Results ════════════════════════════════════════════════ */}
         <section className="sr-section sr-fade" aria-labelledby="sr-results-h">
-          <h2 id="sr-results-h"><span className="sr-secnum">§ 03</span> Results</h2>
+          <h2 id="sr-results-h">
+            <span className="sr-secnum">§ 03</span> Results
+          </h2>
 
           {/*
             PLACEHOLDER: Hero reconstruction (one real-river example).
@@ -339,23 +423,25 @@ function SonarRendering() {
               src="/papers/sonar-rendering/3d_bigview_channel_tp.png"
               alt="Side-by-side comparison: real sonar sensor reading, our reconstructed render, and recovered 3D height field mesh for a river scene."
               className="sr-fig-img"
-              onError={(e) => { e.target.style.display = 'none'; }}
+              onError={(e) => {
+                e.target.style.display = "none";
+              }}
             />
             {/* <FigPlaceholder label="fig_hero_recon.png: sensor / render / 3D mesh" /> */}
             <figcaption className="sr-fig-caption">
-              Real sensor reading captured with a Didson sonar camera (left), our
-              reconstructed image after 150 optimization steps (center), and the recovered
-              3D height field (right). No retraining; same model parameters used for all scenes.
+              Real sensor reading captured with a Didson sonar camera (left), our reconstructed
+              image after 150 optimization steps (center), and the recovered 3D height field
+              (right). No retraining; same model parameters used for all scenes.
             </figcaption>
           </figure>
 
           <p>
-            On synthetic in-distribution data, a supervised U-Net trained on 10,000 labeled
-            frames achieves lower error. Supervised learning has the advantage when training
-            and test distributions match as it can learn statistical priors of the dataset. Out of distribution,
-            the situation changes considerably. Our method outperforms the CNN on the standard HoloOcean
-            benchmark across all metrics and stays close on rough terrain, without accessing
-            those conditions during development.
+            On synthetic in-distribution data, a supervised U-Net trained on 10,000 labeled frames
+            achieves lower error. Supervised learning has the advantage when training and test
+            distributions match as it can learn statistical priors of the dataset. Out of
+            distribution, the situation changes considerably. Our method outperforms the CNN on the
+            standard HoloOcean benchmark across all metrics and stays close on rough terrain,
+            without accessing those conditions during development.
           </p>
 
           <div className="sr-table-wrap" role="region" aria-label="HoloOcean OOD results">
@@ -399,33 +485,37 @@ function SonarRendering() {
               src="/papers/sonar-rendering/rmse_training_plot_tp.png"
               alt="Log-scale plot showing CNN 3D RMSE on three test sets versus number of training samples, with our training-free method shown as a constant dashed line."
               className="sr-fig-img sr-fig-img--constrained"
-              onError={(e) => { e.target.style.display = 'none'; }}
+              onError={(e) => {
+                e.target.style.display = "none";
+              }}
             />
             {/* <FigPlaceholder label="fig_cnn_plot.png: Figure 6 (CNN accuracy vs training set size)" /> */}
             <figcaption className="sr-fig-caption">
-              CNN error on three test sets as a function of training set size. Solid lines
-              are means over five independent runs; shaded regions are 95% confidence
-              intervals. Our training-free method (dashed) stays constant. The supervised
-              model beats our method only beyond roughly 100–1,000 labelled samples.
+              CNN error on three test sets as a function of training set size. Solid lines are means
+              over five independent runs; shaded regions are 95% confidence intervals. Our
+              training-free method (dashed) stays constant. The supervised model beats our method
+              only beyond roughly 100–1,000 labelled samples.
             </figcaption>
           </figure>
 
           <p>
-            A single reconstruction takes 5–15 seconds on an RTX 5090. The same pipeline
-            applies directly to ARIS and Didson captures from the Nushagak, Eel, and Kenai
-            rivers without retraining or fine-tuning.
+            A single reconstruction takes 5–15 seconds on an RTX 5090. The same pipeline applies
+            directly to ARIS and Didson captures from the Nushagak, Eel, and Kenai rivers without
+            retraining or fine-tuning.
           </p>
         </section>
 
         {/* ══ § 04 Citation ═══════════════════════════════════════════════ */}
         <section className="sr-section sr-fade" aria-labelledby="sr-cite-h">
-          <h2 id="sr-cite-h"><span className="sr-secnum">§ 04</span> Citation</h2>
+          <h2 id="sr-cite-h">
+            <span className="sr-secnum">§ 04</span> Citation
+          </h2>
           <div className="sr-bibtex-wrap">
             <button
               className="sr-copy-btn"
               onClick={handleCopy}
-              aria-label={copied ? 'Copied' : 'Copy citation to clipboard'}
-              title={copied ? 'Copied!' : 'Copy to clipboard'}
+              aria-label={copied ? "Copied" : "Copy citation to clipboard"}
+              title={copied ? "Copied!" : "Copy to clipboard"}
             >
               {copied ? <CheckIcon /> : <CopyIcon />}
             </button>
@@ -439,7 +529,6 @@ function SonarRendering() {
           <span className="sr-footer-meta">PBVS · CVPR 2026</span>
           <a href="/">sevanb.net</a>
         </footer>
-
       </div>
     </main>
   );

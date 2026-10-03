@@ -1,36 +1,42 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import './Projects.css';
+import { useEffect, useState } from "react";
+import { Link } from "react-router";
+import { fetchApi } from "../api";
+import { PAGES } from "../site";
+import "./Projects.css";
 
 function Projects() {
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState(null);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL}/api/projects/`)
-      .then(response => response.json())
-      .then(data => setProjects(data))
-      .catch(error => console.error("There was an error fetching projects:", error));
+    fetchApi("projects/")
+      .then(setProjects)
+      .catch((error) => {
+        console.error("There was an error fetching projects:", error);
+        setFailed(true);
+      });
   }, []);
 
   return (
     <div className="projects cosmic-bg-bright">
-      <div className="bg-overlay-2"></div>
+      <title>{PAGES.projects.title}</title>
+      <div className="bg-overlay-2" />
       <div className="title">Projects</div>
       <div className="project-cards-container">
-        {projects.length > 0 ? (
-          projects.map(project => (
+        {projects ? (
+          projects.map((project) => (
             <div className="project-card" key={project.slug}>
               <div className="project-image">
                 <Link to={`/projects/${project.slug}`} className="project-link">
-                  {project.img && project.img.includes('youtube') ? (
+                  {project.img && project.img.includes("youtube") ? (
                     <iframe
                       src={project.img}
                       title="YouTube video player"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                    ></iframe>
+                      allowFullScreen={true}
+                    />
                   ) : project.img && /\.mp4$/i.test(project.img) ? (
-                    <video autoPlay loop muted playsInline>
+                    <video autoPlay={true} loop={true} muted={true} playsInline={true}>
                       <source src={project.img} type="video/mp4" />
                     </video>
                   ) : (
@@ -39,7 +45,9 @@ function Projects() {
                 </Link>
               </div>
               <div className="project-details">
-                <Link className="project-title" to={`/projects/${project.slug}`}>{project.title}</Link>
+                <Link className="project-title" to={`/projects/${project.slug}`}>
+                  {project.title}
+                </Link>
                 <p className="project-status">
                   {project.end ? `Project closed on ${project.end}` : "Ongoing Project"}
                 </p>
@@ -50,7 +58,7 @@ function Projects() {
             </div>
           ))
         ) : (
-          <h2 className="loading">Loading...</h2>
+          <h2 className="loading">{failed ? "Couldn't load projects." : "Loading..."}</h2>
         )}
       </div>
     </div>

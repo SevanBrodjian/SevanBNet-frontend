@@ -1,15 +1,19 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Link } from "react-router-dom";
-import { debounce } from 'lodash';
-import p5 from 'p5';
-import anime from 'animejs/lib/anime.es.js';
-import './Home.css';
-// import logo from '../assets/site-logo.png';
-import reactionDiffusion from './bg_animations/reactionDiffusion.js';
-import taglines from '../data/taglines.js';
-import differentialGrowth from './bg_animations/differentialGrowth.js';
-import particleLife from './bg_animations/particleLife.js';
-import particleUniverse from './bg_animations/particleUniverse.js';
+import anime from "animejs/lib/anime.es.js";
+import p5 from "p5";
+import { Fragment, useEffect, useRef, useState } from "react";
+import { Link } from "react-router";
+import "./Home.css";
+import taglines from "../data/taglines.js";
+import { NAME, PAGES } from "../site";
+import reactionDiffusion from "./bg_animations/reactionDiffusion.js";
+
+function debounce(fn, ms) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), ms);
+  };
+}
 
 function Home() {
   const animations = [reactionDiffusion, reactionDiffusion];
@@ -20,9 +24,11 @@ function Home() {
   const cycleTagline = () => {
     setTaglineVisible(false);
     setTimeout(() => {
-      setTaglineIndex(i => {
+      setTaglineIndex((i) => {
         let next;
-        do { next = Math.floor(Math.random() * taglines.length); } while (next === i && taglines.length > 1);
+        do {
+          next = Math.floor(Math.random() * taglines.length);
+        } while (next === i && taglines.length > 1);
         return next;
       });
       setTaglineVisible(true);
@@ -45,9 +51,11 @@ function Home() {
     return cleanupP5;
   }, []);
 
-  const setOpacityDebounced = useRef(debounce(newOpacity => {
-    setOpacity(newOpacity);
-  }, 100)).current;
+  const setOpacityDebounced = useRef(
+    debounce((newOpacity) => {
+      setOpacity(newOpacity);
+    }, 100),
+  ).current;
 
   useEffect(() => {
     const setupP5 = () => {
@@ -74,97 +82,103 @@ function Home() {
 
     return () => {
       clearTimeout(timeoutIdAnimation);
-    }
+    };
   }, [animationIndex]);
 
   useEffect(() => {
     const animatePaths = () => {
-      document.querySelectorAll('.animated-path').forEach(svg => {
-        const path = svg.querySelector('path');
+      document.querySelectorAll(".animated-path").forEach((svg) => {
+        const path = svg.querySelector("path");
         const width = svg.clientWidth;
         const height = svg.clientHeight;
-        
+
         // Set an initial path
-        path.setAttribute('d', generateRandomCurvedPath(width, height));
-  
+        path.setAttribute("d", generateRandomCurvedPath(width, height));
+
         const animatePath = () => {
           const newPath = generateRandomCurvedPath(width, height);
           const duration = Math.random() * 3500 + 3500;
           anime({
             targets: path,
             d: newPath,
-            easing: 'easeInOutSine',
-            duration: duration,
+            easing: "easeInOutSine",
+            duration,
             complete: animatePath,
           });
         };
         animatePath();
       });
-  
-      document.querySelectorAll('.animated-path text').forEach(text => {
-        const svg = text.closest('.animated-path');
+
+      document.querySelectorAll(".animated-path text").forEach((text) => {
+        const svg = text.closest(".animated-path");
         const width = svg.clientWidth;
         const height = svg.clientHeight;
         const floatX = 0.065 * width;
         const floatY = 0.065 * height;
-        const randomX = `${Math.random() * floatX - (floatX / 2)}px`;
-        const randomY = `${Math.random() * floatY - (floatY / 2)}px`;
-        text.style.setProperty('--random-x', randomX);
-        text.style.setProperty('--random-y', randomY);
-  
+        const randomX = `${Math.random() * floatX - floatX / 2}px`;
+        const randomY = `${Math.random() * floatY - floatY / 2}px`;
+        text.style.setProperty("--random-x", randomX);
+        text.style.setProperty("--random-y", randomY);
+
         const duration = `${Math.random() * 4000 + 4000}ms`;
-        text.style.setProperty('--duration', duration);
+        text.style.setProperty("--duration", duration);
       });
     };
-  
+
     animatePaths();
   }, []);
-  
 
   const generateRandomCurvedPath = (fullWidth, fullHeight) => {
     const width = 1.0 * fullWidth;
     const height = 1.0 * fullHeight;
     const offX = (fullWidth - width) / 2;
     const offY = (fullHeight - height) / 2;
-    const wobble = Math.min(1 / 5 * height, 1 / 5 * width);
+    const wobble = Math.min((1 / 5) * height, (1 / 5) * width);
     const points = [
-      [offX + Math.random() * wobble,                   offY + height / 2 + Math.random() * wobble],
-      [offX + width / 6 + Math.random() * wobble,       offY + height / 6 + Math.random() * wobble],
-      [offX + width / 2 + Math.random() * wobble,       offY + Math.random() * wobble],
-      [offX + width * 5 / 6 + Math.random() * wobble,   offY + height / 6 + Math.random() * wobble],
-      [offX + width + Math.random() * wobble,           offY + height / 2 + Math.random() * wobble],
-      [offX + width * 5 / 6 + Math.random() * wobble,   offY + height * 5 / 6 + Math.random() * wobble],
-      [offX + width / 2 + Math.random() * wobble,       offY + height + Math.random() * wobble],
-      [offX + width * 1 / 6 + Math.random() * wobble,   offY + height * 5 / 6 + Math.random() * wobble],
+      [offX + Math.random() * wobble, offY + height / 2 + Math.random() * wobble],
+      [offX + width / 6 + Math.random() * wobble, offY + height / 6 + Math.random() * wobble],
+      [offX + width / 2 + Math.random() * wobble, offY + Math.random() * wobble],
+      [offX + (width * 5) / 6 + Math.random() * wobble, offY + height / 6 + Math.random() * wobble],
+      [offX + width + Math.random() * wobble, offY + height / 2 + Math.random() * wobble],
+      [
+        offX + (width * 5) / 6 + Math.random() * wobble,
+        offY + (height * 5) / 6 + Math.random() * wobble,
+      ],
+      [offX + width / 2 + Math.random() * wobble, offY + height + Math.random() * wobble],
+      [
+        offX + (width * 1) / 6 + Math.random() * wobble,
+        offY + (height * 5) / 6 + Math.random() * wobble,
+      ],
     ];
-  
+
     let path = `M ${points[0][0]},${points[0][1]}`;
-  
+
     for (let i = 0; i < points.length + 1; i++) {
       const current = points[i % points.length];
       const next = points[(i + 1) % points.length];
-      const midPoint = [
-        (current[0] + next[0]) / 2,
-        (current[1] + next[1]) / 2
-      ];
+      const midPoint = [(current[0] + next[0]) / 2, (current[1] + next[1]) / 2];
       path += ` Q ${current[0]},${current[1]} ${midPoint[0]},${midPoint[1]}`;
     }
-  
-    path += ' Z';
-  
+
+    path += " Z";
+
     return path;
   };
 
   return (
     <div className="home">
-      <div ref={sketchRef} className="background-animation" style={{ opacity: opacity }}></div>
+      <title>{PAGES.home.title}</title>
+      <div ref={sketchRef} className="background-animation" style={{ opacity }} />
       <div className="home-content">
         <span
-          className={`homepage-tag${taglineVisible ? '' : ' tagline-hidden'}`}
+          className={`homepage-tag${taglineVisible ? "" : " tagline-hidden"}`}
           onClick={cycleTagline}
         >
-          {taglines[taglineIndex].split('\n').map((line, i, arr) => (
-            <React.Fragment key={i}>{line}{i < arr.length - 1 && <br />}</React.Fragment>
+          {taglines[taglineIndex].split("\n").map((line, i, arr) => (
+            <Fragment key={i}>
+              {line}
+              {i < arr.length - 1 && <br />}
+            </Fragment>
           ))}
         </span>
         <div className="buttons-container">
@@ -172,13 +186,29 @@ function Home() {
             <Link to="/projects">
               <svg className="animated-path">
                 <path d={generateRandomCurvedPath()} />
-                <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" className="text-drift">Projects</text>
+                <text
+                  x="50%"
+                  y="50%"
+                  dominantBaseline="middle"
+                  textAnchor="middle"
+                  className="text-drift"
+                >
+                  Projects
+                </text>
               </svg>
             </Link>
             <Link to="/research">
               <svg className="animated-path">
                 <path d={generateRandomCurvedPath()} />
-                <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" className="text-drift">Research</text>
+                <text
+                  x="50%"
+                  y="50%"
+                  dominantBaseline="middle"
+                  textAnchor="middle"
+                  className="text-drift"
+                >
+                  Research
+                </text>
               </svg>
             </Link>
           </div>
@@ -186,19 +216,35 @@ function Home() {
             <Link to="/blog">
               <svg className="animated-path">
                 <path d={generateRandomCurvedPath()} />
-                <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" className="text-drift">Blog</text>
+                <text
+                  x="50%"
+                  y="50%"
+                  dominantBaseline="middle"
+                  textAnchor="middle"
+                  className="text-drift"
+                >
+                  Blog
+                </text>
               </svg>
             </Link>
             <Link to="/about">
               <svg className="animated-path">
                 <path d={generateRandomCurvedPath()} />
-                <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" className="text-drift">About Me</text>
+                <text
+                  x="50%"
+                  y="50%"
+                  dominantBaseline="middle"
+                  textAnchor="middle"
+                  className="text-drift"
+                >
+                  About Me
+                </text>
               </svg>
             </Link>
           </div>
         </div>
       </div>
-      <span className="homepage-msg">SevanB.net</span>
+      <h1 className="homepage-msg">{NAME}</h1>
     </div>
   );
 }

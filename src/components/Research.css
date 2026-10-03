@@ -1,174 +1,256 @@
 .research {
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    min-width: 100%;
-    min-height: 100%;
-    text-align: center;
-    padding: 2rem 0;
-    overflow-y: auto;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  min-width: 100%;
+  min-height: 100%;
+  text-align: center;
+  padding: 2rem 0;
+  overflow-y: auto;
 }
 
 .research-container {
-    max-width: min(80%, 800px);
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: nowrap;
+  max-width: min(80%, 800px);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap;
 }
 
 .research-card {
-    min-width: 100%;
-    display: flex;
-    flex-direction: row;
-    margin: 2rem 0;
-    background-color: rgba(0, 0, 0, 0.65);
-    border-radius: 25px;
-    border: 2px solid #222222;
+  min-width: 100%;
+  display: flex;
+  flex-direction: row;
+  margin: 1.5rem 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  border-radius: 25px;
+  border: 2px solid #222222;
 }
 
 .research-image {
-    flex: 1;
-    position: relative;
+  flex: 1;
+  position: relative;
 }
 
 .research-image img,
 .research-image iframe,
 .research-image video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 23px 5px 5px 23px;
-    display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 23px 5px 5px 23px;
+  display: block;
 }
 
 .research-content {
-    flex: 1;
-    padding: 2rem;
-    text-align: left;
+  flex: 1;
+  padding: 1.5rem;
+  text-align: left;
 }
 
 .research-title {
-    font-size: 2.25rem;
-    color: rgb(240, 240, 240);
-    margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+  color: rgb(240, 240, 240);
+  margin-bottom: 0.5rem;
 }
 
 .research-authors {
-    font-size: 1.15rem;
-    color: #aaa;
-    margin-bottom: 0.75rem;
-    font-style: italic;
+  font-size: 1.05rem;
+  color: #aaa;
+  margin-bottom: 0.75rem;
+  font-style: italic;
 }
 
 .research-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    align-items: center;
-    margin-bottom: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  align-items: center;
+  margin-bottom: 1rem;
 }
 
 .research-status {
-    font-size: 1rem;
-    color: #17a2b8;
-    border: 1px solid #17a2b8;
-    border-radius: 6px;
-    padding: 0.2rem 0.6rem;
-    white-space: nowrap;
+  font-size: 1rem;
+  color: #17a2b8;
+  border: 1px solid #17a2b8;
+  border-radius: 6px;
+  padding: 0.2rem 0.6rem;
+  white-space: nowrap;
 }
 
 .research-journal {
-    font-size: 1.1rem;
-    color: #ccc;
-    font-style: italic;
+  font-size: 1.1rem;
+  color: #ccc;
+  font-style: italic;
 }
 
 .research-date {
-    font-size: 1.1rem;
-    color: #bbb;
-    margin-left: auto;
+  font-size: 1.1rem;
+  color: #bbb;
+  margin-left: auto;
 }
 
-
 .research-description {
-    font-size: 1.25rem;
-    color: #ddd;
-    margin-bottom: 1.5rem;
-    margin-top: 0.5rem;
-    line-height: 1.6;
+  font-size: 1.25rem;
+  color: #ddd;
+  margin-bottom: 1.5rem;
+  margin-top: 0.5rem;
+  line-height: 1.4;
 }
 
 .research-links {
-    display: flex;
-    flex-direction: row;
-    gap: 1rem;
-    flex-wrap: wrap;
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .research-btn {
-    border: 2px solid;
-    padding: 0.5rem 1rem;
-    background-color: transparent;
-    cursor: pointer;
-    border-radius: 10px;
-    font-size: 1rem;
-    font-weight: 550;
-    transition: all 0.2s ease;
+  border: 2px solid;
+  padding: 0.4rem 0.8rem;
+  background-color: transparent;
+  cursor: pointer;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 550;
+  transition: all 0.2s ease;
 }
 
 .research-btn:active {
-    transform: scale(0.95);
+  transform: scale(0.95);
 }
 
 .research-btn-site {
-    border-color: rgb(23, 162, 184);
-    color: #17a2b8;
+  border-color: rgb(23, 162, 184);
+  color: #17a2b8;
 }
 
 .research-btn-site:hover {
-    background-color: rgba(23, 162, 184, 0.2);
+  background-color: rgba(23, 162, 184, 0.2);
 }
 
 .research-btn-paper {
-    border-color: rgb(150, 130, 220);
-    color: rgb(150, 130, 220);
+  border-color: rgb(150, 130, 220);
+  color: rgb(150, 130, 220);
 }
 
 .research-btn-paper:hover {
-    background-color: rgba(150, 130, 220, 0.2);
+  background-color: rgba(150, 130, 220, 0.2);
+}
+
+.research-btn-bibtex {
+  margin-left: auto;
+  background: transparent;
+  /* border: 1px solid #555; */
+  border: none;
+  border-radius: 8px;
+  color: #888;
+  font-size: 0.85rem;
+  padding: 0.3rem 0.65rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.research-btn-bibtex:hover {
+  border-color: #999;
+  color: #ccc;
+}
+
+.research-btn-bibtex.active {
+  border-color: #999;
+  color: #ccc;
+  /* background: rgba(255, 255, 255, 0.06); */
+  background: transparent;
+}
+
+.bibtex-panel {
+  position: relative;
+  margin-top: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 0.75rem;
+  padding-right: 5.5rem;
+  animation: bibtex-fade-in 0.2s ease;
+}
+
+@keyframes bibtex-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bibtex-copy {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: transparent;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: #aaa;
+  font-size: 0.8rem;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bibtex-copy:hover {
+  border-color: #888;
+  color: #eee;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.bibtex-text {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.85rem;
+  color: #ccc;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+  line-height: 1.5;
 }
 
 body.ios .research-container {
-    margin-bottom: 12.5vh;
+  margin-bottom: 12.5vh;
 }
 
 @media (max-width: 7680px) {
-    .research-container {
-        margin-bottom: 12.5vh;
-    }
+  .research-container {
+    margin-bottom: 12.5vh;
+  }
 
-    .research-card {
-        flex-direction: column;
-    }
+  .research-card {
+    flex-direction: column;
+  }
 
-    .research-image img,
-    .research-image iframe,
-    .research-image video {
-        border-radius: 23px 23px 5px 5px;
-    }
+  .research-image img,
+  .research-image iframe,
+  .research-image video {
+    border-radius: 23px 23px 5px 5px;
+  }
 
-    .research-title {
-        font-size: 2rem;
-    }
+  .research-title {
+    font-size: 1.5rem;
+  }
 
-    .research-description {
-        font-size: 1.1rem;
-    }
+  .research-description {
+    font-size: 1rem;
+  }
 
-    .research-date {
-        margin-left: 0;
-    }
+  .research-date {
+    margin-left: 0;
+  }
 }

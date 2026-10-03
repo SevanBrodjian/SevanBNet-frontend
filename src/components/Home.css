@@ -110,8 +110,12 @@
 }
 
 @keyframes drift {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(var(--random-x), var(--random-y)); }
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(var(--random-x), var(--random-y));
+  }
 }
 
 .text-drift {
@@ -119,7 +123,9 @@
   font-size: 3rem;
   color: white;
   fill: white;
-  transition: fill 0.3s ease, color 0.3s ease; 
+  transition:
+    fill 0.3s ease,
+    color 0.3s ease;
 }
 
 .homepage-tag {
@@ -155,7 +161,8 @@
 
 .homepage-msg {
   font-size: 1.2rem;
-  letter-spacing: 0.1em; 
+  font-weight: normal;
+  letter-spacing: 0.1em;
   color: #ffffff;
   text-align: center;
   margin: 1vh 0;
@@ -167,11 +174,11 @@
 }
 
 .homepage-msg::before {
-  content: '{ ';
+  content: "{ ";
 }
 
 .homepage-msg::after {
-  content: ' }';
+  content: " }";
 }
 
 /* Mobile Phones (Portrait) */
@@ -222,7 +229,7 @@
   }
 
   .home {
-    justify-content: flex-start; 
+    justify-content: flex-start;
   }
 }
 
@@ -418,7 +425,7 @@
   .homepage-msg {
     font-size: 1.7rem;
   }
-  
+
   .homepage-tag {
     font-size: 2.25rem;
   }
