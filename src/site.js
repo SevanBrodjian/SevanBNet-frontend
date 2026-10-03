@@ -11,6 +11,15 @@ export const PROFILES = [
   { label: "LinkedIn", url: "https://www.linkedin.com/in/sevan-b" },
 ];
 
+// Confirmed by Sevan (2026-10-03).
+export const ROLE = {
+  title: "PhD Student",
+  department: "Computation and Neural Systems",
+  institution: "California Institute of Technology",
+  institutionShort: "Caltech",
+  institutionUrl: "https://www.caltech.edu/",
+};
+
 export const ABOUT = {
   subtitle: "Computation and Neural Systems",
   paragraphs: [

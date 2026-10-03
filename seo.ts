@@ -13,7 +13,7 @@
 // in the admin reaches these files on the next deploy.
 
 import type { Plugin } from "vite";
-import { ABOUT, NAME, PAGES, PROFILES, pageTitle, SITE_URL } from "./src/site.js";
+import { ABOUT, NAME, PAGES, PROFILES, pageTitle, ROLE, SITE_URL } from "./src/site.js";
 
 type Project = {
   title: string;
@@ -155,6 +155,14 @@ const person = {
   url: `${SITE_URL}/`,
   image: `${SITE_URL}/headshot.jpg`,
   description: PAGES.about.description,
+  jobTitle: ROLE.title,
+  affiliation: {
+    "@type": "CollegeOrUniversity",
+    name: ROLE.institution,
+    alternateName: ROLE.institutionShort,
+    url: ROLE.institutionUrl,
+    department: { "@type": "Organization", name: ROLE.department },
+  },
   knowsAbout: [
     "Generative modeling",
     "Neural rendering",
@@ -396,6 +404,8 @@ function llmsTxt({ projects, publications, posts }: Content) {
     `# ${NAME}`,
     "",
     `> ${PAGES.home.description}`,
+    "",
+    `${ROLE.title} in ${ROLE.department}, ${ROLE.institution} (${ROLE.institutionShort}).`,
     "",
     "From the About page, in Sevan's words:",
     "",
