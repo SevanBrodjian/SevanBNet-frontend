@@ -17,7 +17,9 @@ To develop against a deployed backend instead, set `VITE_API_URL`, for example `
 
 ## Deployment
 
-Railway builds `dev` into the development environment and `main` into production (see `railway.json`). The build reads `RAILWAY_ENVIRONMENT_NAME`, which Railway sets automatically:
+Railway builds `dev` into the development environment (service `frontend_dev`) and `main` into production (`frontend_prod`), each only after CI passes. Service settings live in `.railway/railway.ts`; Railway does not read that file on deploy, so apply edits explicitly with `railway config plan` (dry run, must say "0 to destroy") and `railway config apply`, once per environment. See the backend README for the full steps.
+
+The build reads `RAILWAY_ENVIRONMENT_NAME`, which Railway sets automatically:
 
 - **production**: indexable by search engines, uses the production API.
 - **anything else**: every response carries `X-Robots-Tag: noindex` plus a robots meta tag, and the build uses the development API. Preview sites stay viewable but never appear in search results.
