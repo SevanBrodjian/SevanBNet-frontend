@@ -154,16 +154,13 @@ function SonarRendering() {
     });
   };
 
-  /* Page title & scroll unlock */
+  /* Scroll unlock (the site shell locks page scrolling) */
   useEffect(() => {
-    const prevTitle = document.title;
     const prevBody = document.body.style.overflow;
     const prevHtml = document.documentElement.style.overflow;
-    document.title = "Single-View Seafloor Recovery from Imaging Sonar";
     document.body.style.overflow = "auto";
     document.documentElement.style.overflow = "auto";
     return () => {
-      document.title = prevTitle;
       document.body.style.overflow = prevBody;
       document.documentElement.style.overflow = prevHtml;
     };
@@ -206,6 +203,7 @@ function SonarRendering() {
 
   return (
     <main className={`sr-page${darkMode ? " sr-dark" : ""}`}>
+      <title>Single-View Seafloor Recovery from Imaging Sonar</title>
       <div className="sr-topbar" aria-hidden="true" />
       <div className="sr-grid" aria-hidden="true" />
       <button

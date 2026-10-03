@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
+import { ABOUT, NAME, PAGES } from "../site";
 import "./About.css";
 import headshot from "../assets/rainforest_cropped.JPG";
 
@@ -33,15 +34,15 @@ function About() {
 
   return (
     <div className="about cosmic-bg-bright">
-      <title>About · Sevan Brodjian</title>
+      <title>{PAGES.about.title}</title>
       <div className="bg-overlay-2" />
       <div className="about-container">
         <div className="image-container">
           <img className="headshot" src={headshot} alt="Headshot" />
         </div>
         <div className="text-container">
-          <h1 className="about-name">Sevan Brodjian</h1>
-          <h3 className="about-subtitle">Computation and Neural Systems</h3>
+          <h1 className="about-name">{NAME}</h1>
+          <h3 className="about-subtitle">{ABOUT.subtitle}</h3>
           <div className="links-container">
             <button onClick={toggleCvPopup} className="about-link-btn">
               CV
@@ -51,24 +52,17 @@ function About() {
             </button>
           </div>
           <p className="about-description">
-            I study perception as an active, generative process, building machines that perceive by
-            synthesizing multimodal representations grounded in physical interaction. Drawing from
-            phenomenology (the study of lived, embodied experience) I explore how experience emerges
-            through construction, not passive reception.
-            <br />
-            <br />
-            My current research focuses on sonar-to-3D inverse rendering: reconstructing geometric
-            environments from sparse acoustic data using custom differentiable simulators grounded
-            in physical sensor models. This work investigates how generative models informed by
-            sensor physics can unify perception and generation, producing interpretable systems that
-            both sense and synthesize environments.
-            <br />
-            <br />
-            Long-term, I aim to develop real-time generative models that integrate vision, audition,
-            and neural signals (brain-computer interfaces), leading to immersive technologies that
-            co-perceive the world with users. My work bridges generative machine learning,
-            physically-based simulation, and real-time graphics, paving the way for experiential
-            computing in areas like robotics, embodied intelligence, and interactive media.
+            {ABOUT.paragraphs.map((text, i) => (
+              <Fragment key={text}>
+                {i > 0 && (
+                  <>
+                    <br />
+                    <br />
+                  </>
+                )}
+                {text}
+              </Fragment>
+            ))}
           </p>
           {/* <p className="about-description">
               I study perception as an active, generative process — building machines that construct a world rather than passively receive one. The framing borrows from phenomenology: experience as something synthesized through embodied commitment, not delivered ready-made.

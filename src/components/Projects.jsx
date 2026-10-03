@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { fetchApi } from "../api";
+import { PAGES } from "../site";
 import "./Projects.css";
 
 function Projects() {
@@ -18,7 +19,7 @@ function Projects() {
 
   return (
     <div className="projects cosmic-bg-bright">
-      <title>Projects · Sevan Brodjian</title>
+      <title>{PAGES.projects.title}</title>
       <div className="bg-overlay-2" />
       <div className="title">Projects</div>
       <div className="project-cards-container">

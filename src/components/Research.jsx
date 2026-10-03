@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { fetchApi } from "../api";
+import { PAGES } from "../site";
 import "./Research.css";
 
 const CopyIcon = () => (
@@ -128,7 +129,7 @@ function Research() {
 
   return (
     <div className="research cosmic-bg-bright">
-      <title>Research · Sevan Brodjian</title>
+      <title>{PAGES.research.title}</title>
       <div className="bg-overlay-2" />
       <div className="title">Research</div>
       <div className="research-container">

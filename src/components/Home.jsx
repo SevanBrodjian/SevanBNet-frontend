@@ -4,6 +4,7 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import "./Home.css";
 import taglines from "../data/taglines.js";
+import { NAME, PAGES } from "../site";
 import reactionDiffusion from "./bg_animations/reactionDiffusion.js";
 
 function debounce(fn, ms) {
@@ -166,6 +167,7 @@ function Home() {
 
   return (
     <div className="home">
+      <title>{PAGES.home.title}</title>
       <div ref={sketchRef} className="background-animation" style={{ opacity }} />
       <div className="home-content">
         <span
@@ -242,7 +244,7 @@ function Home() {
           </div>
         </div>
       </div>
-      <span className="homepage-msg">SevanB.net</span>
+      <h1 className="homepage-msg">{NAME}</h1>
     </div>
   );
 }

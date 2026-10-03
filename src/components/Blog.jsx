@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { fetchApi } from "../api";
+import { PAGES } from "../site";
 import "./Blog.css";
 
 function Blog() {
@@ -18,7 +19,7 @@ function Blog() {
 
   return (
     <div className="blog cosmic-bg-bright">
-      <title>Blog · Sevan Brodjian</title>
+      <title>{PAGES.blog.title}</title>
       <div className="bg-overlay-2" />
       <div className="title">Blog</div>
       <div className="blog-container">
@@ -28,7 +29,9 @@ function Blog() {
               <h2 className="post-title">{post.title}</h2>
               <p className="post-description">{post.description}</p>
               <div className="post-link-date">
-                <p className="post-date">{new Date(post.published_date).toLocaleDateString()}</p>
+                <p className="post-date">
+                  {new Date(post.published_date).toLocaleDateString("en-US", { timeZone: "UTC" })}
+                </p>
                 <Link to={`/blog/${post.slug}`}>
                   <button className="post-link-btn">Read More</button>
                 </Link>

@@ -1,14 +1,15 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { BrowserRouter, HashRouter, Navigate, Route, Routes, useLocation } from "react-router";
-import { SITE_URL } from "./api";
 import About from "./components/About";
 import Blog from "./components/Blog";
 import BlogPost from "./components/BlogPost";
 import Home from "./components/Home";
 import Navbar from "./components/Navbar";
+import NotFound from "./components/NotFound";
 import ProjectDetail from "./components/ProjectDetail";
 import Projects from "./components/Projects";
 import Research from "./components/Research";
+import { SITE_URL } from "./site";
 import "./App.css";
 import "./components/common.css";
 
@@ -73,6 +74,7 @@ function App() {
                     <Route path="/blog" element={<Blog />} />
                     <Route path="/blog/:blogId" element={<BlogPost />} />
                     <Route path="/about" element={<About />} />
+                    <Route path="*" element={<NotFound />} />
                   </Routes>
                 </div>
               </div>

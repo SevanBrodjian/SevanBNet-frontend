@@ -2,6 +2,8 @@ import DomPurify from "dompurify";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { fetchApi } from "../api";
+import { NAME, pageTitle } from "../site";
+import { NoIndex } from "./NotFound";
 import "./ProjectDetail.css";
 import p5 from "p5";
 import projectAnimation from "./bg_animations/particle_background.js";
@@ -10,6 +12,7 @@ function ProjectDetail() {
   const { projectId } = useParams();
   const [project, setProject] = useState(null);
   const [failed, setFailed] = useState(false);
+  const [missing, setMissing] = useState(false);
   const p5Instance = useRef(null);
   const projRef = useRef(null);
 
@@ -19,6 +22,8 @@ function ProjectDetail() {
       .catch((error) => {
         console.error("There was an error fetching the project:", error);
         setFailed(true);
+        // Only a confirmed 404 is noindexed; an API outage must not de-index real pages.
+        setMissing(error.status === 404);
       });
   }, [projectId]);
 
@@ -38,7 +43,7 @@ function ProjectDetail() {
       <div ref={projRef} className="projectd-background" />
       {project ? (
         <div className="projectd-container">
-          <title>{`${project.title} · Sevan Brodjian`}</title>
+          <title>{pageTitle(project.title)}</title>
           <div className="projectd-title">{project.title}</div>
           <div className="projectd-content">
             {project.img && project.img.includes("youtube") ? (
@@ -104,7 +109,11 @@ function ProjectDetail() {
           </div>
         </div>
       ) : (
-        <h2 className="loading">{failed ? "Couldn't load this project." : "Loading..."}</h2>
+        <h2 className="loading">
+          <title>{missing ? pageTitle("Not found") : NAME}</title>
+          {missing && <NoIndex />}
+          {missing ? "Not found." : failed ? "Couldn't load this project." : "Loading..."}
+        </h2>
       )}
     </div>
   );
