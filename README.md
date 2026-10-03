@@ -1,70 +1,29 @@
-# Getting Started with Create React App
+# sevanb.net frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+React single-page app for [sevanb.net](https://www.sevanb.net), built with Vite. Content (projects, publications, blog posts) comes from the [backend API](https://github.com/SevanBrodjian/SevanBNet-backend).
 
-## Available Scripts
+## Local development
 
-In the project directory, you can run:
+Requires Node 24 (see `.nvmrc`).
 
-### `npm start`
+```sh
+npm install
+npm run dev      # http://localhost:5173, talks to a backend at http://127.0.0.1:8000
+npm run check    # Biome lint/format + TypeScript
+npm run build    # production bundle in dist/
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+To develop against a deployed backend instead, set `VITE_API_URL`, for example `VITE_API_URL=https://sevanbnet-backend-development.up.railway.app npm run dev`.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Deployment
 
-### `npm test`
+Railway builds `dev` into the development environment and `main` into production (see `railway.json`). The build reads `RAILWAY_ENVIRONMENT_NAME`, which Railway sets automatically:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- **production**: indexable by search engines, uses the production API.
+- **anything else**: every response carries `X-Robots-Tag: noindex` plus a robots meta tag, and the build uses the development API. Preview sites stay viewable but never appear in search results.
 
-### `npm run build`
+All pages declare `https://www.sevanb.net/...` as their canonical URL.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Code conventions
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+New code is TypeScript (`.ts`/`.tsx`) and passes Biome's full rule set. Older components are listed in the override in `biome.json`, where findings are warnings; remove each file from that list when it is rewritten.

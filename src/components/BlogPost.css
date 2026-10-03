@@ -20,7 +20,7 @@
   position: relative;
   width: 100%;
   margin-bottom: 2rem;
-} 
+}
 
 .blog-post-title-container {
   margin-top: 5vh;
@@ -82,10 +82,9 @@ body.ios .blog-content-container {
 }
 
 @media (max-width: 768px) {
-  
   .blog-post-container {
     max-width: 95%;
-  } 
+  }
 
   .blog-post-title-container {
     max-width: 90%;

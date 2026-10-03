@@ -1,16 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import './BlogPost.css';
+import DOMPurify from "dompurify";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router";
+import { fetchApi } from "../api";
+import "./BlogPost.css";
 
 function BlogPost() {
   const { blogId } = useParams();
   const [blog, setBlog] = useState(null);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL}/api/blogposts/${blogId}/`)
-      .then(response => response.json())
-      .then(data => setBlog(data))
-      .catch(error => console.error("There was an error fetching the blog post:", error));
+    fetchApi(`blogposts/${blogId}/`)
+      .then(setBlog)
+      .catch((error) => {
+        console.error("There was an error fetching the blog post:", error);
+        setFailed(true);
+      });
   }, [blogId]);
 
   return (
@@ -19,18 +24,19 @@ function BlogPost() {
       <div className="static-bg"></div>
       {blog ? (
         <div className="blog-post-container">
+          <title>{`${blog.title} · Sevan Brodjian`}</title>
           <div className="blog-post-title-container">
             <h1 className="blog-title">{blog.title}</h1>
           </div>
           <div className="blog-content-container">
             <div
               className="blog-content"
-              dangerouslySetInnerHTML={{ __html: blog.content }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blog.content) }}
             />
           </div>
         </div>
       ) : (
-        <h2 className="loading">Loading...</h2>
+        <h2 className="loading">{failed ? "Couldn't load this post." : "Loading..."}</h2>
       )}
     </div>
   );

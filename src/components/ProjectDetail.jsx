@@ -1,20 +1,25 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import './ProjectDetail.css';
-import p5 from 'p5';
-import projectAnimation from './bg_animations/particle_background.js';
+import DomPurify from "dompurify";
+import { useEffect, useRef, useState } from "react";
+import { useParams } from "react-router";
+import { fetchApi } from "../api";
+import "./ProjectDetail.css";
+import p5 from "p5";
+import projectAnimation from "./bg_animations/particle_background.js";
 
 function ProjectDetail() {
   const { projectId } = useParams();
   const [project, setProject] = useState(null);
+  const [failed, setFailed] = useState(false);
   const p5Instance = useRef(null);
   const projRef = useRef(null);
 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL}/api/projects/${projectId}/`)
-      .then(response => response.json())
-      .then(data => setProject(data))
-      .catch(error => console.error("There was an error fetching the project:", error));
+    fetchApi(`projects/${projectId}/`)
+      .then(setProject)
+      .catch((error) => {
+        console.error("There was an error fetching the project:", error);
+        setFailed(true);
+      });
   }, [projectId]);
 
   useEffect(() => {
@@ -30,28 +35,29 @@ function ProjectDetail() {
 
   return (
     <div className="project-detail">
-      <div ref={projRef} className="projectd-background"></div>
+      <div ref={projRef} className="projectd-background" />
       {project ? (
         <div className="projectd-container">
+          <title>{`${project.title} · Sevan Brodjian`}</title>
           <div className="projectd-title">{project.title}</div>
           <div className="projectd-content">
-            {project.img && project.img.includes('youtube') ? (
+            {project.img && project.img.includes("youtube") ? (
               <div className="projectd-media">
                 <iframe
                   src={project.img}
                   title="YouTube video player"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                ></iframe>
+                  allowFullScreen={true}
+                />
               </div>
             ) : project.img && /\.mp4$/i.test(project.img) ? (
               <video
                 className="projectd-video"
-                autoPlay
-                loop
-                muted
-                playsInline
-                controls
+                autoPlay={true}
+                loop={true}
+                muted={true}
+                playsInline={true}
+                controls={true}
                 preload="metadata"
               >
                 <source src={project.img} type="video/mp4" />
@@ -63,16 +69,24 @@ function ProjectDetail() {
           <div className="projectd-info">
             <div className="projectd-dates bigscreen">
               {project.end ? (
-                <em>{project.start} - {project.end}</em>
+                <em>
+                  {project.start} - {project.end}
+                </em>
               ) : (
                 <em>{project.start} - Present (ongoing)</em>
               )}
             </div>
             <div className="projectd-dates smallscreen">
               {project.end ? (
-                <em>{project.start} - <br></br>{project.end}</em>
+                <em>
+                  {project.start} - <br />
+                  {project.end}
+                </em>
               ) : (
-                <em>{project.start} - <br></br>Present (ongoing)</em>
+                <em>
+                  {project.start} - <br />
+                  Present (ongoing)
+                </em>
               )}
             </div>
             {project.link && (
@@ -85,12 +99,12 @@ function ProjectDetail() {
             <div className="desc-header">Description</div>
             <div
               className="desc-text"
-              dangerouslySetInnerHTML={{ __html: project.description }}
+              dangerouslySetInnerHTML={{ __html: DomPurify.sanitize(project.description) }}
             />
           </div>
         </div>
       ) : (
-        <h2 className="loading">Loading...</h2>
+        <h2 className="loading">{failed ? "Couldn't load this project." : "Loading..."}</h2>
       )}
     </div>
   );

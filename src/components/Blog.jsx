@@ -1,24 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import './Blog.css';
+import { useEffect, useState } from "react";
+import { Link } from "react-router";
+import { fetchApi } from "../api";
+import "./Blog.css";
 
 function Blog() {
-  const [blogs, setBlogs] = useState([]);
+  const [blogs, setBlogs] = useState(null);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL}/api/blogposts/`)
-      .then(response => response.json())
-      .then(data => setBlogs(data.reverse()))
-      .catch(error => console.error("There was an error fetching blog posts:", error));
+    fetchApi("blogposts/")
+      .then((data) => setBlogs(data.reverse()))
+      .catch((error) => {
+        console.error("There was an error fetching blog posts:", error);
+        setFailed(true);
+      });
   }, []);
 
   return (
     <div className="blog cosmic-bg-bright">
-      <div className="bg-overlay-2"></div>
+      <title>Blog · Sevan Brodjian</title>
+      <div className="bg-overlay-2" />
       <div className="title">Blog</div>
       <div className="blog-container">
-        {blogs.length > 0 ? (
-          blogs.map(post => (
+        {blogs?.length > 0 ? (
+          blogs.map((post) => (
             <div className="blog-post-card" key={post.id}>
               <h2 className="post-title">{post.title}</h2>
               <p className="post-description">{post.description}</p>
@@ -31,7 +36,9 @@ function Blog() {
             </div>
           ))
         ) : (
-          <h2 className="loading">Loading...</h2>
+          <h2 className="loading">
+            {failed ? "Couldn't load posts." : blogs ? "No posts yet." : "Loading..."}
+          </h2>
         )}
       </div>
     </div>

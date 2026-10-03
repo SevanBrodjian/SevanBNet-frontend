@@ -1,5 +1,5 @@
 export default function projectAnimation(p) {
-  let particles = [];
+  const particles = [];
 
   p.setup = () => {
     p.createCanvas(p.windowWidth - 15, p.windowHeight);
@@ -16,9 +16,9 @@ export default function projectAnimation(p) {
     // Clear the background more aggressively to avoid buildup, adjust alpha as needed
     p.background(30, 0, 0, 30);
 
-    let forceDirection = p.createVector(p.mouseX - p.width / 2, p.mouseY - p.height / 2);
+    const forceDirection = p.createVector(p.mouseX - p.width / 2, p.mouseY - p.height / 2);
     forceDirection.normalize().mult(0.1); // Reduced force to cursor
-    let drivingVector = p.createVector(0, 0.2);
+    const drivingVector = p.createVector(0, 0.2);
     forceDirection.add(drivingVector);
 
     let numParts = 50;
@@ -53,7 +53,7 @@ export default function projectAnimation(p) {
       if (p.width <= 768) {
         defSize = 0.75;
       }
-      this.size = p.random(defSize, defSize*2.25);
+      this.size = p.random(defSize, defSize * 2.25);
     }
 
     attract(force) {

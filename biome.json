@@ -1,0 +1,55 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "includes": ["**", "!public"]
+  },
+  "formatter": {
+    "indentStyle": "space",
+    "lineWidth": 100
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "security": {
+        "noDangerouslySetInnerHtml": "off"
+      }
+    }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": [
+        "src/components/About.jsx",
+        "src/components/Blog.jsx",
+        "src/components/Home.jsx",
+        "src/components/ProjectDetail.jsx",
+        "src/components/Projects.jsx",
+        "src/components/Research.jsx",
+        "src/components/*.css",
+        "src/assets/*.svg",
+        "src/components/papers/*"
+      ],
+      "linter": {
+        "rules": {
+          "a11y": "warn",
+          "complexity": "warn",
+          "correctness": "warn",
+          "style": "warn",
+          "suspicious": "warn"
+        }
+      }
+    }
+  ]
+}

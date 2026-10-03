@@ -1,16 +1,16 @@
-import React, { useState } from "react";
-import './About.css';
-import headshot from '../assets/rainforest_cropped.JPG';
+import { useState } from "react";
+import "./About.css";
+import headshot from "../assets/rainforest_cropped.JPG";
 
 function About() {
-  const [isCVOpen, setIsCVOpen] = useState(false);
+  const [isCvOpen, setIsCvOpen] = useState(false);
   const [isResumeOpen, setIsResumeOpen] = useState(false);
-  const [isCVLoading, setIsCVLoading] = useState(true);
+  const [isCvLoading, setIsCvLoading] = useState(true);
   const [isResumeLoading, setIsResumeLoading] = useState(true);
 
-  const toggleCVPopup = () => {
-    setIsCVOpen(!isCVOpen);
-    setIsCVLoading(true); // Set loading to true when opening the popup
+  const toggleCvPopup = () => {
+    setIsCvOpen(!isCvOpen);
+    setIsCvLoading(true); // Set loading to true when opening the popup
   };
 
   const toggleResumePopup = () => {
@@ -19,12 +19,12 @@ function About() {
   };
 
   const closePopup = () => {
-    setIsCVOpen(false);
+    setIsCvOpen(false);
     setIsResumeOpen(false);
   };
 
-  const handleCVLoad = () => {
-    setIsCVLoading(false); // Set loading to false when PDF is loaded
+  const handleCvLoad = () => {
+    setIsCvLoading(false); // Set loading to false when PDF is loaded
   };
 
   const handleResumeLoad = () => {
@@ -33,7 +33,8 @@ function About() {
 
   return (
     <div className="about cosmic-bg-bright">
-      <div className="bg-overlay-2"></div>
+      <title>About · Sevan Brodjian</title>
+      <div className="bg-overlay-2" />
       <div className="about-container">
         <div className="image-container">
           <img className="headshot" src={headshot} alt="Headshot" />
@@ -42,15 +43,32 @@ function About() {
           <h1 className="about-name">Sevan Brodjian</h1>
           <h3 className="about-subtitle">Computation and Neural Systems</h3>
           <div className="links-container">
-            <button onClick={toggleCVPopup} className="about-link-btn">CV</button>
-            <button onClick={toggleResumePopup} className="about-link-btn">Resume</button>
+            <button onClick={toggleCvPopup} className="about-link-btn">
+              CV
+            </button>
+            <button onClick={toggleResumePopup} className="about-link-btn">
+              Resume
+            </button>
           </div>
           <p className="about-description">
-            I study perception as an active, generative process, building machines that perceive by synthesizing multimodal representations grounded in physical interaction. Drawing from phenomenology (the study of lived, embodied experience) I explore how experience emerges through construction, not passive reception.
-            <br></br><br></br>
-            My current research focuses on sonar-to-3D inverse rendering: reconstructing geometric environments from sparse acoustic data using custom differentiable simulators grounded in physical sensor models. This work investigates how generative models informed by sensor physics can unify perception and generation, producing interpretable systems that both sense and synthesize environments.
-            <br></br><br></br>
-            Long-term, I aim to develop real-time generative models that integrate vision, audition, and neural signals (brain-computer interfaces), leading to immersive technologies that co-perceive the world with users. My work bridges generative machine learning, physically-based simulation, and real-time graphics, paving the way for experiential computing in areas like robotics, embodied intelligence, and interactive media.
+            I study perception as an active, generative process, building machines that perceive by
+            synthesizing multimodal representations grounded in physical interaction. Drawing from
+            phenomenology (the study of lived, embodied experience) I explore how experience emerges
+            through construction, not passive reception.
+            <br />
+            <br />
+            My current research focuses on sonar-to-3D inverse rendering: reconstructing geometric
+            environments from sparse acoustic data using custom differentiable simulators grounded
+            in physical sensor models. This work investigates how generative models informed by
+            sensor physics can unify perception and generation, producing interpretable systems that
+            both sense and synthesize environments.
+            <br />
+            <br />
+            Long-term, I aim to develop real-time generative models that integrate vision, audition,
+            and neural signals (brain-computer interfaces), leading to immersive technologies that
+            co-perceive the world with users. My work bridges generative machine learning,
+            physically-based simulation, and real-time graphics, paving the way for experiential
+            computing in areas like robotics, embodied intelligence, and interactive media.
           </p>
           {/* <p className="about-description">
               I study perception as an active, generative process — building machines that construct a world rather than passively receive one. The framing borrows from phenomenology: experience as something synthesized through embodied commitment, not delivered ready-made.
@@ -61,17 +79,19 @@ function About() {
           </p> */}
         </div>
       </div>
-      {isCVOpen && (
+      {isCvOpen && (
         <div className="popup-overlay" onClick={closePopup}>
           <div className="popup-content" onClick={(e) => e.stopPropagation()}>
-            <button className="pdf-close-btn" onClick={toggleCVPopup}>X</button>
-            <div className={`loading-text ${isCVLoading ? '' : 'hidden'}`}>Loading...</div>
+            <button className="pdf-close-btn" onClick={toggleCvPopup}>
+              X
+            </button>
+            <div className={`loading-text ${isCvLoading ? "" : "hidden"}`}>Loading...</div>
             <iframe
               src="https://drive.google.com/file/d/1-Vxy1hyLh5NeTWmCb3i-T4X0nr1gIdD6/preview"
               className="popup-iframe"
               type="application/pdf"
-              onLoad={handleCVLoad}
-              style={{ opacity: isCVLoading ? 0 : 1 }}
+              onLoad={handleCvLoad}
+              style={{ opacity: isCvLoading ? 0 : 1 }}
             />
           </div>
         </div>
@@ -79,8 +99,10 @@ function About() {
       {isResumeOpen && (
         <div className="popup-overlay" onClick={closePopup}>
           <div className="popup-content" onClick={(e) => e.stopPropagation()}>
-            <button className="pdf-close-btn" onClick={toggleResumePopup}>X</button>
-            <div className={`loading-text ${isResumeLoading ? '' : 'hidden'}`}>Loading...</div>
+            <button className="pdf-close-btn" onClick={toggleResumePopup}>
+              X
+            </button>
+            <div className={`loading-text ${isResumeLoading ? "" : "hidden"}`}>Loading...</div>
             <iframe
               src="https://drive.google.com/file/d/1i_i-cfGA80DceD8W69wgLDuAupEtMVI7/preview"
               className="popup-iframe"
