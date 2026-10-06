@@ -8,12 +8,12 @@ Requires Node 24 (see `.nvmrc`).
 
 ```sh
 npm install
-npm run dev      # http://localhost:5173, talks to a backend at http://127.0.0.1:8000
+npm run dev      # http://localhost:5173; /api is proxied to the production backend
 npm run check    # Biome lint/format + TypeScript
 npm run build    # production bundle in dist/
 ```
 
-To develop against a deployed backend instead, set `VITE_API_URL`, for example `VITE_API_URL=https://sevanbnet-backend-development.up.railway.app npm run dev`.
+In development the app calls relative `/api`, which Vite (`vite` and `vite preview`) forwards to a real backend, so any port works without CORS changes. `VITE_API_TARGET` picks the backend, for example `VITE_API_TARGET=http://127.0.0.1:8000 npm run dev` for a local Django or the development backend's URL. To preview a production build locally against the proxy, build with an empty API URL: `VITE_API_URL= npm run build && npm run preview`.
 
 ## Deployment
 

@@ -1,5 +1,5 @@
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { defineConfig, type ProxyOptions } from "vite";
 import { sitePages } from "./seo.ts";
 
 // Railway sets RAILWAY_ENVIRONMENT_NAME at build time. Only the production build may
@@ -12,13 +12,28 @@ const API_URLS: Record<string, string> = {
   development: "https://sevanbnet-backend-development.up.railway.app",
 };
 
+// Local servers (`vite`, `vite preview`) forward /api to a real backend, so the app can
+// call relative /api from any port; the backend's CORS only allows the real domains.
+// VITE_API_TARGET picks the backend, e.g. http://127.0.0.1:8000 for a local Django.
+const apiTarget = process.env.VITE_API_TARGET ?? API_URLS.production;
+const proxy: Record<string, ProxyOptions> = {
+  "/api": { target: apiTarget, changeOrigin: true, secure: true },
+};
+
 export default defineConfig(({ command }) => {
-  // An explicit VITE_API_URL wins; otherwise follow the Railway environment.
+  // An explicit VITE_API_URL wins (an empty value means relative /api, which suits a
+  // local `vite preview`); otherwise dev uses the proxy and builds follow Railway.
   const apiUrl =
     process.env.VITE_API_URL ??
-    (command === "serve" ? "http://127.0.0.1:8000" : API_URLS[railwayEnv ?? "production"]);
+    (command === "serve" ? "" : API_URLS[railwayEnv ?? "production"]);
   return {
-    plugins: [react(), sitePages({ apiUrl, indexable: railwayEnv === "production" })],
+    plugins: [
+      react(),
+      // The build-time page generator fetches content itself, so it needs a full URL.
+      sitePages({ apiUrl: apiUrl || apiTarget, indexable: railwayEnv === "production" }),
+    ],
     define: { "import.meta.env.VITE_API_URL": JSON.stringify(apiUrl) },
+    server: { proxy },
+    preview: { proxy },
   };
 });
