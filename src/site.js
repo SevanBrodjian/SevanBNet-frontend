@@ -29,13 +29,30 @@ export const ABOUT = {
   ],
 };
 
+// The one line the site leads with (Sevan, 2026-10-06).
+export const LINE = "Generative models and simulators for next-generation virtual environments.";
+
 // <title> and meta description for each top-level page.
 export const PAGES = {
   home: {
     path: "/",
-    title: `${NAME} · Generative models and simulation`,
-    description:
-      "Sevan Brodjian studies perception as a generative process, bridging generative machine learning, physically-based simulation and real-time graphics.",
+    title: `${NAME} · Generative models and simulators`,
+    description: `${NAME}: generative models and simulators for next-generation virtual environments.`,
+  },
+  projects: {
+    path: "/projects",
+    title: `Projects · ${NAME}`,
+    description: "Projects by Sevan Brodjian: systems you can explore, run and read about.",
+  },
+  papers: {
+    path: "/papers",
+    title: `Papers · ${NAME}`,
+    description: "Papers by Sevan Brodjian, each with a small interactive sketch of its idea.",
+  },
+  writing: {
+    path: "/writing",
+    title: `Writing · ${NAME}`,
+    description: "Essays by Sevan Brodjian on science, consciousness and technology.",
   },
   about: {
     path: "/about",
@@ -43,21 +60,20 @@ export const PAGES = {
     description:
       "Sevan Brodjian studies perception as an active, generative process, building machines that perceive by synthesizing multimodal representations grounded in physical interaction.",
   },
-  projects: {
-    path: "/projects",
-    title: `Projects · ${NAME}`,
-    description: "Projects by Sevan Brodjian, with write-ups, media and code.",
-  },
-  research: {
-    path: "/research",
-    title: `Research · ${NAME}`,
-    description: "Publications by Sevan Brodjian, with papers and project pages.",
-  },
-  blog: {
-    path: "/blog",
-    title: `Blog · ${NAME}`,
-    description: "Essays by Sevan Brodjian on science, consciousness and technology.",
-  },
 };
+
+// Profile documents, shown in an on-site viewer with a link out to Drive.
+export const DOCUMENTS = [
+  {
+    id: "cv",
+    label: "CV",
+    url: "https://drive.google.com/file/d/1-Vxy1hyLh5NeTWmCb3i-T4X0nr1gIdD6/preview",
+  },
+  {
+    id: "resume",
+    label: "Resume",
+    url: "https://drive.google.com/file/d/1i_i-cfGA80DceD8W69wgLDuAupEtMVI7/preview",
+  },
+];
 
 export const pageTitle = (title) => `${title} · ${NAME}`;

@@ -13,7 +13,8 @@
 // in the admin reaches these files on the next deploy.
 
 import type { Plugin } from "vite";
-import { ABOUT, NAME, PAGES, PROFILES, pageTitle, ROLE, SITE_URL } from "./src/site.js";
+import { FLAGSHIPS } from "./src/projects/meta.js";
+import { ABOUT, LINE, NAME, PAGES, PROFILES, pageTitle, ROLE, SITE_URL } from "./src/site.js";
 
 type Project = {
   title: string;
@@ -58,7 +59,7 @@ type Page = {
 // The paper page's header and abstract, kept in sync by hand with
 // src/components/papers/SonarRendering.jsx.
 const SONAR = {
-  path: "/papers/sonar-rendering",
+  path: "/projects/sonar-inverse-rendering",
   pageTitle: "Single-View Seafloor Recovery from Imaging Sonar",
   fullTitle: "Single-View Seafloor Recovery from Imaging Sonar via Differentiable Rendering",
   authors: ["Sevan Brodjian", "Michael Hobley", "Pietro Perona"],
@@ -128,6 +129,12 @@ const plainSlug = (slug: string) => /^[\w-]+$/.test(slug);
 const monthYear = (iso: string | null) =>
   iso ? new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "long" }) : null;
 
+// Publications that moved into Projects keep their old site_path; map it to the new page.
+const MOVED = Object.fromEntries(
+  FLAGSHIPS.filter((f) => f.legacyPath).map((f) => [f.legacyPath, `/projects/${f.slug}`]),
+);
+const sitePath = (p: Publication) => (p.site_path ? (MOVED[p.site_path] ?? p.site_path) : null);
+
 const paperUrl = (p: Publication) => p.url ?? (p.doi ? `https://doi.org/${p.doi}` : null);
 
 async function fetchJson<T>(apiUrl: string, path: string): Promise<T[]> {
@@ -179,8 +186,8 @@ const person = {
 const NAV = [
   { href: "/", text: "Home" },
   { href: "/projects", text: "Projects" },
-  { href: "/research", text: "Research" },
-  { href: "/blog", text: "Blog" },
+  { href: "/papers", text: "Papers" },
+  { href: "/writing", text: "Writing" },
   { href: "/about", text: "About" },
 ];
 
@@ -207,7 +214,7 @@ function pages({ projects, publications, posts }: Content): Page[] {
       paperUrl(p) && link(paperUrl(p) as string, "Paper"),
       // QR short links (go.sevanb.net/r/...) log scans; keep crawlers off them.
       p.project_url && !p.project_url.includes("/r/") && link(p.project_url, "Project page"),
-      p.site_path && link(p.site_path, "View on site"),
+      sitePath(p) && link(sitePath(p) as string, "View on site"),
     ].filter(Boolean);
     return (
       `<li><h2>${esc(p.title)}</h2>` +
@@ -224,16 +231,38 @@ function pages({ projects, publications, posts }: Content): Page[] {
     .reverse()
     .map(
       (p) =>
-        `<li><h2>${link(`/blog/${p.slug}`, p.title)}</h2>` +
+        `<li><h2>${link(`/writing/${p.slug}`, p.title)}</h2>` +
         `<p>${esc(plain(p.description))}</p>` +
         `<p>${esc(day(p.published_date))}</p></li>`,
     );
 
+  const flagshipItems = FLAGSHIPS.map(
+    (f) =>
+      `<li><h2>${link(`/projects/${f.slug}`, f.title)}</h2>` +
+      `<p>${esc(`${f.year} · ${f.status}`)}</p><p>${esc(f.line)}</p></li>`,
+  ).join("");
+  const taichi = FLAGSHIPS.find((f) => f.slug === "learning-taichi");
+
   return [
+    ...(taichi
+      ? [
+          {
+            path: `/projects/${taichi.slug}`,
+            file: `_pages/projects/${taichi.slug}.html`,
+            title: pageTitle(taichi.title),
+            description: taichi.description,
+            body: page(
+              `<p>${esc(`${taichi.year} · ${taichi.status}`)}</p><h1>${esc(taichi.title)}</h1><p>${esc(taichi.line)}</p>`,
+            ),
+          },
+        ]
+      : []),
     {
       ...PAGES.home,
       file: "index.html",
-      body: page(`<h1>${esc(NAME)}</h1>`),
+      body: page(
+        `<p>${esc(`${NAME}. ${ROLE.title}, ${ROLE.department}, ${ROLE.institutionShort}.`)}</p><h1>${esc(LINE)}</h1>`,
+      ),
       jsonLd: {
         "@context": "https://schema.org",
         "@graph": [
@@ -268,21 +297,23 @@ function pages({ projects, publications, posts }: Content): Page[] {
     {
       ...PAGES.projects,
       file: "projects.html",
-      body: page(`<h1>Projects</h1><ul>${projectItems.join("")}</ul>`),
+      body: page(
+        `<h1>Projects</h1><ul>${flagshipItems}</ul><h2>Earlier</h2><ul>${projectItems.join("")}</ul>`,
+      ),
     },
     {
-      ...PAGES.research,
-      file: "research.html",
-      body: page(`<h1>Research</h1><ul>${publicationItems.join("")}</ul>`),
+      ...PAGES.papers,
+      file: "papers.html",
+      body: page(`<h1>Papers</h1><ul>${publicationItems.join("")}</ul>`),
     },
     {
-      ...PAGES.blog,
-      file: "blog.html",
-      body: page(`<h1>Blog</h1><ul>${postItems.join("")}</ul>`),
+      ...PAGES.writing,
+      file: "writing.html",
+      body: page(`<h1>Writing</h1><ul>${postItems.join("")}</ul>`),
     },
     {
       path: SONAR.path,
-      file: "papers/sonar-rendering.html",
+      file: "_pages/projects/sonar-inverse-rendering.html",
       title: SONAR.pageTitle,
       description: truncate(SONAR.abstract[1], 160),
       body:
@@ -324,8 +355,8 @@ function detailPages({ projects, posts }: Content): Page[] {
   const postPages = posts
     .filter((p) => plainSlug(p.slug))
     .map((p) => ({
-      path: `/blog/${p.slug}`,
-      file: `_pages/blog/${p.slug}.html`,
+      path: `/writing/${p.slug}`,
+      file: `_pages/writing/${p.slug}.html`,
       title: pageTitle(p.title),
       description: truncate(plain(p.description), 160),
       body: page(`<h1>${esc(p.title)}</h1>${paragraphs(p.content)}`),
@@ -334,7 +365,7 @@ function detailPages({ projects, posts }: Content): Page[] {
         "@type": "BlogPosting",
         headline: plain(p.title),
         datePublished: p.published_date,
-        url: `${SITE_URL}/blog/${p.slug}`,
+        url: `${SITE_URL}/writing/${p.slug}`,
         author: { "@type": "Person", "@id": PERSON_ID, name: NAME, url: `${SITE_URL}/about` },
       },
     }));
@@ -413,17 +444,15 @@ function llmsTxt({ projects, publications, posts }: Content) {
     "## Pages",
     "",
     `- [About](${SITE_URL}/about): background and research interests`,
-    `- [Research](${SITE_URL}/research): publications`,
+    `- [Papers](${SITE_URL}/papers): publications`,
     `- [Projects](${SITE_URL}/projects): project write-ups with code`,
-    `- [Blog](${SITE_URL}/blog): essays`,
+    `- [Writing](${SITE_URL}/writing): essays`,
   ];
   if (publications.length) {
     lines.push("", "## Publications", "");
     for (const p of publications) {
       // Every entry must be a link; papers without one point at the Research page.
-      const url = p.site_path
-        ? `${SITE_URL}${p.site_path}`
-        : (paperUrl(p) ?? `${SITE_URL}/research`);
+      const url = sitePath(p) ? `${SITE_URL}${sitePath(p)}` : (paperUrl(p) ?? `${SITE_URL}/papers`);
       const title = `[${md(p.title)}](${url})`;
       const meta = [p.authors_str, p.journal_name, p.status].filter(Boolean).join("; ");
       lines.push(`- ${title}${meta ? `: ${meta}` : ""}`);
@@ -441,7 +470,7 @@ function llmsTxt({ projects, publications, posts }: Content) {
   if (posts.length) {
     lines.push("", "## Blog posts", "");
     for (const p of [...posts].reverse())
-      lines.push(`- [${md(p.title)}](${SITE_URL}/blog/${p.slug})`);
+      lines.push(`- [${md(p.title)}](${SITE_URL}/writing/${p.slug})`);
   }
   lines.push("", "## Elsewhere", "", ...PROFILES.map((p) => `- [${p.label}](${p.url})`), "");
   return lines.join("\n");
@@ -519,12 +548,23 @@ export function sitePages({ apiUrl, indexable }: { apiUrl: string; indexable: bo
           rewrites: [
             // Known pages first; the generic fallbacks cover content published since the
             // last deploy (served the app shell until the next build includes it).
-            ...details.map((p) => ({ source: p.path.slice(1), destination: `/${p.file}` })),
+            ...all
+              .filter((p) => p.file.startsWith("_pages/"))
+              .map((p) => ({ source: p.path.slice(1), destination: `/${p.file}` })),
             { source: "projects/:slug", destination: "/_shell.html" },
-            { source: "blog/:slug", destination: "/_shell.html" },
+            { source: "writing/:slug", destination: "/_shell.html" },
           ],
           redirects: [
             { source: "/home", destination: "/", type: 301 },
+            // Old URLs from before the 2026 redesign.
+            { source: "/blog", destination: "/writing", type: 301 },
+            { source: "/blog/:slug", destination: "/writing/:slug", type: 301 },
+            { source: "/research", destination: "/papers", type: 301 },
+            ...FLAGSHIPS.filter((f) => f.legacyPath).map((f) => ({
+              source: f.legacyPath,
+              destination: `/projects/${f.slug}`,
+              type: 301,
+            })),
             { source: "/_shell", destination: "/", type: 301 },
             { source: "/_pages/**", destination: "/", type: 301 },
           ],

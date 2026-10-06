@@ -1,0 +1,392 @@
+/* The frame every page shares: tokens, type, header, footer, loading box.
+   Base layer from design option E; the round-3 design is ported on top of this. */
+
+:root {
+  --g0: #0b0c0d; /* ground */
+  --g1: #111214;
+  --rule: #222428;
+  --rule2: #34373c;
+  --tx: #ece9e2; /* 16.6:1 on --g0 */
+  --tx2: #bdb9b0; /* 10.3:1 */
+  --tx3: #8f8c85; /* 5.9:1, smallest text colour allowed */
+  --acc: #28b0c5;
+
+  --sans: "Archivo Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --serif: "Source Serif 4 Variable", Georgia, "Times New Roman", serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --m: 48px;
+  --maxw: 1440px;
+  --hdr: 56px;
+  color-scheme: dark;
+}
+
+@media (max-width: 760px) {
+  :root {
+    --m: 20px;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--g0);
+  color: var(--tx2);
+  font: 400 16px / 1.55 var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  display: contents;
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+a {
+  color: inherit;
+}
+
+::selection {
+  background: var(--tx);
+  color: var(--g0);
+}
+
+:focus-visible {
+  outline: 1px solid var(--tx);
+  outline-offset: 3px;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+h1,
+h2 {
+  color: var(--tx);
+  font-family: var(--serif);
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.vh {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.wrap {
+  width: 100%;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0 var(--m);
+}
+
+.skip {
+  position: absolute;
+  left: 8px;
+  top: -60px;
+  z-index: 50;
+  padding: 8px 12px;
+  background: var(--tx);
+  color: var(--g0);
+}
+
+.skip:focus {
+  top: 8px;
+}
+
+.lbl {
+  font: 500 11.5px / 1.3 var(--sans);
+  font-stretch: 87.5%;
+  letter-spacing: 0.085em;
+  text-transform: uppercase;
+  color: var(--tx3);
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Header */
+.hdr {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--g0);
+  border-bottom: 1px solid var(--rule);
+}
+
+.hdr-row {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  height: var(--hdr);
+}
+
+.mark {
+  color: var(--tx);
+  text-decoration: none;
+  font-family: var(--serif);
+  font-size: 18px;
+}
+
+/* The brace motif from the original hand-built site. */
+.mark::before {
+  content: "{ ";
+  color: var(--tx3);
+}
+
+.mark::after {
+  content: " }";
+  color: var(--tx3);
+}
+
+.nav {
+  display: flex;
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nav a {
+  text-decoration: none;
+  color: var(--tx3);
+}
+
+.nav a:hover,
+.nav a[aria-current="page"] {
+  color: var(--tx);
+}
+
+.viewmenu {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.viewmenu select,
+.btn,
+.reset {
+  background: transparent;
+  color: var(--tx2);
+  border: 1px solid var(--rule2);
+  padding: 4px 8px;
+  font: inherit;
+  cursor: pointer;
+}
+
+@media (max-width: 760px) {
+  .hdr-row {
+    flex-wrap: wrap;
+    height: auto;
+    padding-block: 12px;
+    gap: 12px 20px;
+  }
+}
+
+/* Footer */
+.ftr {
+  border-top: 1px solid var(--rule);
+  padding: 24px 0;
+}
+
+.ftr-links,
+.about-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ext {
+  text-decoration: none;
+}
+
+.ext:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.ext-mark {
+  margin-left: 0.2em;
+  font-size: 0.8em;
+  color: var(--tx3);
+}
+
+/* The plain loading box, kept from the original site. */
+.loading {
+  display: inline-block;
+  margin: 48px 0;
+  padding: 16px 24px;
+  border: 1px solid var(--rule2);
+  background: var(--g1);
+  color: var(--tx);
+}
+
+/* Pages (structure only; round-3 design replaces the look) */
+.page {
+  padding-top: 48px;
+  padding-bottom: 96px;
+}
+
+.featured,
+.rows,
+.papers {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.featured-item,
+.paper,
+.post-row,
+.row {
+  padding: 24px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.row,
+.post-row {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 24px;
+}
+
+.paper {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 24px;
+}
+
+.featured-item h2,
+.paper h2,
+.post-row h2 {
+  margin: 8px 0;
+  font-size: 28px;
+}
+
+.featured-item a,
+.paper a,
+.post-row a,
+.row a {
+  text-decoration: none;
+}
+
+.section-label {
+  margin-top: 64px;
+}
+
+.about {
+  display: grid;
+  grid-template-columns: minmax(200px, 320px) minmax(0, 640px);
+  gap: 48px;
+}
+
+.doc-viewer {
+  width: min(960px, 92vw);
+  height: 88vh;
+  padding: 0;
+  background: var(--g0);
+  border: 1px solid var(--rule2);
+  color: var(--tx2);
+}
+
+.doc-viewer::backdrop {
+  background: rgb(0 0 0 / 0.7);
+}
+
+.doc-bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 16px;
+}
+
+.doc-bar .btn {
+  margin-left: auto;
+}
+
+.doc-viewer iframe {
+  width: 100%;
+  height: calc(100% - 56px);
+  border: 0;
+}
+
+.essay {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 64px var(--m) 96px;
+  font-family: var(--serif);
+  font-size: 19px;
+  line-height: 1.65;
+}
+
+.essay-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 64px;
+  font-family: var(--sans);
+  font-size: 15px;
+}
+
+.prose img {
+  height: auto;
+}
+
+@media (max-width: 760px) {
+  .row,
+  .post-row,
+  .paper,
+  .about {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+/* Cockpit hook: a minimal wireframe pass so the view engine is visibly wired. The
+   round-3 design replaces this with the full labelled skeleton view. */
+html[data-view="wireframe"] main * {
+  outline: 1px dashed color-mix(in srgb, var(--acc) 60%, transparent);
+}
+
+/* Plain-HTML page content written by seo.ts. Visible only until React mounts (or
+   without JavaScript), so it just needs to be legible. */
+.static-page {
+  min-height: 100vh;
+  padding: 2rem max(1.25rem, calc((100% - 46rem) / 2));
+  background: #000;
+  color: #d8d8d8;
+  line-height: 1.5;
+}
+
+.static-page a {
+  color: var(--acc);
+}
+
+.static-page nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 0;
+  list-style: none;
+}
