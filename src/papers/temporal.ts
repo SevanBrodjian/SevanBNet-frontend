@@ -36,7 +36,7 @@ function video(seed: number, n: number): Scene[] {
     out.push({
       a,
       b: a + len,
-      sky: dark ? 0.12 + r() * 0.1 : 0.34 + r() * 0.16,
+      sky: dark ? 0.08 + r() * 0.08 : 0.42 + r() * 0.2,
       ground: 0.2 + r() * 0.3,
       horizon: prev ? clamp(1 - prev.horizon + (r() - 0.5) * 0.2, 0.3, 0.78) : 0.4 + r() * 0.3,
       slope: (r() - 0.5) * 0.4,

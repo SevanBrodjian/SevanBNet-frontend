@@ -166,7 +166,6 @@ export default function Papers() {
       <title>{PAGES.papers.title}</title>
       <div className="ptitle">
         <h1>Papers</h1>
-        {papers && <span className="n">{papers.length}</span>}
       </div>
       {papers?.length ? (
         <ol className="pas">

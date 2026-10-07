@@ -9,7 +9,7 @@
 
 .pas {
   display: grid;
-  gap: 28px;
+  gap: 24px;
   margin: 40px 0 0;
   padding: 0;
   list-style: none;
@@ -99,6 +99,14 @@
 
 .pa-acts {
   margin-top: 28px;
+}
+
+/* BibTeX, while its block is open: held down. */
+.pa-acts .act[aria-pressed="true"] {
+  border-color: var(--tx3);
+  background: var(--g0);
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.55);
+  --cx: var(--tx);
 }
 
 .pa-bib {

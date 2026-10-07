@@ -22,7 +22,7 @@ const MAX = 180; // steps to a fit
 const HOLD_MS = 1700;
 const LAM: [number, number, number] = [5e-3, 5e-3, 1e-4];
 const DH = 0.42; // the fans' drawn half-angle (wider than the sensor's, for legibility)
-const SPREAD = 2.3; // the same for the ridges
+const SPREAD = 2; // the same for the ridges
 const EX = 3; // height exaggeration on the ridges
 
 // Sonar colours (design B): deep water to a warm return.
@@ -219,7 +219,7 @@ const mount: MountWidget = (host) => {
   const P = new Float32Array(S.NB * 2);
   function ridge(r: number[]) {
     const [rx, ry, rw, rh] = r;
-    const pitch = 0.52;
+    const pitch = 0.66;
     const cy = Math.cos(yaw);
     const sy = Math.sin(yaw);
     const fy = Math.cos(pitch);
@@ -340,7 +340,7 @@ const mount: MountWidget = (host) => {
   });
   canvas.addEventListener("pointermove", (e) => {
     if (drag === null) return;
-    yaw = clamp(yaw + (e.clientX - drag) * 0.006, -0.8, 0.8);
+    yaw = clamp(yaw + (e.clientX - drag) * 0.004, -0.4, 0.4);
     drag = e.clientX;
     if (live.paused) draw();
   });
