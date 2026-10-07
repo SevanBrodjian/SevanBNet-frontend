@@ -4,7 +4,9 @@ import still from "../assets/lt-lab.webp";
 
 // The Learning Taichi dashboard, exported read-only (public/lab/learning-taichi), in a
 // framed viewport at the top of the page. Fullscreen uses the Fullscreen API where it
-// exists and otherwise fills the window, with Exit (or Esc) to come back.
+// exists; otherwise (iPhone) the frame fills the window from the top layer (a manual
+// popover, so no view's transforms can move it and the iframe never reloads), and as a
+// last resort the lab opens on its own. Exit, or Esc, comes back.
 // - the frame shows a still of the lab until the real one has loaded
 // - the iframe goes in once the page has settled, so it never competes with first paint
 // - if the export is not deployed, the frame says it could not load it
@@ -32,7 +34,7 @@ const idle = (fn: () => void) => {
 };
 
 export default function Lab() {
-  const box = useRef<HTMLDivElement>(null);
+  const box = useRef<HTMLElement>(null);
   const frame = useRef<HTMLIFrameElement>(null);
   const [state, setState] = useState<State>("wait");
   const [loaded, setLoaded] = useState(false);
@@ -62,18 +64,36 @@ export default function Lab() {
 
   const exit = useCallback(() => {
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    const el = box.current;
+    if (el?.hasAttribute("popover")) {
+      try {
+        el.hidePopover();
+      } catch {
+        // Already hidden.
+      }
+      el.removeAttribute("popover");
+    }
     setFull("");
   }, []);
+
+  const fillWindow = () => {
+    const el = box.current;
+    if (!el) return;
+    if (typeof el.showPopover !== "function") {
+      location.assign(LAB);
+      return;
+    }
+    el.setAttribute("popover", "manual");
+    el.showPopover();
+    setFull("window");
+  };
 
   const enter = () => {
     const el = box.current;
     if (!el) return;
     if (el.requestFullscreen && document.fullscreenEnabled) {
-      el.requestFullscreen().then(
-        () => setFull("api"),
-        () => setFull("window"),
-      );
-    } else setFull("window");
+      el.requestFullscreen().then(() => setFull("api"), fillWindow);
+    } else fillWindow();
   };
 
   // Leaving fullscreen by Esc or the browser's own controls.
@@ -114,10 +134,12 @@ export default function Lab() {
             Exit fullscreen
           </button>
         ) : (
-          <button type="button" className="btn" onClick={enter} disabled={state === "missing"}>
-            <i className="lab-fs" aria-hidden="true" />
-            Fullscreen
-          </button>
+          state !== "missing" && (
+            <button type="button" className="btn" onClick={enter}>
+              <i className="lab-fs" aria-hidden="true" />
+              Fullscreen
+            </button>
+          )
         )}
       </div>
       <div className="lab-vp mx">

@@ -13,6 +13,7 @@
 .lab-bar {
   display: flex;
   justify-content: flex-end;
+  min-height: 36px;
   margin: 0 0 10px;
 }
 
@@ -30,11 +31,6 @@
     linear-gradient(currentColor, currentColor) left bottom / 1.5px 4px no-repeat,
     linear-gradient(currentColor, currentColor) right bottom / 4px 1.5px no-repeat,
     linear-gradient(currentColor, currentColor) right bottom / 1.5px 4px no-repeat;
-}
-
-.lab-bar .btn[disabled] {
-  color: var(--tx3);
-  cursor: default;
 }
 
 .lab-vp {
@@ -83,10 +79,16 @@
   background: var(--g0);
 }
 
+/* In the top layer (a manual popover): undo the popover's own box. */
 .lab-win {
   position: fixed;
   inset: 0;
-  z-index: 90;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  border: 0;
+  color: inherit;
 }
 
 .lab-full .lab-bar {

@@ -1,5 +1,3 @@
-import katex from "katex";
-import { useMemo } from "react";
 import "katex/dist/katex.min.css";
 import Action from "../../frame/Action";
 import AutoVideo from "../../frame/AutoVideo";
@@ -10,6 +8,7 @@ import rmse from "../assets/sonar-rmse-dark.webp";
 import { CopyButton, ProjectHead, ProjectRoom } from "../kit";
 import { flagshipBySlug } from "../meta";
 import SonarDemo from "./SonarDemo";
+import * as tex from "./tex";
 import "./sonar.css";
 
 const meta = flagshipBySlug["sonar-inverse-rendering"];
@@ -24,11 +23,8 @@ const BIBTEX = `@inproceedings{brodjian2026sonar,
   year      = {2026}
 }`;
 
-function TeX({ tex, block = false }: { tex: string; block?: boolean }) {
-  const html = useMemo(
-    () => katex.renderToString(tex, { displayMode: block, throwOnError: false, output: "html" }),
-    [tex, block],
-  );
+/** Pre-rendered KaTeX (see ./tex.ts). */
+function TeX({ html, block = false }: { html: string; block?: boolean }) {
   const Tag = block ? "div" : "span";
   return (
     <Tag className={block ? "sr-math" : undefined} dangerouslySetInnerHTML={{ __html: html }} />
@@ -145,18 +141,11 @@ export default function Page() {
               150 optimization steps the recovered height field reproduces the observed image. The
               reflectance at each ray-surface intersection combines diffuse and specular terms:
             </p>
-            <TeX
-              block
-              tex={String.raw`f(r,\theta,\phi) = \Big[\, \mu^{\gamma} \;+\; \exp\!\Big(\!-\tfrac{1 - \boldsymbol{\omega}_{\text{refl}}\cdot\boldsymbol{\omega}_{\theta,\phi}}{\sigma_{\text{spec}}^{2}}\Big) \,\Big]\, J`}
-            />
+            <TeX block html={tex.reflectance} />
             <p>
-              where{" "}
-              <TeX
-                tex={String.raw`\mu = \max(0,\,\mathbf{n}_{r,\theta}\!\cdot\!\boldsymbol{\omega}_{\theta,\phi})`}
-              />{" "}
-              sets the diffuse falloff and <TeX tex={String.raw`\sigma_{\text{spec}}`} /> the width
-              of the specular lobe. Gaussian binning spreads returns across range bins, and the
-              result is log-compressed, as in standard sonar processing.
+              where <TeX html={tex.mu} /> sets the diffuse falloff and <TeX html={tex.sigma} /> the
+              width of the specular lobe. Gaussian binning spreads returns across range bins, and
+              the result is log-compressed, as in standard sonar processing.
             </p>
             <p>
               A single view can be fit by geometry that only explains this exact angle. Conditioning

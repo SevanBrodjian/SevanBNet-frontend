@@ -16,6 +16,7 @@ function youtube(id: string) {
     loop: "1",
     playlist: id,
     playsinline: "1",
+    controls: "0",
     rel: "0",
     modestbranding: "1",
   });
