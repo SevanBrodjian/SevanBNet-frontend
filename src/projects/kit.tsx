@@ -84,7 +84,7 @@ export function Entry({
       <div className="pjl-tx">
         <p className="pjl-when">
           {lit !== undefined && <span className={lit ? "lamp on" : "lamp"} aria-hidden="true" />}
-          {when}
+          <span>{when}</span>
         </p>
         <h2>
           <Link to={to}>{title}</Link>

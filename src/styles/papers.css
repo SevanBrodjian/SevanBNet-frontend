@@ -102,13 +102,6 @@
 }
 
 /* BibTeX, while its block is open: held down. */
-.pa-acts .act[aria-pressed="true"] {
-  border-color: var(--tx3);
-  background: var(--g0);
-  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.55);
-  --cx: var(--tx);
-}
-
 .pa-bib {
   max-width: 100%;
   margin-top: 20px;

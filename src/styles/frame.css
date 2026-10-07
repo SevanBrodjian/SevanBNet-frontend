@@ -722,6 +722,14 @@ html.k-br-none .mark .brc {
   --cx-o: 3px;
 }
 
+/* An action that toggles something (e.g. BibTeX): held down while on. */
+.act[aria-pressed="true"] {
+  border-color: var(--tx3);
+  background: var(--g0);
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.55);
+  --cx: var(--tx);
+}
+
 .act .ext-mark {
   margin-left: -2px;
   color: inherit;
@@ -1234,6 +1242,20 @@ html[data-framed] .ftr-in .ext-mark {
   color: #f1eee7;
   font-size: 21px;
   font-weight: 530;
+}
+
+#root > .static-page > nav li:first-child a::before,
+#root > .static-page > nav li:first-child a::after {
+  color: #6d6b66;
+  font-weight: 330;
+}
+
+#root > .static-page > nav li:first-child a::before {
+  content: "{\2009\2009";
+}
+
+#root > .static-page > nav li:first-child a::after {
+  content: "\2009\2009}";
 }
 
 #root > .static-page > main {

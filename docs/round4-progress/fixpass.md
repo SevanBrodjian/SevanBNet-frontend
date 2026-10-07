@@ -39,3 +39,9 @@ public/lab/). Resume from the first unchecked item.
   once, then shows "Couldn't load this page. Reload"; panel fails quietly. The lab works
   through serve's cleanUrls with the injected <base>; without the lab the still shows.
   Next: full sweep of views/pages/sizes, controls both ways, final screenshots.
+- Checkpoint 3: full sweep on the prod-like server: 11 routes x 4 views x 2 sizes, no
+  errors, no overflow, no "cockpit"; controls open on the 7th rapid press (mouse and touch)
+  and on the third arrival at Comfort; Esc closes and returns focus; lab fullscreen
+  in/out on desktop and phone; reduced motion: 0 rAF calls; pressed .act style moved to
+  frame.css; static pre-JS page looks like the header; FRAME.md updated.
+  Next: final screenshots into scratchpad/round4, final commit.

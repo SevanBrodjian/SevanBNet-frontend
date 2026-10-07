@@ -7,7 +7,7 @@ comments carry the detail.
 
 | Area | Files |
 | --- | --- |
-| Frame | `src/frame/*`, `src/controls/*`, `src/styles/frame.css`, `controls.css`, `home.css`, `about.css`, `src/pages/Home.tsx`, `About.tsx`, `NotFound.tsx`, `src/main.tsx`, `src/App.tsx`, `seo.ts`, `vite.config.ts` |
+| Frame | `src/frame/*`, `src/controls/*`, `src/styles/frame.css`, `controls.css`, `home.css`, `about.css`, `src/pages/Home.tsx`, `About.tsx`, `NotFound.tsx`, `src/main.tsx`, `src/App.tsx`, `src/routes.ts`, `seo.ts`, `vite.config.ts` |
 | Projects | `src/pages/Projects.tsx`, `ProjectPage.tsx`, `src/projects/**`, `src/styles/projects.css` |
 | Papers | `src/pages/Papers.tsx`, `src/styles/papers.css` (+ any `src/papers/**`) |
 | Writing | `src/pages/Writing.tsx`, `Essay.tsx`, `src/styles/writing.css` (+ any `src/writing/**`) |
@@ -53,14 +53,17 @@ file; ask the frame instead.
   on screen and in a visible tab; holds its poster under reduced motion / Save-Data;
   a small square in the corner (hover/focus) pauses it. No play button in front.
   `src` may be a list of `{ src, type }`.
-- `<StarSky density? />`: the shooting-star sky for project pages (fixed, behind
-  `<main>`). Render it once anywhere in the page; it removes itself on unmount.
+- `<StarSky density? quiet? />`: the shooting-star sky for project pages (fixed, behind
+  `<main>`). Render it once anywhere in the page; it removes itself on unmount. It is not
+  drawn behind blocks of words (`quiet`, a selector; default: prose, captions, the page
+  head and pager).
 - `<PageFrame glow? />`: the plain bezel used by Home and About.
 - `<Time iso f />`: every date. `f`: `y` 2026, `ym` 2026.03, `ymd`, `my` Mar 2026,
   `day` Mar 4, 2026, `long`. Follows the Calendar control (Wireframe shows ISO, Broken
   Unix).
 - `<Loading failed? empty? what? />`: the plain box.
 - `useApi(path)`: fetch from the backend (`/api` is proxied in dev; any port works).
+  Answers are kept for the visit, so coming back to a page renders it at once.
 - `useLiving(ref, el => ({ fps, tick(dt), budget?, slow?, always?, paused? }))`: put a
   canvas or simulation on the one shared loop. It is capped by the Clock control, scaled
   by Tempo, paused offscreen and in hidden tabs, and starts paused under reduced motion
@@ -73,7 +76,8 @@ file; ask the frame instead.
 ## Views and the controls (`src/controls`)
 
 - 55 settings (`schema.ts`); a view is a preset of them. The navbar toggle cycles
-  Comfort, Wireframe, Broken, Reactive. Reset returns everything to Comfort.
+  Comfort, Wireframe, Broken, Reactive. The panel's "Reset all" returns everything to
+  Comfort (the navbar has no Reset).
 - The panel (`Panel.tsx`) has no entry point: pressing the toggle rapidly (7 presses
   within 1.4 s) or arriving at Comfort for the third time opens it; `?controls` too.
   Esc closes it. `?view=wireframe` etc. and `?reset` work in URLs.
@@ -104,6 +108,24 @@ file; ask the frame instead.
   `h` hue, `s` choice (`o`), `b` on/off. Values persist on the device and reset with
   everything else. Numbers also appear as `--k-writing-tempo` on `<html>`, choices as
   `data-k-writing-biome`.
+
+## Pages load when needed (`src/routes.ts`)
+
+- Every page but Home is its own chunk (`route()` in `src/frame/route.tsx`). A link to a
+  page starts loading it on hover or focus (Layout), `main.tsx` loads the first page
+  before mounting, and the server's page asks for that chunk and its fonts with the HTML
+  (seo.ts), so nothing waits on a spinner and nothing shifts.
+- A page that fails to load (a tab opened before a deploy) reloads once, then shows
+  "Couldn't load this page." with a Reload link (`Boundary.tsx`); the header stays.
+- New pages start at the top with focus on `<main>`; Back and Forward return to where
+  the page was left (Layout).
+
+## The lab
+
+`VITE_LAB_URL` points at the Learning Taichi dashboard export wherever it is hosted. If
+unset, the build uses `public/lab/learning-taichi/` when that folder exists (it is not in
+git; seo.ts pins its `<base>` so serve's clean URLs don't break its relative paths).
+Without either, the page shows a still of the dashboard.
 
 ## Rules the frame keeps (keep them too)
 
