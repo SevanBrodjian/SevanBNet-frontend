@@ -44,7 +44,7 @@ export default function StarSky({ density = 1 }: { density?: number }) {
       H = innerHeight;
       cv.width = Math.round(W * dpr);
       cv.height = Math.round(H * dpr);
-      const base = COARSE || W < 760 ? 9 : TIER === "A" ? 22 : 16;
+      const base = COARSE || W < 760 ? 12 : TIER === "A" ? 28 : 20;
       max = Math.max(1, Math.round(base * density));
     };
     size();
@@ -68,7 +68,7 @@ export default function StarSky({ density = 1 }: { density?: number }) {
         age: age * life,
         life,
         hue: Math.random() * 360,
-        w: 0.9 + Math.random() * 0.9,
+        w: 1.1 + Math.random() * 1.1,
       });
     };
 
@@ -84,22 +84,28 @@ export default function StarSky({ density = 1 }: { density?: number }) {
         const env = Math.min(1, t / 0.12) * (1 - t) ** 1.3;
         if (env <= 0.01) continue;
         const travelled = s.v * s.age;
-        const len = Math.min(travelled, s.v * 0.17);
+        const len = Math.min(travelled, s.v * 0.22);
         const tx = s.x - s.dx * len;
         const ty = s.y - s.dy * len;
-        const [r, g, b] = ink > 0.3 ? oklch(0.86, 0.14, phos) : oklch(0.8, 0.09, s.hue);
-        const grad = ctx.createLinearGradient(s.x, s.y, tx, ty);
-        grad.addColorStop(0, `rgb(${r} ${g} ${b} / ${(0.62 * env).toFixed(3)})`);
-        grad.addColorStop(1, `rgb(${r} ${g} ${b} / 0)`);
-        ctx.strokeStyle = grad;
-        ctx.lineWidth = s.w;
+        const [r, g, b] = ink > 0.3 ? oklch(0.86, 0.14, phos) : oklch(0.8, 0.13, s.hue);
+        // A faint wide glow under a sharp core.
+        for (const [width, alpha] of [
+          [s.w * 3.2, 0.14],
+          [s.w, 0.64],
+        ]) {
+          const grad = ctx.createLinearGradient(s.x, s.y, tx, ty);
+          grad.addColorStop(0, `rgb(${r} ${g} ${b} / ${(alpha * env).toFixed(3)})`);
+          grad.addColorStop(1, `rgb(${r} ${g} ${b} / 0)`);
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = width;
+          ctx.beginPath();
+          ctx.moveTo(s.x, s.y);
+          ctx.lineTo(tx, ty);
+          ctx.stroke();
+        }
+        ctx.fillStyle = `rgb(${Math.min(255, r + 50)} ${Math.min(255, g + 50)} ${Math.min(255, b + 50)} / ${(0.9 * env).toFixed(3)})`;
         ctx.beginPath();
-        ctx.moveTo(s.x, s.y);
-        ctx.lineTo(tx, ty);
-        ctx.stroke();
-        ctx.fillStyle = `rgb(${Math.min(255, r + 40)} ${Math.min(255, g + 40)} ${Math.min(255, b + 40)} / ${(0.85 * env).toFixed(3)})`;
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, s.w * 0.75, 0, Math.PI * 2);
+        ctx.arc(s.x, s.y, s.w * 0.8, 0, Math.PI * 2);
         ctx.fill();
       }
     };

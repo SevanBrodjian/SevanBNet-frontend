@@ -1,11 +1,14 @@
-import { type ReactNode, useEffect, useLayoutEffect, useRef } from "react";
+import { lazy, type ReactNode, Suspense, useEffect, useLayoutEffect, useRef } from "react";
 import { Link, NavLink, useLocation } from "react-router";
 import { startFx } from "../controls/fx";
-import Panel from "../controls/Panel";
+import { usePanelOpen } from "../controls/store";
 import ViewToggle from "../controls/ViewToggle";
 import { PROFILES } from "../site";
 import ExternalLink from "./ExternalLink";
 import Time from "./Time";
+
+// The panel is found, not shown: load it only when it opens.
+const Panel = lazy(() => import("../controls/Panel"));
 
 const NAV = [
   { to: "/projects", label: "Projects" },
@@ -26,6 +29,7 @@ export function roomFor(path: string) {
 export default function Layout({ children }: { children: ReactNode }) {
   const { pathname, hash } = useLocation();
   const header = useRef<HTMLElement>(null);
+  const panelOpen = usePanelOpen();
 
   // <html data-room> before paint, so a room's colours never flash.
   useLayoutEffect(() => {
@@ -106,7 +110,11 @@ export default function Layout({ children }: { children: ReactNode }) {
           </span>
         </div>
       </footer>
-      <Panel />
+      {panelOpen && (
+        <Suspense fallback={null}>
+          <Panel />
+        </Suspense>
+      )}
     </>
   );
 }

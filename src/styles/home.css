@@ -106,3 +106,19 @@ html[data-room="home"] .fx-web {
     margin-top: 48px;
   }
 }
+
+@media (max-width: 760px) {
+  .home-in {
+    padding-top: 36px;
+    padding-bottom: 24px;
+  }
+
+  .home .role {
+    margin-bottom: 22px;
+  }
+
+  .slot {
+    width: min(64%, 240px);
+    margin-top: 36px;
+  }
+}

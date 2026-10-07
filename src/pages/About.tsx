@@ -7,8 +7,9 @@ import "../styles/about.css";
 
 type Doc = (typeof DOCUMENTS)[number];
 
-// About echoes the home page: the same frame, the same left column. The CV and Resume
-// open in a viewer on the page, with a way out to Google Drive.
+// About echoes the home page: the same frame, the name on the left where the home page
+// has its line, the bio on the right. The CV and Resume open in a viewer on the page,
+// with a way out to Google Drive.
 export default function About() {
   const dialog = useRef<HTMLDialogElement>(null);
   const [doc, setDoc] = useState<Doc | null>(null);
@@ -25,17 +26,19 @@ export default function About() {
       <title>{PAGES.about.title}</title>
       <PageFrame />
       <section className="wrap about-in">
-        <p className="lbl role">
-          {ROLE.title}, {ROLE.department}, {ROLE.institution}
-        </p>
-        <h1>{NAME}</h1>
-        <Actions className="docs">
-          {DOCUMENTS.map((d) => (
-            <Action key={d.id} onClick={() => open(d)}>
-              {d.label}
-            </Action>
-          ))}
-        </Actions>
+        <div className="about-id">
+          <p className="lbl role">
+            {ROLE.title}, {ROLE.department}, {ROLE.institution}
+          </p>
+          <h1>{NAME}</h1>
+          <Actions className="docs">
+            {DOCUMENTS.map((d) => (
+              <Action key={d.id} primary onClick={() => open(d)}>
+                {d.label}
+              </Action>
+            ))}
+          </Actions>
+        </div>
         <div className="bio" data-slot="about.text">
           {ABOUT.paragraphs.map((t) => (
             <p key={t}>{t}</p>

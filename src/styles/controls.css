@@ -967,6 +967,15 @@ html.k-web .fx-web {
   mix-blend-mode: overlay;
 }
 
+/* Phones and slow devices: plain alpha instead of a blend over the whole page while
+   scrolling. */
+@media (pointer: coarse) {
+  .fx-grain {
+    opacity: calc(var(--k-grain) * 0.07);
+    mix-blend-mode: normal;
+  }
+}
+
 html.k-grain .fx-grain {
   display: block;
 }

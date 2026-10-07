@@ -6,7 +6,7 @@
 // their own settings with registerGroup(); those get --k-<group>-<name> properties (numbers)
 // or data-k-<group>-<name> attributes (choices) on <html>, and reset with everything else.
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import {
   blend,
   DEFAULTS,
@@ -417,6 +417,15 @@ export const useGroups = () => {
 };
 
 export const usePanelOpen = () => useSyncExternalStore(panelChange, () => panelOpen);
+
+/**
+ * Show a page area's group in the panel while this component is mounted. Pass a constant
+ * defined at module level. (Call registerGroup at module level instead to keep the group
+ * in the panel on every page.)
+ */
+export function useControlGroup(group: ControlGroup) {
+  useEffect(() => registerGroup(group), [group]);
+}
 
 // ---------------------------------------------------------------------------------
 
