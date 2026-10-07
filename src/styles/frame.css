@@ -11,15 +11,15 @@
    so ground, temperature and phosphor ink work in every room. Use --g0..--tx4 in styles;
    only set --r-* to define a room. */
 :root {
-  --r-g0: #141619; /* ground */
-  --r-g1: #191b1f; /* raised */
-  --r-g2: #212428; /* raised more */
-  --r-rule: #2c2f35;
-  --r-rule2: #454950;
-  --r-tx: #f1eee7; /* 16:1 on the ground */
-  --r-tx2: #d3cfc6; /* 11.5:1 */
-  --r-tx3: #a9a69e; /* 7.4:1, the smallest text colour for words */
-  --r-tx4: #6d6b66; /* decoration only: braces, ticks, crop marks */
+  --r-g0: #0f1113; /* ground */
+  --r-g1: #151619; /* raised */
+  --r-g2: #1b1e21; /* raised more */
+  --r-rule: #27292e;
+  --r-rule2: #3c4046;
+  --r-tx: #eeebe4; /* 16:1 on the ground */
+  --r-tx2: #c8c4bb; /* 11:1 */
+  --r-tx3: #9c9992; /* 6.9:1, the smallest text colour for words */
+  --r-tx4: #5e5c57; /* decoration only: braces, ticks, crop marks */
 
   /* Controls inputs (Comfort values; src/controls writes the live ones on <html>). */
   --k-ground: 0;
@@ -105,7 +105,7 @@
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 
   /* Weights: a touch heavier than the type's defaults; the Weight control shifts them. */
-  --wb: 30;
+  --wb: 15;
   --w3: calc(300 + var(--wb) + var(--k-wght));
   --w35: calc(350 + var(--wb) + var(--k-wght));
   --w4: calc(400 + var(--wb) + var(--k-wght));
@@ -356,7 +356,7 @@ h3 {
   align-items: baseline;
   gap: 0.34em;
   color: var(--tx);
-  font: var(--w5) 21px / 1 var(--sans);
+  font: var(--w5) 18px / 1 var(--sans);
   letter-spacing: 0.002em;
   text-decoration: none;
   white-space: nowrap;
@@ -388,7 +388,7 @@ html.k-br-none .mark .brc {
   display: block;
   padding: 9px 13px 10px;
   color: var(--tx2);
-  font: var(--w45) 17px / 1 var(--sans);
+  font: var(--w45) 15.5px / 1 var(--sans);
   letter-spacing: 0.004em;
   text-decoration: none;
   --cx: transparent;
@@ -535,7 +535,7 @@ html.k-br-none .mark .brc {
 
   .mark {
     order: 1;
-    font-size: 19px;
+    font-size: 17px;
     line-height: 46px;
   }
 

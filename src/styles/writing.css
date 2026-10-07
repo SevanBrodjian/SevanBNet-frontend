@@ -3,7 +3,7 @@
    a lamp-lit page in a darker room, the garden dim around it. */
 
 html[data-room="writing"] {
-  --r-g0: #1a1713;
+  --r-g0: #15120f;
   --r-g1: #1f1c18;
   --r-g2: #26231f;
   --r-rule: #34302b;
@@ -15,7 +15,7 @@ html[data-room="writing"] {
 }
 
 html[data-room="essay"] {
-  --r-g0: #130f0c;
+  --r-g0: #0e0a08;
   --r-g1: #1d1814;
   --r-g2: #25201b;
   --r-rule: #2c2621;

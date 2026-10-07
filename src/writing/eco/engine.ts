@@ -401,7 +401,7 @@ export function createEco(o: EcoOptions): Eco {
     return [Math.floor((top - 140) / CS), Math.ceil((bot + 140) / CS)];
   }
   const inB = (y: number, b: [number, number]) => y >= b[0] && y <= b[1];
-  const cap = (s: Side) => s.cols * s.rows * (NARROW ? 0.24 : 0.24);
+  const cap = (s: Side) => s.cols * s.rows * (NARROW ? 0.22 : 0.205);
   const at = (s: Side, x: number, y: number) =>
     x < 0 || y < 0 || x >= s.cols || y >= s.rows ? -1 : y * s.cols + x;
 
@@ -1127,8 +1127,8 @@ export function createEco(o: EcoOptions): Eco {
     const small = s.cols < 14;
     if (night)
       return {
-        firefly: bio.sp[0] === "vetch" ? (small ? 1 : 5) : 0,
-        moth: bio.sp[0] !== "hypha" ? (small ? 0 : 2) : 0,
+        firefly: bio.sp[0] === "vetch" ? (small ? 1 : 2) : 0,
+        moth: 0,
       };
     const poll = seas("poll");
     return {
@@ -1165,8 +1165,8 @@ export function createEco(o: EcoOptions): Eco {
         if (!pollinator(s, c, near, openF)) continue;
       } else if (c.k === "moth") moth(s, c, near);
       else if (c.k === "firefly") {
-        c.vx = c.vx * 0.96 + (rnd() - 0.5) * 0.05;
-        c.vy = c.vy * 0.96 + (rnd() - 0.5) * 0.05 - 0.002;
+        c.vx = c.vx * 0.96 + (rnd() - 0.5) * 0.012;
+        c.vy = c.vy * 0.96 + (rnd() - 0.5) * 0.012 - 0.0005;
         c.x += c.vx;
         c.y += c.vy;
         if (c.x < 1) c.vx += 0.05;
@@ -1288,25 +1288,10 @@ export function createEco(o: EcoOptions): Eco {
     c.x += c.vx;
     c.y += c.vy;
   }
-  /**
-   * Fireflies are pulse-coupled oscillators: each flash nudges the others' clocks
-   * forward, so over a minute or two they fall into step, across both margins.
-   */
-  function fireflySync() {
-    const all: Crit[] = [];
-    for (const s of sides) for (const c of s.crit) if (c.k === "firefly") all.push(c);
-    const flashed: Crit[] = [];
-    for (const c of all) {
-      c.th += c.w;
-      if (c.th >= 1) flashed.push(c);
-    }
-    for (const c of flashed) {
-      c.th = 0;
-      c.on = 4 + Math.floor(rnd() * 3);
-      for (const o2 of all) if (o2 !== c && o2.th > 0) o2.th = Math.min(1, o2.th + 0.02);
-    }
+  /** A firefly's light: a slow, steady breath (about 25 s), never a flash. */
+  function fireflyGlow(c: Crit, tt: number) {
+    return 0.3 + 0.15 * Math.sin(tt * 0.25 + c.th * 6.28);
   }
-
   // ---------- what glows at night ----------
   function glowing(s: Side, b: [number, number]) {
     const small = s.cols < 14;
@@ -1345,12 +1330,12 @@ export function createEco(o: EcoOptions): Eco {
     }
     // pulses along the hyphae (mycelium)
     if (bio.shrooms) {
-      if (s.pulses.length < (small ? 1 : 2) && rnd() < 0.02) {
+      if (s.pulses.length < 1 && rnd() < 0.004) {
         const pl = pick([...plants.values()].filter((p) => p.s === s && inB(p.base, b)));
         const i = pl ? (pick(pl.cells) ?? -1) : -1;
         if (i >= 0 && s.T[i] === HYP) pulse(s, i);
       }
-      s.pulses = s.pulses.filter((p) => spread(s, p));
+      if (frame % 4 === 0) s.pulses = s.pulses.filter((p) => spread(s, p));
     }
   }
   function pulse(s: Side, i: number) {
@@ -1381,13 +1366,14 @@ export function createEco(o: EcoOptions): Eco {
   function collectLights(s: Side, b: [number, number]) {
     const L: Light[] = [];
     const tt = frame * 0.06;
-    if (ptr && ptr.s === s) L.push({ x: ptr.x, y: ptr.y, r: 12, c: LIGHT.lamp, k: 0.5 });
+    if (ptr && ptr.s === s) L.push({ x: ptr.x, y: ptr.y, r: 12, c: LIGHT.lamp, k: 0.35 });
     for (const c of s.crit)
-      if (c.k === "firefly" && c.on > 0) L.push({ x: c.x, y: c.y, r: 7, c: LIGHT.firefly, k: 1 });
+      if (c.k === "firefly")
+        L.push({ x: c.x, y: c.y, r: 6, c: LIGHT.firefly, k: fireflyGlow(c, tt) });
     for (const g of s.glows) {
       const y = (g.i / s.cols) | 0;
       if (!inB(y, b)) continue;
-      const breath = 0.75 + 0.25 * Math.sin(tt * 0.5 + g.ph);
+      const breath = 0.8 + 0.2 * Math.sin(tt * 0.2 + g.ph);
       L.push(
         g.k === "worm"
           ? { x: g.i % s.cols, y, r: 5, c: LIGHT.glowworm, k: 0.8 * breath }
@@ -1401,7 +1387,7 @@ export function createEco(o: EcoOptions): Eco {
         y: th.y + th.len * 0.6,
         r: 4,
         c: LIGHT.thread,
-        k: 0.45 + 0.15 * Math.sin(tt + th.ph),
+        k: 0.4 + 0.1 * Math.sin(tt * 0.3 + th.ph),
       });
     }
     for (const m of s.shrooms)
@@ -1409,7 +1395,7 @@ export function createEco(o: EcoOptions): Eco {
         L.push({ x: m.x, y: m.y, r: 5, c: LIGHT.cap, k: 0.6 });
     for (const p of s.pulses)
       for (const i of p.front.slice(0, 6))
-        L.push({ x: i % s.cols, y: (i / s.cols) | 0, r: 3, c: LIGHT.pulse, k: 0.5 });
+        L.push({ x: i % s.cols, y: (i / s.cols) | 0, r: 3, c: LIGHT.pulse, k: 0.3 });
     s.lights = L;
   }
 
@@ -1422,8 +1408,8 @@ export function createEco(o: EcoOptions): Eco {
     let n = 0;
     for (const pl of plants.values())
       if (pl.s === s && !pl.dying && pl.base >= b0 && pl.base <= b1) n++;
-    const want = Math.max(2, Math.round((b1 - b0) / (s.cols < 14 ? 110 : 28)));
-    if (n < want && rnd() < (pre ? 0.6 : 0.14 * g)) {
+    const want = Math.max(2, Math.round((b1 - b0) / (s.cols < 14 ? 120 : 34)));
+    if (n < want && rnd() < (pre ? 0.6 : 0.13 * g)) {
       const y = clamp(Math.floor(b0 + 20 + rnd() * Math.max(8, b1 - b0 - 30)), 3, s.rows - 3);
       newPlant(s, s.dirIn > 0 ? 0 : s.cols - 1, y);
     }
@@ -1456,7 +1442,6 @@ export function createEco(o: EcoOptions): Eco {
       ensure(s, b, pre);
       if (night) glowing(s, b);
     }
-    if (night && !pre) fireflySync();
   }
 
   // ---------- drawing ----------
@@ -1507,14 +1492,11 @@ export function createEco(o: EcoOptions): Eco {
           dot(s, c.x + 1, c.y, shade(m, 0.8));
         } else dot(s, c.x, c.y - 1, shade(m, 0.7));
       } else if (c.k === "firefly") {
-        if (c.on > 0) {
-          dot(s, c.x, c.y, "#F4FFB0");
-          const g = rgb(shade(LIGHT.firefly, 150));
-          dot(s, c.x - 1, c.y, g);
-          dot(s, c.x + 1, c.y, g);
-          dot(s, c.x, c.y - 1, g);
-          dot(s, c.x, c.y + 1, g);
-        } else dot(s, c.x, c.y, "#2A2C1E");
+        const k = fireflyGlow(c, frame * 0.06);
+        dot(s, c.x, c.y, rgb(shade(LIGHT.firefly, Math.round(150 + 90 * k))));
+        const g = rgb(shade(LIGHT.firefly, Math.round(70 * k)));
+        dot(s, c.x - 1, c.y, g);
+        dot(s, c.x + 1, c.y, g);
       } else if (c.k === "beetle") dot(s, c.x, c.y, C.beetle);
       else dot(s, c.x, c.y, C.spring);
     }
@@ -1799,7 +1781,7 @@ export function createEco(o: EcoOptions): Eco {
     ready = false;
     live.setPaused(true);
     // nights start grown; days start young and grow in (still: grown, then drawn once)
-    const n = night || STILL ? (NARROW ? 300 : 420) : NARROW ? 160 : 200;
+    const n = night || STILL ? (NARROW ? 300 : 420) : NARROW ? 260 : 360;
     chunk(pregrow(n, my), 4).then(() => {
       if (growing !== my || disposed) return;
       ready = true;

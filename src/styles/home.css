@@ -1,7 +1,7 @@
 /* Home: one line, an open slot, and a frame that holds still. Owned by the frame. */
 
 html[data-room="home"] {
-  --r-g0: #131518;
+  --r-g0: #0a0b0d;
 }
 
 .home {
@@ -18,10 +18,10 @@ html[data-room="home"] main > .home {
   flex: 1;
 }
 
-/* The old site's cosmic web, faint behind the home page only. */
+/* The old site's cosmic web: behind the home page only, and only when turned up in the controls. */
 html[data-room="home"] .fx-web {
   display: block;
-  opacity: max(calc(var(--k-web) * 0.85), 0.2);
+  opacity: calc(var(--k-web) * 0.85);
 }
 
 .home-in {
