@@ -24,8 +24,7 @@ export default defineConfig(({ command }) => {
   // An explicit VITE_API_URL wins (an empty value means relative /api, which suits a
   // local `vite preview`); otherwise dev uses the proxy and builds follow Railway.
   const apiUrl =
-    process.env.VITE_API_URL ??
-    (command === "serve" ? "" : API_URLS[railwayEnv ?? "production"]);
+    process.env.VITE_API_URL ?? (command === "serve" ? "" : API_URLS[railwayEnv ?? "production"]);
   return {
     plugins: [
       react(),
