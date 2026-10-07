@@ -56,7 +56,15 @@ export type Eco = {
   setNight: (n: boolean) => void;
   seasonChanged: () => void;
   dispose: () => void;
-  stats: () => { plants: number; flowers: number; creatures: number; cost: number; steps: number };
+  stats: () => {
+    plants: number;
+    flowers: number;
+    creatures: number;
+    cost: number;
+    steps: number;
+    /** Fireflies lit now, and all of them. */
+    fireflies: [number, number];
+  };
 };
 
 // cell types
@@ -1192,7 +1200,6 @@ export function createEco(o: EcoOptions): Eco {
       out.push(c);
     }
     s.crit = out;
-    if (night) fireflySync();
   }
   /** Bees and butterflies: visit open flowers, carry pollen, keep away from the pointer. */
   function pollinator(s: Side, c: Crit, near: number, openF: Flower[]) {
@@ -1449,6 +1456,7 @@ export function createEco(o: EcoOptions): Eco {
       ensure(s, b, pre);
       if (night) glowing(s, b);
     }
+    if (night && !pre) fireflySync();
   }
 
   // ---------- drawing ----------
@@ -1876,7 +1884,22 @@ export function createEco(o: EcoOptions): Eco {
         fo += s.flowers.filter((f) => f.st === "open").length;
         cr += s.crit.length;
       }
-      return { plants: pc, flowers: fo, creatures: cr, cost: lastCost, steps };
+      let lit = 0;
+      let ff = 0;
+      for (const s of sides)
+        for (const c of s.crit)
+          if (c.k === "firefly") {
+            ff++;
+            if (c.on > 0) lit++;
+          }
+      return {
+        plants: pc,
+        flowers: fo,
+        creatures: cr,
+        cost: lastCost,
+        steps,
+        fireflies: [lit, ff],
+      };
     },
   };
 }

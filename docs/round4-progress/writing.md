@@ -11,11 +11,11 @@ src/styles/writing.css, the writing parts of seo.ts and vite.config.ts, package.
       API into content/writing/*.md, content/writing/README.md.
 - [x] 2. Writing index + Essay pages on the markdown posts (no API), progress bar, pager,
       biome toggle at the end of an essay, no reading time.
-- [~] 3. Ecosystem (src/writing/eco/*): port of F's eco.js to TS on the shared loop; more
+- [x] 3. Ecosystem (src/writing/eco/*): port of F's eco.js to TS on the shared loop; more
       alive; season from today's date; biome rolled at random and kept for days; settings
       only in the hidden controls (writing.biome / writing.season / writing.tempo).
-- [~] 4. Essay night: dim margins, biome-specific bioluminescence lighting its surroundings.
-- [~] 5. seo.ts on markdown posts (static pages, sitemap, llms.txt, no writing/:slug shell
+- [x] 4. Essay night: dim margins, biome-specific bioluminescence lighting its surroundings.
+- [x] 5. seo.ts on markdown posts (static pages, sitemap, llms.txt, no writing/:slug shell
       fallback), browser checks (1440x900, 390x844, four views, reduced motion, perf),
       npm run check + production build.
 
@@ -38,3 +38,7 @@ src/styles/writing.css, the writing parts of seo.ts and vite.config.ts, package.
   toggles and 12 rapid essay navigations at 4x CPU (no long tasks, no leaks).
   Next: final look pass (density, mycelium brightness), remove zz-test-draft, final
   check/build, summary.
+- Checkpoint 3 (done): fireflies sync once per step (measured: 2/5 lit together at the
+  start, 7/10 after 90 s); an essay whose chunk is gone after a deploy reloads the page
+  once; test draft removed; npm run check and the production build pass; clean copy of
+  HEAD passes npm ci + check + build.

@@ -33,7 +33,21 @@ function EssayPage({ post }: { post: PostMeta }) {
     const t = window.setTimeout(() => live && setSlow(true), 400);
     loadBody(post.slug).then(
       (h) => live && setHtml(h),
-      () => live && setFailed(true),
+      () => {
+        if (!live) return;
+        // After a deploy an open tab may ask for a chunk that no longer exists: load the
+        // page afresh, once.
+        const key = `essay-reload:${post.slug}`;
+        let tried = true;
+        try {
+          tried = !!sessionStorage.getItem(key);
+          sessionStorage.setItem(key, "1");
+        } catch {
+          // No storage: never reload in a loop.
+        }
+        if (tried) setFailed(true);
+        else location.reload();
+      },
     );
     return () => {
       live = false;
