@@ -4,6 +4,7 @@ import "@fontsource-variable/source-serif-4/opsz-italic.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles/frame.css";
+import "./styles/controls.css";
 import App from "./App";
 
 // The server sends each page with a static <title> and canonical link (see seo.ts) for

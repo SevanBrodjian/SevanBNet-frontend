@@ -6,6 +6,7 @@ import useApi from "../frame/useApi";
 import { NAME, pageTitle } from "../site";
 import type { Post } from "../types";
 import NotFound from "./NotFound";
+import "../styles/writing.css";
 
 export default function Essay() {
   const { slug = "" } = useParams();

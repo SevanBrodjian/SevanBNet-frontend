@@ -9,6 +9,7 @@ import { PAGES } from "../projects/pages";
 import { NAME, pageTitle } from "../site";
 import type { Project } from "../types";
 import NotFound from "./NotFound";
+import "../styles/projects.css";
 
 // Flagship projects render their own hand-built page; earlier projects share a template
 // fed by the API.

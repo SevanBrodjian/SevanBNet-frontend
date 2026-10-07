@@ -5,6 +5,7 @@ import Loading from "../frame/Loading";
 import useApi from "../frame/useApi";
 import { PAGES } from "../site";
 import type { Publication } from "../types";
+import "../styles/papers.css";
 
 function PaperTitle({ p }: { p: Publication }) {
   const internal = onSitePath(p);

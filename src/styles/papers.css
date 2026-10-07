@@ -1,0 +1,33 @@
+/* Papers (/papers). Owned by the Papers area.
+   Room: html[data-room="papers"]; set --r-g0 and friends there to colour it (see the
+   tokens in frame.css). */
+
+.papers {
+  margin: 0;
+  padding: 48px 0 96px;
+  list-style: none;
+}
+
+.paper {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 24px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.paper h2 {
+  margin: 8px 0;
+  font-size: 28px;
+}
+
+.paper a {
+  text-decoration: none;
+}
+
+@media (max-width: 760px) {
+  .paper {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}

@@ -4,6 +4,7 @@ import Loading from "../frame/Loading";
 import useApi from "../frame/useApi";
 import { PAGES } from "../site";
 import type { Post } from "../types";
+import "../styles/writing.css";
 
 export default function Writing() {
   const { data, failed } = useApi<Post[]>("blogposts/");

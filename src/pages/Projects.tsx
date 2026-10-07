@@ -4,6 +4,7 @@ import useApi from "../frame/useApi";
 import { FLAGSHIPS } from "../projects/meta";
 import { PAGES } from "../site";
 import type { Project } from "../types";
+import "../styles/projects.css";
 
 const year = (p: Project) => (p.end ?? p.start).slice(0, 4);
 

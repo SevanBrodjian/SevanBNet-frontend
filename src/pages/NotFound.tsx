@@ -8,7 +8,7 @@ export default function NotFound() {
     <div className="wrap page">
       <title>{pageTitle("Not found")}</title>
       <meta name="robots" content="noindex" />
-      <p className="loading">
+      <p className="loadbox">
         Not found. <Link to="/">Home</Link>
       </p>
     </div>

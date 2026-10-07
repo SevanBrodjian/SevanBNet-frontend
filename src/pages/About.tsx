@@ -1,52 +1,79 @@
 import { useRef, useState } from "react";
+import Action, { Actions } from "../frame/Action";
 import ExternalLink from "../frame/ExternalLink";
-import { ABOUT, DOCUMENTS, NAME, PAGES, PROFILES, ROLE } from "../site";
+import PageFrame from "../frame/PageFrame";
+import { ABOUT, DOCUMENTS, NAME, PAGES, ROLE } from "../site";
+import "../styles/about.css";
 
+type Doc = (typeof DOCUMENTS)[number];
+
+// About echoes the home page: the same frame, the same left column. The CV and Resume
+// open in a viewer on the page, with a way out to Google Drive.
 export default function About() {
   const dialog = useRef<HTMLDialogElement>(null);
-  const [doc, setDoc] = useState(DOCUMENTS[0]);
-  const open = (d: (typeof DOCUMENTS)[number]) => {
+  const [doc, setDoc] = useState<Doc | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const open = (d: Doc) => {
     setDoc(d);
+    setLoaded(false);
     dialog.current?.showModal();
   };
+  const close = () => dialog.current?.close();
+
   return (
-    <div className="wrap page about">
+    <div className="about">
       <title>{PAGES.about.title}</title>
-      <img className="portrait" src="/headshot.jpg" alt={NAME} width={740} height={889} />
-      <div>
-        <h1>{NAME}</h1>
-        <p className="lbl">
+      <PageFrame />
+      <section className="wrap about-in">
+        <p className="lbl role">
           {ROLE.title}, {ROLE.department}, {ROLE.institution}
         </p>
-        {ABOUT.paragraphs.map((t) => (
-          <p key={t}>{t}</p>
-        ))}
-        <p className="about-actions">
+        <h1>{NAME}</h1>
+        <Actions className="docs">
           {DOCUMENTS.map((d) => (
-            <button key={d.id} type="button" className="btn" onClick={() => open(d)}>
+            <Action key={d.id} onClick={() => open(d)}>
               {d.label}
-            </button>
+            </Action>
           ))}
-        </p>
-        <ul className="about-links">
-          {PROFILES.map((p) => (
-            <li key={p.url}>
-              <ExternalLink href={p.url}>{p.label}</ExternalLink>
-            </li>
+        </Actions>
+        <div className="bio" data-slot="about.text">
+          {ABOUT.paragraphs.map((t) => (
+            <p key={t}>{t}</p>
           ))}
-        </ul>
-      </div>
-      <dialog ref={dialog} className="doc-viewer" aria-label={doc.label}>
-        <div className="doc-bar">
-          <span className="lbl">{doc.label}</span>
-          <ExternalLink href={doc.url.replace(/\/preview$/, "/view")}>
-            Open in Google Drive
-          </ExternalLink>
-          <button type="button" className="btn" onClick={() => dialog.current?.close()}>
-            Close
-          </button>
         </div>
-        <iframe title={doc.label} src={doc.url} loading="lazy" />
+      </section>
+      {/* biome-ignore lint/a11y/useKeyWithClickEvents: Escape closes it; the click is only the backdrop */}
+      <dialog
+        ref={dialog}
+        className="doc"
+        aria-label={doc?.label ?? "Document"}
+        onClose={() => setDoc(null)}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) close();
+        }}
+      >
+        {doc && (
+          <>
+            <div className="doc-bar">
+              <span className="doc-t">{doc.label}</span>
+              <ExternalLink href={doc.url.replace(/\/preview$/, "/view")}>
+                Open in Google Drive
+              </ExternalLink>
+              <button type="button" className="btn" onClick={close}>
+                Close
+              </button>
+            </div>
+            <div className="doc-body">
+              {!loaded && <p className="loadbox">Loading...</p>}
+              <iframe
+                className={loaded ? undefined : "wait"}
+                title={doc.label}
+                src={doc.url}
+                onLoad={() => setLoaded(true)}
+              />
+            </div>
+          </>
+        )}
       </dialog>
     </div>
   );

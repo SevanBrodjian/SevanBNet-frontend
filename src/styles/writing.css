@@ -1,0 +1,60 @@
+/* Writing (/writing) and essays (/writing/<slug>). Owned by the Writing area.
+   Rooms: html[data-room="writing"], html[data-room="essay"]; set --r-g0 and friends there
+   to colour them (see the tokens in frame.css). */
+
+.writing {
+  padding-top: 48px;
+  padding-bottom: 96px;
+}
+
+.writing .rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.post-row {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 24px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.post-row h2 {
+  margin: 8px 0;
+  font-size: 28px;
+}
+
+.post-row a {
+  text-decoration: none;
+}
+
+.essay {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 64px var(--m) 96px;
+  font-family: var(--serif);
+  font-size: 19px;
+  line-height: 1.65;
+}
+
+.essay-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 64px;
+  font-family: var(--sans);
+  font-size: 15px;
+}
+
+.essay .prose img {
+  height: auto;
+}
+
+@media (max-width: 760px) {
+  .post-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}

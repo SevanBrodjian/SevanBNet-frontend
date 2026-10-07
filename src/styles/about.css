@@ -1,0 +1,58 @@
+/* About: the home page's frame and left column, a name, two documents and the bio.
+   Owned by the frame. */
+
+.about-in {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gap);
+  padding-top: 96px;
+}
+
+.about-in > * {
+  grid-column: 1 / span 7;
+}
+
+.about .role {
+  margin: 0 0 30px;
+  color: var(--tx2);
+  font-size: 12.5px;
+}
+
+.about h1 {
+  margin: 0;
+  color: var(--tx);
+  font-weight: var(--w35);
+  font-size: clamp(38px, 4.4vw, 68px);
+  line-height: calc(1.04 * var(--k-lead));
+  letter-spacing: -0.026em;
+}
+
+.about .docs {
+  margin-top: 40px;
+}
+
+.about .docs .act {
+  min-width: 156px;
+}
+
+.about .bio {
+  max-width: 34em;
+  margin-top: 56px;
+  color: var(--tx2);
+  font: var(--w4) 19.5px / calc(1.62 * var(--k-lead)) var(--serif);
+}
+
+.about .bio p {
+  margin: 0 0 1.05em;
+}
+
+@media (max-width: 900px) {
+  .about-in {
+    display: block;
+    padding-top: 44px;
+  }
+
+  .about .bio {
+    font-size: 18.5px;
+  }
+}
