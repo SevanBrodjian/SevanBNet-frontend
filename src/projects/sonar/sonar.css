@@ -1,0 +1,279 @@
+/* The sonar project page (/projects/sonar-inverse-rendering): the live demo on top, then
+   the paper in sections. Owned by the Projects area; loaded with the page. */
+
+.sr .pj-head h1 {
+  max-width: 30ch;
+}
+
+.sr-au {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 18px 0 0;
+  color: var(--tx2);
+  font-size: 18px;
+}
+
+.sr-au b {
+  color: var(--tx);
+  font-weight: var(--w5);
+}
+
+.sr-au .sr-af {
+  color: var(--tx3);
+}
+
+/* ---------- the live demo ---------- */
+.sr-demo {
+  margin: 0 0 24px;
+}
+
+.sn-panes {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 0.8fr) minmax(0, 2fr);
+  gap: 1px;
+  height: clamp(300px, 34vw, 440px);
+  border: 1px solid var(--rule2);
+  background: var(--rule2);
+}
+
+.sn-pane {
+  min-width: 0;
+  background: #050506;
+}
+
+.sn-pane .osd {
+  top: 10px;
+  left: 12px;
+  text-transform: uppercase;
+}
+
+.sn-mesh canvas {
+  cursor: grab;
+  touch-action: none;
+}
+
+.sn-mesh canvas:active {
+  cursor: grabbing;
+}
+
+.sn-mesh canvas:focus-visible {
+  outline: 1px solid var(--tx);
+  outline-offset: -2px;
+}
+
+.sn-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.sn-bar .btn[disabled] {
+  color: var(--tx3);
+  cursor: default;
+}
+
+.sn-rd {
+  display: flex;
+  gap: 22px;
+  margin: 0 0 0 auto;
+  color: var(--tx3);
+  font: 12.5px / 1 var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.sn-rd b {
+  color: var(--tx);
+  font-weight: 500;
+}
+
+/* ---------- the paper ---------- */
+.sr-sec {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: var(--gap);
+  padding: 44px 0 52px;
+  border-top: 1px solid var(--rule);
+}
+
+.sr-demo + .sr-sec {
+  margin-top: 56px;
+}
+
+.sr-sec h2 {
+  margin: 4px 0 0;
+  color: var(--tx2);
+  font: var(--w5) 13px / 1.3 var(--sans);
+  font-stretch: 92%;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sr-body {
+  min-width: 0;
+  max-width: 1000px;
+}
+
+.sr-body.prose,
+.sr-body .prose {
+  max-width: 70ch;
+  color: var(--tx2);
+  font: var(--w4) 18.5px / calc(1.65 * var(--k-lead)) var(--serif);
+}
+
+.sr-body .prose p,
+.sr-body.prose p {
+  margin: 0 0 1.05em;
+}
+
+.sr-body .prose p:last-child,
+.sr-body.prose p:last-child {
+  margin-bottom: 0;
+}
+
+.sr-after {
+  margin-top: 36px;
+}
+
+.sr-vid {
+  border: 1px solid var(--rule2);
+}
+
+.sr-fig {
+  margin: 28px 0 0;
+  border: 1px solid var(--rule);
+  background: #111215;
+}
+
+.sr-fig img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.sr-narrow {
+  max-width: 680px;
+}
+
+.sr-math {
+  margin: 1.1em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  color: var(--tx);
+  font-size: 1.05em;
+}
+
+.sr-math .katex-display {
+  margin: 0;
+}
+
+.sr-tbl-wrap {
+  max-width: 560px;
+  margin: 32px 0 0;
+  overflow-x: auto;
+}
+
+.sr-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font: 14.5px / 1.4 var(--sans);
+  font-variant-numeric: tabular-nums;
+}
+
+.sr-tbl caption {
+  padding-bottom: 10px;
+  color: var(--tx3);
+  font-size: 13.5px;
+  text-align: left;
+}
+
+.sr-tbl th,
+.sr-tbl td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--rule);
+  text-align: right;
+}
+
+.sr-tbl th:first-child {
+  padding-left: 0;
+  text-align: left;
+}
+
+.sr-tbl thead th {
+  color: var(--tx3);
+  font: var(--w5) 12px / 1.3 var(--sans);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.sr-tbl tbody th {
+  color: var(--tx2);
+  font-weight: var(--w4);
+}
+
+.sr-tbl td {
+  color: var(--tx2);
+  font-family: var(--mono);
+  font-size: 13.5px;
+}
+
+.sr-tbl .sr-ours :is(th, td) {
+  color: var(--tx);
+}
+
+.sr-tbl .sr-ours th::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 9px;
+  background: var(--acc);
+  vertical-align: 0.12em;
+}
+
+.sr .bib {
+  max-width: 760px;
+  padding-right: 80px;
+}
+
+@media (max-width: 1000px) {
+  .sr-sec {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    padding: 36px 0 40px;
+  }
+}
+
+@media (max-width: 760px) {
+  .sr-au {
+    font-size: 16px;
+  }
+
+  .sn-panes {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 280px 230px;
+    height: auto;
+  }
+
+  .sn-mesh {
+    grid-column: 1 / -1;
+  }
+
+  .sn-rd {
+    width: 100%;
+    gap: 16px;
+    margin: 6px 0 0;
+    font-size: 11.5px;
+  }
+
+  .sr-demo + .sr-sec {
+    margin-top: 40px;
+  }
+
+  .sr-body.prose,
+  .sr-body .prose {
+    font-size: 17px;
+  }
+}

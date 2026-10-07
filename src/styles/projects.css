@@ -1,53 +1,536 @@
-/* Projects: the list (/projects), flagship pages (/projects/<slug>) and the shared
-   template for earlier projects. Owned by the Projects area.
-   Rooms: html[data-room="projects"] (the list), html[data-room="project"] (a page). Set
-   --r-g0 and friends there to colour a room (see the tokens in frame.css). */
+/* Projects: the list (/projects), the shared parts of every project page (/projects/<slug>)
+   and the template for earlier projects. Owned by the Projects area. The flagship pages
+   add their own files (src/projects/sonar/sonar.css, src/projects/learning-taichi/lab.css).
+   Rooms: html[data-room="projects"] (the list), html[data-room="project"] (a page). */
 
+/* ---------- shared, kept here until the frame takes them over ----------
+   NotFound, Writing and Essay still use these two classes from the skeleton; the
+   projects pages no longer do. */
 .page {
   padding-top: 48px;
   padding-bottom: 96px;
 }
 
-.featured,
 .rows {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.featured-item,
-.row {
-  padding: 24px 0;
-  border-bottom: 1px solid var(--rule);
-}
-
 .row {
   display: grid;
   grid-template-columns: 140px 1fr;
   gap: 24px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--rule);
 }
 
-.featured-item h2 {
-  margin: 8px 0;
-  font-size: 28px;
-}
-
-.featured-item a,
 .row a {
   text-decoration: none;
-}
-
-.section-label {
-  margin-top: 64px;
-}
-
-.prose img {
-  height: auto;
 }
 
 @media (max-width: 760px) {
   .row {
     grid-template-columns: 1fr;
     gap: 8px;
+  }
+}
+
+/* A project page: near-black, never pure black, with the shooting stars behind. */
+html[data-room="project"] {
+  --r-g0: #0e1013;
+  --r-g1: #15171b;
+  --r-g2: #1c1f24;
+  --r-rule: #272a30;
+  --r-rule2: #3d4249;
+}
+
+/* ---------- a project page ---------- */
+.pj {
+  padding-top: 56px;
+}
+
+.pj-head {
+  margin-bottom: 48px;
+}
+
+.pj-crumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px;
+  color: var(--tx3);
+  font: var(--w5) 12.5px / 1.3 var(--sans);
+  font-stretch: 92%;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.pj-up {
+  color: var(--tx2);
+  text-decoration: none;
+}
+
+.pj-up:hover {
+  color: var(--tx);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.pj-crumb [aria-hidden] {
+  color: var(--tx4);
+}
+
+.pj-head h1 {
+  max-width: 24ch;
+  margin: 0;
+  color: var(--tx);
+  font: var(--w5) clamp(34px, 4.2vw, 56px) / 1.08 var(--sans);
+  letter-spacing: -0.014em;
+}
+
+.pj-line {
+  max-width: 58ch;
+  margin: 18px 0 0;
+  color: var(--tx2);
+  font-size: 20px;
+  line-height: calc(1.45 * var(--k-lead));
+}
+
+.pj-acts {
+  margin-top: 32px;
+}
+
+.pj-media {
+  max-width: 1120px;
+  margin: 0 0 56px;
+  border: 1px solid var(--rule2);
+  background: #060708;
+}
+
+figure.pj-media {
+  padding: 0;
+}
+
+.pj-media img {
+  width: 100%;
+  height: auto;
+}
+
+.pj-yt {
+  aspect-ratio: 16 / 9;
+}
+
+.pj-yt iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.pj-code {
+  max-width: 640px;
+  margin: 0 0 56px;
+  padding: 22px 96px 22px 24px;
+  color: var(--tx);
+  font-size: 16px;
+}
+
+.pj-prompt {
+  color: var(--tx3);
+  user-select: none;
+}
+
+.pj-notes {
+  max-width: 70ch;
+  color: var(--tx2);
+  font: var(--w4) 18.5px / calc(1.65 * var(--k-lead)) var(--serif);
+}
+
+.pj-notes p {
+  margin: 0 0 1.05em;
+}
+
+.pj-notes a:any-link {
+  color: var(--acc-tx);
+}
+
+.pj-notes img {
+  height: auto;
+}
+
+.pj-pager {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  max-width: 1120px;
+  margin-top: 80px;
+}
+
+.pj-pg {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 20px 20px;
+  border: 1px solid var(--rule);
+  background: var(--g1);
+  color: var(--tx);
+  font: var(--w5) 17px / 1.3 var(--sans);
+  text-decoration: none;
+  --cx: transparent;
+  --cx-o: 4px;
+}
+
+.pj-pg:hover {
+  border-color: var(--rule2);
+  background: var(--g2);
+  --cx: var(--tx3);
+}
+
+.pj-pg:active {
+  translate: 0 1px;
+}
+
+.pj-pager .pj-next {
+  align-items: flex-end;
+  text-align: right;
+}
+
+@media (max-width: 760px) {
+  .pj {
+    padding-top: 32px;
+  }
+
+  .pj-head {
+    margin-bottom: 32px;
+  }
+
+  .pj-line {
+    font-size: 17.5px;
+  }
+
+  .pj-acts {
+    margin-top: 24px;
+  }
+
+  .pj-media,
+  .pj-code {
+    margin-bottom: 36px;
+  }
+
+  .pj-code {
+    padding: 18px 80px 18px 16px;
+    font-size: 14px;
+  }
+
+  .pj-notes {
+    font-size: 17px;
+  }
+
+  .pj-pager {
+    grid-template-columns: 1fr;
+    margin-top: 56px;
+  }
+
+  .pj-pager .pj-next {
+    align-items: flex-start;
+    text-align: left;
+  }
+}
+
+/* ---------- the list ---------- */
+.pjl-list {
+  display: grid;
+  gap: 16px;
+  margin: 40px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pjl-item {
+  display: grid;
+  grid-template-columns: 272px minmax(0, 1fr) 48px;
+  gap: 32px;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid var(--rule);
+  background: var(--g1);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.035),
+    0 1px 0 rgb(0 0 0 / 0.4);
+  cursor: pointer;
+  --cx: transparent;
+  --cx-o: 5px;
+  --cx-s: 7px;
+}
+
+.pjl-item:hover {
+  border-color: var(--rule2);
+  background: var(--g2);
+  --cx: var(--tx3);
+}
+
+.pjl-item:active {
+  translate: 0 1px;
+  --cx-o: 4px;
+}
+
+.pjl-item:has(a:focus-visible) {
+  outline: 1px solid var(--tx);
+  outline-offset: 3px;
+  --cx: var(--tx2);
+}
+
+/* The thumbnail: dim at rest; on hover it comes up in colour and glows its own colour. */
+.pjl-th {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: #0a0b0d;
+  box-shadow: 0 0 0 1px var(--rule);
+}
+
+.pjl-th img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(0.75) brightness(0.8);
+}
+
+.pjl-item:is(:hover, :has(a:focus-visible)) .pjl-th {
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--glow) 75%, transparent),
+    0 0 18px -2px color-mix(in oklab, var(--glow) 55%, transparent),
+    0 0 56px -8px color-mix(in oklab, var(--glow) 32%, transparent);
+}
+
+.pjl-item:is(:hover, :has(a:focus-visible)) .pjl-th img {
+  filter: none;
+}
+
+/* A terminal drawn in type, for projects whose picture is a command. */
+.pjl-term {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background: #0b0c0e;
+  color: #8d8a84;
+  font: 500 14px / 1.4 var(--mono);
+}
+
+.pjl-bar {
+  display: flex;
+  gap: 5px;
+  padding: 8px 9px;
+  border-bottom: 1px solid #1e2024;
+}
+
+.pjl-bar i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #2b2d31;
+}
+
+.pjl-cmd {
+  align-self: center;
+  padding: 0 16px 18px;
+  overflow-wrap: anywhere;
+}
+
+.pjl-cmd b {
+  color: #6f6c66;
+  font-weight: 500;
+}
+
+.pjl-cmd em {
+  color: #b6b2aa;
+  font-style: normal;
+}
+
+.pjl-cur {
+  display: inline-block;
+  width: 0.6em;
+  height: 1.1em;
+  margin-left: 4px;
+  background: #5f5c57;
+  vertical-align: -0.2em;
+}
+
+.pjl-item:is(:hover, :has(a:focus-visible)) .pjl-term {
+  color: #e8e4dc;
+}
+
+.pjl-item:is(:hover, :has(a:focus-visible)) .pjl-cmd b {
+  color: var(--glow);
+}
+
+.pjl-item:is(:hover, :has(a:focus-visible)) .pjl-cmd em {
+  color: #f2c46d;
+}
+
+.pjl-item:is(:hover, :has(a:focus-visible)) .pjl-cur {
+  background: #e8e4dc;
+}
+
+.pjl-item:is(:hover, :has(a:focus-visible)) .pjl-bar i:nth-child(1) {
+  background: #e0625a;
+}
+
+.pjl-item:is(:hover, :has(a:focus-visible)) .pjl-bar i:nth-child(2) {
+  background: #e3b341;
+}
+
+.pjl-item:is(:hover, :has(a:focus-visible)) .pjl-bar i:nth-child(3) {
+  background: #4fbf5a;
+}
+
+.pjl-name {
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  color: var(--tx3);
+  font: var(--w5) 15px / 1.3 var(--sans);
+  text-align: center;
+}
+
+.pjl-item:hover .pjl-name {
+  color: var(--tx);
+}
+
+.pjl-tx {
+  min-width: 0;
+}
+
+.pjl-when {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 10px;
+  color: var(--tx3);
+  font: var(--w5) 12.5px / 1.3 var(--sans);
+  font-stretch: 92%;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.pjl-item h2 {
+  margin: 0;
+  font: var(--w5) 25px / 1.2 var(--sans);
+  letter-spacing: -0.004em;
+}
+
+.pjl-item h2 a {
+  color: var(--tx);
+  text-decoration: none;
+}
+
+/* The title is the link; its box covers the whole entry. */
+.pjl-item h2 a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.pjl-item h2 a:focus-visible {
+  outline: none;
+}
+
+.pjl-item:hover h2 a {
+  color: var(--acc-tx);
+}
+
+.pjl-line {
+  max-width: 64ch;
+  margin: 9px 0 0;
+  color: var(--tx2);
+  font-size: 16.5px;
+  line-height: calc(1.5 * var(--k-lead));
+}
+
+.pjl-go {
+  justify-self: end;
+  padding-right: 10px;
+  color: var(--tx4);
+  font: var(--w4) 24px / 1 var(--sans);
+}
+
+.pjl-item:hover .pjl-go {
+  color: var(--tx);
+}
+
+@media (max-width: 1000px) {
+  .pjl-item {
+    grid-template-columns: 216px minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .pjl-go {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .pjl-list {
+    gap: 12px;
+    margin-top: 28px;
+  }
+
+  .pjl-item {
+    grid-template-columns: 124px minmax(0, 1fr);
+    gap: 14px;
+    align-items: start;
+    padding: 12px;
+  }
+
+  .pjl-when {
+    margin-bottom: 6px;
+    font-size: 11.5px;
+  }
+
+  .pjl-item h2 {
+    font-size: 18.5px;
+    line-height: 1.22;
+  }
+
+  .pjl-line {
+    margin-top: 6px;
+    font-size: 14.5px;
+    line-height: 1.45;
+  }
+
+  .pjl-term {
+    font-size: 10.5px;
+  }
+
+  .pjl-bar {
+    padding: 6px 7px;
+  }
+
+  .pjl-cmd {
+    padding: 0 9px 10px;
+  }
+}
+
+/* Touch screens have no hover: show the thumbnails in colour. */
+@media (hover: none) {
+  .pjl-th img {
+    filter: none;
+  }
+
+  .pjl-term {
+    color: #e8e4dc;
+  }
+
+  .pjl-cmd b {
+    color: var(--glow);
+  }
+
+  .pjl-cmd em {
+    color: #f2c46d;
   }
 }

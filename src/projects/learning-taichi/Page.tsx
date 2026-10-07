@@ -1,19 +1,34 @@
 import { pageTitle } from "../../site";
+import { ProjectHead, ProjectRoom, Span } from "../kit";
 import { flagshipBySlug } from "../meta";
+import Lab from "./Lab";
+import "./lab.css";
 
 const meta = flagshipBySlug["learning-taichi"];
 
-// Placeholder until the round-3 design is ported: the page will hold the research system
-// overview, the containerized WebGPU demo, and the read-only lab (public/lab/learning-taichi).
 export default function Page() {
   return (
-    <article className="wrap page">
+    <ProjectRoom className="lt">
       <title>{pageTitle(meta.title)}</title>
-      <p className="lbl">
-        {meta.year} · {meta.status}
-      </p>
-      <h1>{meta.title}</h1>
-      <p className="lede">{meta.line}</p>
-    </article>
+      <ProjectHead
+        when={<Span start={meta.start ?? meta.year} end={null} />}
+        title={meta.title}
+        line={meta.line}
+      />
+      <Lab />
+      <div className="prose pj-notes lt-notes">
+        <p>
+          The user chooses what to look into. Agents turn each choice into a task, run it, check the
+          results and write the textbook pages the task needed, so the project and the understanding
+          of it grow together. Above is the system's own dashboard, as a read-only snapshot.
+        </p>
+        <p>
+          The first project is differentiable simulation with the Material Point Method in Taichi:
+          control by backpropagating through a rollout, gradients over long rollouts, water, rubber,
+          snow and sand in one solver, networks that learn material behaviour, and a WebGPU port of
+          the solver that runs in the browser.
+        </p>
+      </div>
+    </ProjectRoom>
   );
 }

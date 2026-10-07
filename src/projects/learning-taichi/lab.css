@@ -1,0 +1,120 @@
+/* The Learning Taichi page: the lab in a framed viewport, then a short note.
+   Owned by the Projects area; loaded with the page. */
+
+.lt .pj-head {
+  margin-bottom: 28px;
+}
+
+.lab {
+  position: relative;
+  margin: 0 0 56px;
+}
+
+.lab-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 10px;
+}
+
+/* Four small corners: the mark for fullscreen. */
+.lab-fs {
+  position: relative;
+  width: 11px;
+  height: 11px;
+  background:
+    linear-gradient(currentColor, currentColor) left top / 4px 1.5px no-repeat,
+    linear-gradient(currentColor, currentColor) left top / 1.5px 4px no-repeat,
+    linear-gradient(currentColor, currentColor) right top / 4px 1.5px no-repeat,
+    linear-gradient(currentColor, currentColor) right top / 1.5px 4px no-repeat,
+    linear-gradient(currentColor, currentColor) left bottom / 4px 1.5px no-repeat,
+    linear-gradient(currentColor, currentColor) left bottom / 1.5px 4px no-repeat,
+    linear-gradient(currentColor, currentColor) right bottom / 4px 1.5px no-repeat,
+    linear-gradient(currentColor, currentColor) right bottom / 1.5px 4px no-repeat;
+}
+
+.lab-bar .btn[disabled] {
+  color: var(--tx3);
+  cursor: default;
+}
+
+.lab-vp {
+  position: relative;
+  height: clamp(520px, 76vh, 880px);
+  overflow: hidden;
+  border: 1px solid var(--rule2);
+  background: #0b0f14;
+  box-shadow: 0 24px 60px -30px rgb(0 0 0 / 0.8);
+}
+
+.lab-still {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top left;
+  filter: brightness(0.45) saturate(0.7);
+}
+
+.lab-vp iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #0b0f14;
+}
+
+.lab-vp .loadbox {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  margin: 0;
+  translate: -50% -50%;
+}
+
+/* Fullscreen: through the browser, or filling the window. */
+.lab-full {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 8px;
+  background: var(--g0);
+}
+
+.lab-win {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+}
+
+.lab-full .lab-bar {
+  margin-bottom: 8px;
+}
+
+.lab-full .lab-vp {
+  flex: 1;
+  height: auto;
+  min-height: 0;
+  box-shadow: none;
+}
+
+html:has(.lab-win) {
+  overflow: hidden;
+}
+
+.lt-notes {
+  margin-top: 8px;
+}
+
+@media (max-width: 760px) {
+  .lab-vp {
+    height: 72svh;
+    min-height: 420px;
+  }
+
+  .lab-full .lab-vp {
+    min-height: 0;
+  }
+}
