@@ -6,10 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": [
-      "**",
-      "!public"
-    ]
+    "includes": ["**", "!public"]
   },
   "formatter": {
     "indentStyle": "space",
@@ -33,10 +30,7 @@
   },
   "overrides": [
     {
-      "includes": [
-        "src/projects/sonar/SonarRendering.*",
-        "src/assets/*.svg"
-      ],
+      "includes": ["src/projects/sonar/SonarRendering.*", "src/assets/*.svg"],
       "linter": {
         "rules": {
           "a11y": "warn",
