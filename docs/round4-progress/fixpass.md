@@ -24,7 +24,7 @@ public/lab/). Resume from the first unchecked item.
 - [x] 10. StarSky subtler behind text; projects list stacks on phones
 - [x] 11. Papers: drop sonar's duplicate "Project page" button
 - [~] 12. Low (done: llms flagships, seo comment, biome override, allowFullScreen, Post type, .page to frame.css, static-page look, route modulepreloads; skipped: sonar content-visibility, DOMPurify lazy): llms.txt flagships, seo comment, biome override, allowFullScreen, sonar content-visibility, types.ts Post, .page/.rows to frame.css, static-page look, DOMPurify lazy
-- [ ] 13. check + build + browser sweep + final screenshots + final commit
+- [x] 13. check + build + browser sweep + final screenshots + final commit
 
 ## Log
 - Checkpoint 1: items 1-11 done. Main bundle 372 KB -> 286 KB. Papers: off-site titles are
@@ -45,3 +45,8 @@ public/lab/). Resume from the first unchecked item.
   in/out on desktop and phone; reduced motion: 0 rAF calls; pressed .act style moved to
   frame.css; static pre-JS page looks like the header; FRAME.md updated.
   Next: final screenshots into scratchpad/round4, final commit.
+- Done. Final screenshots: scratchpad/round4/ (every page at 1440x900 and 390x844, the
+  views on home and projects, controls open, essay at night, lab fullscreen, sonar demo).
+  Open for Sevan: where to host the lab (VITE_LAB_URL or public/lab in the deploy); confirm
+  the two Learning Taichi paragraphs; push redesign to dev (or point frontend_dev at
+  redesign) to get a dev deploy.
