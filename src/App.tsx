@@ -1,14 +1,9 @@
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from "react-router";
 import Layout from "./frame/Layout";
-import About from "./pages/About";
-import Essay from "./pages/Essay";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
-import Papers from "./pages/Papers";
-import ProjectPage from "./pages/ProjectPage";
-import Projects from "./pages/Projects";
-import Writing from "./pages/Writing";
 import { FLAGSHIPS } from "./projects/meta";
+import { About, Essay, Papers, ProjectPage, Projects, Writing } from "./routes";
 import { SITE_URL } from "./site";
 
 // Every copy of the site (www, preview domains) names the same www.sevanb.net URL as

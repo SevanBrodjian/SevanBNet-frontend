@@ -24,6 +24,10 @@ export type AutoVideoProps = {
 
 const HOLD = REDUCED_MOTION || SAVE_DATA;
 
+/** Only the browser refusing to autoplay is a reason to stop trying; an interrupted
+ * play() (AbortError, e.g. paused again while scrolling past) is not. */
+const refused = (e: unknown) => (e as DOMException | null)?.name === "NotAllowedError";
+
 export default function AutoVideo({
   src,
   poster,
@@ -43,8 +47,9 @@ export default function AutoVideo({
     v.muted = true;
     const sync = () => {
       if (wanted.current && visible.current && !document.hidden) {
-        v.play().catch(() => {
+        v.play().catch((e) => {
           // Autoplay refused (e.g. Low Power Mode): hold the poster until pressed.
+          if (!refused(e)) return;
           wanted.current = false;
           setPaused(true);
         });
@@ -72,7 +77,8 @@ export default function AutoVideo({
     wanted.current = !wanted.current;
     setPaused(!wanted.current);
     if (wanted.current) {
-      v.play().catch(() => {
+      v.play().catch((e) => {
+        if (!refused(e)) return;
         wanted.current = false;
         setPaused(true);
       });

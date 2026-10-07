@@ -1,7 +1,7 @@
-import { type ComponentType, lazy } from "react";
+import { type RouteComponent, route } from "../frame/route";
 
-// Each flagship project's hand-built page, loaded only when visited.
-export const PAGES: Record<string, ComponentType> = {
-  "learning-taichi": lazy(() => import("./learning-taichi/Page")),
-  "sonar-inverse-rendering": lazy(() => import("./sonar/Page")),
+// Each flagship project's hand-built page, loaded only when visited (or about to be).
+export const PAGES: Record<string, RouteComponent> = {
+  "learning-taichi": route(() => import("./learning-taichi/Page")),
+  "sonar-inverse-rendering": route(() => import("./sonar/Page")),
 };

@@ -42,12 +42,12 @@ export const PAGES = {
   projects: {
     path: "/projects",
     title: `Projects · ${NAME}`,
-    description: "Projects by Sevan Brodjian: systems you can explore, run and read about.",
+    description: "Projects by Sevan Brodjian.",
   },
   papers: {
     path: "/papers",
     title: `Papers · ${NAME}`,
-    description: "Papers by Sevan Brodjian, each with a small interactive sketch of its idea.",
+    description: "Papers by Sevan Brodjian.",
   },
   writing: {
     path: "/writing",

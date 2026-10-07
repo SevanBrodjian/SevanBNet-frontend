@@ -1,5 +1,7 @@
 import { type MouseEvent, type RefObject, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link, useNavigate, useParams } from "react-router";
+import { reloadOnce } from "../frame/Boundary";
 import Loading from "../frame/Loading";
 import { REDUCED_MOTION } from "../frame/live";
 import Time from "../frame/Time";
@@ -34,19 +36,9 @@ function EssayPage({ post }: { post: PostMeta }) {
     loadBody(post.slug).then(
       (h) => live && setHtml(h),
       () => {
-        if (!live) return;
         // After a deploy an open tab may ask for a chunk that no longer exists: load the
-        // page afresh, once.
-        const key = `essay-reload:${post.slug}`;
-        let tried = true;
-        try {
-          tried = !!sessionStorage.getItem(key);
-          sessionStorage.setItem(key, "1");
-        } catch {
-          // No storage: never reload in a loop.
-        }
-        if (tried) setFailed(true);
-        else location.reload();
+        // page afresh (once), else say so.
+        if (live && !reloadOnce()) setFailed(true);
       },
     );
     return () => {
@@ -190,5 +182,6 @@ function ReadingProgress({ target }: { target: RefObject<HTMLElement | null> }) 
       removeEventListener("resize", queue);
     };
   }, [target]);
-  return <div ref={bar} className="w-progress" aria-hidden="true" />;
+  // In <body>, above the sticky header (inside <main> it would sit under it).
+  return createPortal(<div ref={bar} className="w-progress" aria-hidden="true" />, document.body);
 }

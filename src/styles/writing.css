@@ -76,7 +76,7 @@ html[data-room="essay"] .hdr {
 
 @media (min-width: 761px) {
   .w-progress {
-    top: calc(var(--hdr) - 1px);
+    top: calc(var(--hdr-b, 65px) - 2px);
   }
 }
 

@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import react from "@vitejs/plugin-react";
 import { defineConfig, type ProxyOptions } from "vite";
 import { sitePages } from "./seo.ts";
@@ -21,6 +22,12 @@ const proxy: Record<string, ProxyOptions> = {
   "/api": { target: apiTarget, changeOrigin: true, secure: true },
 };
 
+// The Learning Taichi lab (a static export of its dashboard). VITE_LAB_URL points at it
+// wherever it is hosted; otherwise it is served from public/lab/ when that folder exists
+// at build time (it is not in git). Without either, the page shows a still of it.
+const LOCAL_LAB = "/lab/learning-taichi/index.html";
+const labUrl = process.env.VITE_LAB_URL ?? (existsSync(`public${LOCAL_LAB}`) ? LOCAL_LAB : "");
+
 export default defineConfig(({ command }) => {
   // An explicit VITE_API_URL wins (an empty value means relative /api, which suits a
   // local `vite preview`); otherwise dev uses the proxy and builds follow Railway.
@@ -34,7 +41,10 @@ export default defineConfig(({ command }) => {
       // The build-time page generator fetches content itself, so it needs a full URL.
       sitePages({ apiUrl: apiUrl || apiTarget, indexable: railwayEnv === "production" }),
     ],
-    define: { "import.meta.env.VITE_API_URL": JSON.stringify(apiUrl) },
+    define: {
+      "import.meta.env.VITE_API_URL": JSON.stringify(apiUrl),
+      "import.meta.env.VITE_LAB_URL": JSON.stringify(labUrl),
+    },
     server: { proxy },
     preview: { proxy },
   };

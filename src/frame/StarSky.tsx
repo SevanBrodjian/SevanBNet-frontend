@@ -13,7 +13,12 @@ import { clamp, oklch } from "./util";
 // - capped: a few dozen stars at most, fewer on small or slow devices; 60 Hz, dropping
 //   to 30 if a frame costs too much; stops in hidden tabs (shared loop)
 // - reduced motion, Save-Data and still devices get one still frame
+// - text stays clear: the sky is not drawn behind blocks of words (`quiet`), so a star
+//   passes behind a paragraph the way it passes behind a figure
 // Usage: render <StarSky /> anywhere in a project page.
+
+/** Blocks of words the stars pass behind rather than through. */
+const QUIET = "main .prose, main .cap, main figcaption, main .pj-head, main .pj-pager";
 
 type Star = {
   x: number;
@@ -27,7 +32,13 @@ type Star = {
   w: number;
 };
 
-export default function StarSky({ density = 1 }: { density?: number }) {
+export default function StarSky({
+  density = 1,
+  quiet = QUIET,
+}: {
+  density?: number;
+  quiet?: string;
+}) {
   const canvas = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -48,6 +59,24 @@ export default function StarSky({ density = 1 }: { density?: number }) {
       max = Math.max(1, Math.round(base * density));
     };
     size();
+
+    // Where the words are, in page coordinates; measured when the page changes size, and
+    // now and then in case something moved without resizing it.
+    let blocks: [number, number, number, number][] = [];
+    const measure = () => {
+      blocks = [];
+      if (!quiet) return;
+      for (const el of document.querySelectorAll(quiet)) {
+        const r = el.getBoundingClientRect();
+        if (r.width && r.height)
+          blocks.push([r.left - 10, r.top + scrollY - 8, r.width + 20, r.height + 16]);
+      }
+    };
+    measure();
+    const main = document.querySelector("main");
+    const ro = new ResizeObserver(measure);
+    if (main) ro.observe(main);
+    const every = window.setInterval(measure, 2500);
 
     const stars: Star[] = [];
     // Lean of the fall, in radians from straight down (positive: toward the right).
@@ -75,6 +104,15 @@ export default function StarSky({ density = 1 }: { density?: number }) {
     const draw = () => {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, W, H);
+      ctx.save();
+      if (blocks.length) {
+        const sy = scrollY;
+        const open = new Path2D();
+        open.rect(0, 0, W, H);
+        for (const [x, y, w, h] of blocks)
+          if (y - sy < H && y + h - sy > 0) open.rect(x, y - sy, w, h);
+        ctx.clip(open, "evenodd");
+      }
       ctx.lineCap = "round";
       const ink = getNumber("ink");
       const phos = getNumber("phos");
@@ -108,6 +146,7 @@ export default function StarSky({ density = 1 }: { density?: number }) {
         ctx.arc(s.x, s.y, s.w * 0.8, 0, Math.PI * 2);
         ctx.fill();
       }
+      ctx.restore();
     };
 
     const step = (dt: number) => {
@@ -167,6 +206,7 @@ export default function StarSky({ density = 1 }: { density?: number }) {
       clearTimeout(rt);
       rt = window.setTimeout(() => {
         size();
+        measure();
         if (STILL) still();
         else draw();
       }, 100);
@@ -174,14 +214,28 @@ export default function StarSky({ density = 1 }: { density?: number }) {
     addEventListener("pointermove", onMove, { passive: true });
     document.addEventListener("pointerleave", onLeave);
     addEventListener("resize", onResize);
+    // A still sky is redrawn when the page scrolls, so the words stay clear.
+    let sq = 0;
+    const onScroll = () => {
+      if (STILL && !sq)
+        sq = requestAnimationFrame(() => {
+          sq = 0;
+          draw();
+        });
+    };
+    addEventListener("scroll", onScroll, { passive: true });
     return () => {
       sky.dispose();
+      ro.disconnect();
+      clearInterval(every);
+      removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(sq);
       clearTimeout(rt);
       removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerleave", onLeave);
       removeEventListener("resize", onResize);
     };
-  }, [density]);
+  }, [density, quiet]);
 
   return createPortal(<canvas ref={canvas} className="sky" />, document.body);
 }

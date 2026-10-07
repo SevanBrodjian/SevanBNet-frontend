@@ -3,39 +3,6 @@
    add their own files (src/projects/sonar/sonar.css, src/projects/learning-taichi/lab.css).
    Rooms: html[data-room="projects"] (the list), html[data-room="project"] (a page). */
 
-/* ---------- shared, kept here until the frame takes them over ----------
-   NotFound, Writing and Essay still use these two classes from the skeleton; the
-   projects pages no longer do. */
-.page {
-  padding-top: 48px;
-  padding-bottom: 96px;
-}
-
-.rows {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.row {
-  display: grid;
-  grid-template-columns: 140px 1fr;
-  gap: 24px;
-  padding: 24px 0;
-  border-bottom: 1px solid var(--rule);
-}
-
-.row a {
-  text-decoration: none;
-}
-
-@media (max-width: 760px) {
-  .row {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-}
-
 /* A project page: near-black, never pure black, with the shooting stars behind. */
 html[data-room="project"] {
   --r-g0: #0e1013;
@@ -513,6 +480,39 @@ figure.pj-media {
 
   .pjl-cmd {
     padding: 0 9px 10px;
+  }
+}
+
+/* Phones: the picture across the top of its entry, the words under it. */
+@media (max-width: 600px) {
+  .pjl-item {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    padding: 10px 10px 16px;
+  }
+
+  .pjl-tx {
+    padding: 0 4px;
+  }
+
+  .pjl-item h2 {
+    font-size: 20px;
+  }
+
+  .pjl-line {
+    font-size: 15.5px;
+  }
+
+  .pjl-term {
+    font-size: 14px;
+  }
+
+  .pjl-bar {
+    padding: 8px 9px;
+  }
+
+  .pjl-cmd {
+    padding: 0 16px 18px;
   }
 }
 

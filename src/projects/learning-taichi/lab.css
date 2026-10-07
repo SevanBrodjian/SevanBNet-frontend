@@ -52,6 +52,11 @@
   filter: brightness(0.45) saturate(0.7);
 }
 
+/* Where the lab is not hosted, the still is the picture of it, at full strength. */
+.lab-still-only .lab-still {
+  filter: none;
+}
+
 .lab-vp iframe {
   position: absolute;
   inset: 0;

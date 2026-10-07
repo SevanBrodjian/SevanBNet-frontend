@@ -19,8 +19,7 @@ export default function Page() {
       <div className="prose pj-notes lt-notes">
         <p>
           The user chooses what to look into. Agents turn each choice into a task, run it, check the
-          results and write the textbook pages the task needed, so the project and the understanding
-          of it grow together. Above is the system's own dashboard, as a read-only snapshot.
+          results and write the textbook pages the task needed.
         </p>
         <p>
           The first project is differentiable simulation with the Material Point Method in Taichi:

@@ -168,6 +168,16 @@ main {
   flex: 1 0 auto;
 }
 
+/* Focus moves here on a new page; it is a starting point, not a control. */
+main:focus {
+  outline: none;
+}
+
+/* Pages without the frame keep the footer below the fold while they fill in. */
+html:not([data-framed]) main {
+  min-height: calc(100svh - var(--hdr-b, 65px));
+}
+
 a {
   color: inherit;
 }
@@ -241,26 +251,10 @@ h3 {
   top: 8px;
 }
 
-/* ---------- plain-HTML pages written by seo.ts ----------
-   Visible only until React mounts (or without JavaScript), so they just need to be legible. */
-.static-page {
-  min-height: 100vh;
-  padding: 2rem max(1.25rem, calc((100% - 46rem) / 2));
-  background: #141619;
-  color: #d8d8d8;
-  line-height: 1.5;
-}
-
-.static-page a {
-  color: #5cc6d6;
-}
-
-.static-page nav ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  padding: 0;
-  list-style: none;
+/* A plain page (Not found). */
+.page {
+  padding-top: 48px;
+  padding-bottom: 96px;
 }
 
 /* ---------- type roles ---------- */
@@ -414,7 +408,7 @@ html.k-br-none .mark .brc {
   --cx-o: -1px;
 }
 
-/* ---------- view toggle and Reset ---------- */
+/* ---------- view toggle ---------- */
 .vw {
   display: flex;
   align-items: center;
@@ -422,8 +416,7 @@ html.k-br-none .mark .brc {
   margin-left: auto;
 }
 
-.vw-btn,
-.rst {
+.vw-btn {
   display: inline-flex;
   align-items: center;
   height: 34px;
@@ -455,8 +448,7 @@ html.k-br-none .mark .brc {
   border-color: var(--tx3);
 }
 
-.vw-btn:active,
-.rst:active {
+.vw-btn:active {
   translate: 0 1px;
   box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.6);
 }
@@ -504,24 +496,27 @@ html.k-br-none .mark .brc {
   text-overflow: ellipsis;
 }
 
-.rst {
-  padding: 0 9px;
-  color: var(--tx3);
-  font: 500 10.5px / 1 var(--mono);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
+/* Between phone and desktop widths the header row tightens instead of overflowing. */
+@media (min-width: 761px) and (max-width: 960px) {
+  .hdr-in {
+    gap: 20px;
+  }
 
-.rst:hover {
-  color: var(--tx);
-  border-color: var(--tx3);
-}
+  .nav {
+    gap: 0;
+  }
 
-/* At Comfort with nothing changed, Reset recedes (it still works). */
-.rst[data-idle] {
-  color: var(--tx4);
-  border-color: var(--rule);
-  background: transparent;
+  .nav a {
+    padding-inline: 11px;
+  }
+
+  .vw-btn {
+    width: 132px;
+  }
+
+  .vw-k {
+    display: none;
+  }
 }
 
 @media (max-width: 760px) {
@@ -570,10 +565,6 @@ html.k-br-none .mark .brc {
 
   .vw-k {
     display: none;
-  }
-
-  .rst {
-    height: 36px;
   }
 }
 
@@ -1186,6 +1177,89 @@ html[data-framed] .ftr-in .ext-mark {
   html[data-framed] .ftr-in {
     padding-bottom: 26px;
     font-size: 16px;
+  }
+}
+
+/* ---------- plain-HTML pages written by seo.ts ----------
+   Visible only until React mounts (or without JavaScript). Laid out like the real header
+   and a page column, in the same type, so the switch to the app is quiet. */
+#root > .static-page {
+  min-height: 100vh;
+  background: #141619;
+  color: #d3cfc6;
+  font: 430 16px / 1.55 var(--sans);
+}
+
+#root > .static-page a {
+  color: #f1eee7;
+  text-decoration: none;
+}
+
+#root > .static-page > nav {
+  max-width: var(--maxw);
+  height: 65px;
+  margin: 0 auto;
+  padding: 0 var(--m);
+  box-shadow: 0 1px 0 #2c2f35;
+}
+
+#root > .static-page > nav ul {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 64px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#root > .static-page > nav a {
+  display: block;
+  padding: 9px 13px 10px;
+  color: #d3cfc6;
+  font-size: 17px;
+  line-height: 1;
+}
+
+#root > .static-page > nav li:first-child a {
+  margin-right: 34px;
+  padding-left: 0;
+  color: #f1eee7;
+  font-size: 21px;
+  font-weight: 530;
+}
+
+#root > .static-page > main {
+  max-width: calc(46rem + 2 * var(--m));
+  margin: 0 auto 0 max(0px, calc((100% - var(--maxw)) / 2));
+  padding: 64px var(--m) 96px;
+}
+
+#root > .static-page h1,
+#root > .static-page h2 {
+  color: #f1eee7;
+  font-weight: 430;
+}
+
+#root > .static-page ul ul,
+#root > .static-page main ul {
+  padding: 0;
+  list-style: none;
+}
+
+@media (max-width: 760px) {
+  #root > .static-page > nav {
+    height: auto;
+  }
+
+  #root > .static-page > nav ul {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 8px 0;
+  }
+
+  #root > .static-page > main {
+    padding-top: 36px;
   }
 }
 

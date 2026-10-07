@@ -9,7 +9,6 @@ import {
 import { Link } from "react-router";
 import { onSitePath, paperUrl } from "../format";
 import Action, { Actions } from "../frame/Action";
-import ExternalLink from "../frame/ExternalLink";
 import Loading from "../frame/Loading";
 import Time from "../frame/Time";
 import useApi from "../frame/useApi";
@@ -21,11 +20,11 @@ import "../styles/papers.css";
 
 const dateOf = (p: Publication) => p.publication_date ?? p.submission_date ?? "";
 
+// A paper with a page on this site is named by a link to it; the rest are plain titles
+// (their Paper button goes to arXiv).
 function Title({ p }: { p: Paper }) {
   const internal = onSitePath(p);
-  if (internal) return <Link to={internal}>{p.title}</Link>;
-  const external = paperUrl(p);
-  return external ? <ExternalLink href={external}>{p.title}</ExternalLink> : p.title;
+  return internal ? <Link to={internal}>{p.title}</Link> : p.title;
 }
 
 /** The author list with Sevan's name picked out. */

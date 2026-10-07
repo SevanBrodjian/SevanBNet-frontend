@@ -1,12 +1,25 @@
 /* About: the home page's frame and composition. The name and the two documents hold the
    left, the bio reads on the right. Owned by the frame. */
 
+/* Like the home page, the page fits its frame on a laptop: centred in it when there is
+   room, tighter on shorter screens. */
+html[data-room="about"] main {
+  display: flex;
+}
+
+html[data-room="about"] main > .about {
+  display: flex;
+  flex: 1;
+  align-items: center;
+}
+
 .about-in {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   align-items: start;
   column-gap: var(--gap);
-  padding-top: 96px;
+  padding-top: clamp(40px, 8vh, 96px);
+  padding-bottom: clamp(8px, 3vh, 40px);
 }
 
 .about-id {
@@ -53,7 +66,49 @@
   margin: 0 0 1.05em;
 }
 
+@media (min-width: 901px) and (max-height: 960px) {
+  .about .bio {
+    grid-column: 6 / span 7;
+    max-width: 37em;
+    font-size: 18px;
+    line-height: calc(1.56 * var(--k-lead));
+  }
+}
+
+@media (min-width: 901px) and (max-height: 880px) {
+  .about-in {
+    padding-top: 28px;
+  }
+
+  .about .role {
+    margin-bottom: 22px;
+  }
+
+  .about .docs {
+    margin-top: 30px;
+  }
+
+  .about .bio {
+    margin-top: 38px;
+    font-size: 17px;
+    line-height: calc(1.5 * var(--k-lead));
+  }
+
+  html[data-room="about"] .ftr {
+    margin-top: 20px;
+  }
+
+  html[data-room="about"] .ftr-in {
+    padding-top: 12px;
+    padding-bottom: 26px;
+  }
+}
+
 @media (max-width: 900px) {
+  html[data-room="about"] main > .about {
+    display: block;
+  }
+
   .about-in {
     display: block;
     padding-top: 44px;

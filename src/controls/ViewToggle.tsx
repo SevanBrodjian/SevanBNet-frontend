@@ -1,22 +1,12 @@
 import { useRef } from "react";
 import { ORDER, type View } from "./schema";
-import {
-  isDefault,
-  label,
-  match,
-  nextView,
-  openPanel,
-  preset,
-  reset,
-  subscribe,
-  useControlsVersion,
-} from "./store";
+import { label, match, nextView, openPanel, preset, subscribe, useControlsVersion } from "./store";
 
 // The view toggle on the right of the navbar. Each press moves to the next view:
-// Comfort, Wireframe, Broken, Reactive, then Comfort again. Reset returns everything to
-// Comfort. The controls panel has no button of its own; this toggle opens it when it is
-// pressed rapidly for a moment, or when it comes round to Comfort for the third time.
-// Both live in the header, which no setting can break or move.
+// Comfort, Wireframe, Broken, Reactive, then Comfort again. The controls panel has no
+// button of its own; this toggle opens it when it is pressed rapidly for a moment, or
+// when it comes round to Comfort for the third time. It lives in the header, which no
+// setting can break or move.
 
 /** Presses within RAPID_MS of each other that count as rapid; RAPID_N of them open. */
 const RAPID_N = 7;
@@ -27,7 +17,7 @@ const ARRIVALS = 3;
 let presses: number[] = [];
 let arrivals = -1;
 
-// Reset returns to Comfort: count from there.
+// The panel's reset returns to Comfort: count from there.
 subscribe((_keys, how) => {
   if (how === "reset") arrivals = 1;
 });
@@ -80,9 +70,6 @@ export default function ViewToggle() {
       <span className="vh" aria-live="polite">
         {text}
       </span>
-      <button type="button" className="rst" data-idle={isDefault() || undefined} onClick={reset}>
-        Reset
-      </button>
     </div>
   );
 }

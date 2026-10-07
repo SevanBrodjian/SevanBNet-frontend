@@ -13,6 +13,8 @@
 // succeeds without its parts. Content edited in the admin reaches these files on the next
 // deploy.
 
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { resolve } from "node:path";
 import type { Plugin } from "vite";
 import { FLAGSHIPS } from "./src/projects/meta.js";
 import { ABOUT, LINE, NAME, PAGES, PROFILES, pageTitle, ROLE, SITE_URL } from "./src/site.js";
@@ -66,7 +68,7 @@ type Page = {
 };
 
 // The paper page's header and abstract, kept in sync by hand with
-// src/components/papers/SonarRendering.jsx.
+// src/projects/sonar/Page.tsx.
 const SONAR = {
   path: "/projects/sonar-inverse-rendering",
   pageTitle: "Single-View Seafloor Recovery from Imaging Sonar",
@@ -193,7 +195,7 @@ const person = {
 // Page bodies: plain HTML versions of what each page shows.
 
 const NAV = [
-  { href: "/", text: "Home" },
+  { href: "/", text: "SevanB.net" },
   { href: "/projects", text: "Projects" },
   { href: "/papers", text: "Papers" },
   { href: "/writing", text: "Writing" },
@@ -475,14 +477,14 @@ function llmsTxt({ projects, publications, posts }: Content) {
       lines.push(`- ${title}${meta ? `: ${meta}` : ""}`);
     }
   }
-  if (projects.length) {
-    lines.push("", "## Projects", "");
-    for (const p of projects) {
-      const summary = truncate(plain(p.description), 200);
-      lines.push(
-        `- [${md(p.title)}](${SITE_URL}/projects/${p.slug})${summary ? `: ${summary}` : ""}`,
-      );
-    }
+  lines.push("", "## Projects", "");
+  for (const f of FLAGSHIPS)
+    lines.push(`- [${md(f.title)}](${SITE_URL}/projects/${f.slug}): ${md(f.line)}`);
+  for (const p of projects) {
+    const summary = truncate(plain(p.description), 200);
+    lines.push(
+      `- [${md(p.title)}](${SITE_URL}/projects/${p.slug})${summary ? `: ${summary}` : ""}`,
+    );
   }
   if (posts.length) {
     lines.push("", "## Writing", "");
@@ -506,9 +508,27 @@ export function sitePages({ apiUrl, indexable }: { apiUrl: string; indexable: bo
     ...(indexable ? [] : [{ key: "X-Robots-Tag", value: "noindex, nofollow" }]),
   ];
 
+  let outDir = "dist";
   return {
     name: "site-pages",
     enforce: "post",
+    configResolved(config) {
+      outDir = resolve(config.root, config.build.outDir);
+    },
+    // A lab exported into public/lab/<name>/ (see src/projects/learning-taichi/Lab.tsx)
+    // uses relative paths, but serve's cleanUrls/trailingSlash answer it at
+    // /lab/<name> with no slash, where "./assets" would mean /lab/assets. Pin its base.
+    closeBundle() {
+      const labs = resolve(outDir, "lab");
+      if (!existsSync(labs)) return;
+      for (const name of readdirSync(labs)) {
+        const file = resolve(labs, name, "index.html");
+        if (!existsSync(file)) continue;
+        const html = readFileSync(file, "utf8");
+        if (!html.includes("<base "))
+          writeFileSync(file, html.replace("<head>", `<head>\n    <base href="/lab/${name}/" />`));
+      }
+    },
     transformIndexHtml(html) {
       const withHead = html.replace(/<!-- page-head -->[\s\S]*?<!-- \/page-head -->/, SHELL_HEAD);
       return indexable
@@ -520,7 +540,7 @@ export function sitePages({ apiUrl, indexable }: { apiUrl: string; indexable: bo
     },
     async generateBundle(_options, bundle) {
       const asset = bundle["index.html"];
-      if (!asset || asset.type !== "asset") throw new Error("[seo] index.html not in bundle");
+      if (asset?.type !== "asset") throw new Error("[seo] index.html not in bundle");
       const template = String(asset.source);
 
       const [projects, publications] = await Promise.all([
@@ -538,9 +558,53 @@ export function sitePages({ apiUrl, indexable }: { apiUrl: string; indexable: bo
       const emit = (fileName: string, source: string) =>
         this.emitFile({ type: "asset", fileName, source });
 
+      // Each page's own code (pages load lazily, see src/routes.ts): asked for with the
+      // page, so the app does not wait for the main script to discover it.
+      const entry = Object.values(bundle).find((c) => c.type === "chunk" && c.isEntry);
+      const loaded = new Set(entry?.type === "chunk" ? [entry.fileName, ...entry.imports] : []);
+      const chunkOf = (file: string) => {
+        for (const c of Object.values(bundle))
+          if (c.type === "chunk" && c.facadeModuleId?.endsWith(file)) return c;
+        return null;
+      };
+      const ROUTE_FILES: [RegExp, string[]][] = [
+        [/^\/projects$/, ["/src/pages/Projects.tsx"]],
+        [
+          /^\/projects\/learning-taichi$/,
+          ["/src/pages/ProjectPage.tsx", "/src/projects/learning-taichi/Page.tsx"],
+        ],
+        [
+          /^\/projects\/sonar-inverse-rendering$/,
+          ["/src/pages/ProjectPage.tsx", "/src/projects/sonar/Page.tsx"],
+        ],
+        [/^\/projects\//, ["/src/pages/ProjectPage.tsx"]],
+        [/^\/papers$/, ["/src/pages/Papers.tsx"]],
+        [/^\/writing$/, ["/src/pages/Writing.tsx"]],
+        [/^\/writing\//, ["/src/pages/Essay.tsx"]],
+        [/^\/about$/, ["/src/pages/About.tsx"]],
+      ];
+      const routeHead = (path: string) => {
+        const files = ROUTE_FILES.find(([re]) => re.test(path))?.[1] ?? [];
+        const js = new Set<string>();
+        const css = new Set<string>();
+        for (const f of files) {
+          const c = chunkOf(f);
+          if (!c) continue;
+          for (const name of [c.fileName, ...c.imports]) if (!loaded.has(name)) js.add(name);
+          for (const name of c.viteMetadata?.importedCss ?? []) css.add(name);
+        }
+        return [
+          ...[...css].map((f) => `<link rel="preload" as="style" href="/${f}" />`),
+          ...[...js].map((f) => `<link rel="modulepreload" href="/${f}" />`),
+        ].join("\n    ");
+      };
+
       // index.html (home) is replaced in place; Vite has already emitted it.
       const details = detailPages(content);
-      const all = [...pages(content), ...details];
+      const all = [...pages(content), ...details].map((p) => ({
+        ...p,
+        extraHead: [p.extraHead, routeHead(p.path)].filter(Boolean).join("\n    "),
+      }));
       for (const p of all) {
         const html = render(template, headTags(p), p.body);
         if (p.file === "index.html") asset.source = html;

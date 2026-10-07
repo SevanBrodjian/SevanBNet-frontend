@@ -101,7 +101,7 @@ html[data-room="home"] .fx-web {
   }
 
   .slot {
-    justify-self: start;
+    justify-self: center;
     width: min(100%, 300px);
     margin-top: 48px;
   }

@@ -45,7 +45,6 @@ export default function Media({ media, title }: { media: MediaData; title: strin
             loading="lazy"
             allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
             referrerPolicy="strict-origin-when-cross-origin"
-            allowFullScreen
           />
         </div>
       );

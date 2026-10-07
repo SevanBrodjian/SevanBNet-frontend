@@ -30,7 +30,7 @@
   },
   "overrides": [
     {
-      "includes": ["src/projects/sonar/SonarRendering.*", "src/assets/*.svg"],
+      "includes": ["src/assets/*.svg"],
       "linter": {
         "rules": {
           "a11y": "warn",

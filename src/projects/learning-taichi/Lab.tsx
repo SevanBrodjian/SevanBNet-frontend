@@ -9,15 +9,19 @@ import still from "../assets/lt-lab.webp";
 // last resort the lab opens on its own. Exit, or Esc, comes back.
 // - the frame shows a still of the lab until the real one has loaded
 // - the iframe goes in once the page has settled, so it never competes with first paint
-// - if the export is not deployed, the frame says it could not load it
+// - where the lab is not hosted (VITE_LAB_URL, see vite.config.ts), or does not answer,
+//   the still is all there is: shown plainly, with no fullscreen and no error
 
-const LAB = "/lab/learning-taichi/index.html";
+const LAB: string = import.meta.env.VITE_LAB_URL ?? "";
+const SAME_SITE = LAB.startsWith("/");
 const PLACE = "lt_place";
 
 type State = "wait" | "ok" | "missing";
 
 /** Is the export really there? A missing file may come back as the app's own page. */
 async function present() {
+  if (!LAB) return false;
+  if (!SAME_SITE) return true;
   try {
     const r = await fetch(LAB, { cache: "no-cache" });
     if (!r.ok) return false;
@@ -42,6 +46,10 @@ export default function Lab() {
 
   useEffect(() => {
     let live = true;
+    if (!LAB) {
+      setState("missing");
+      return;
+    }
     idle(() => {
       present().then((ok) => {
         if (!live) return;
@@ -125,25 +133,40 @@ export default function Lab() {
     };
   }, [full, exit]);
 
-  const cls = ["lab", full && "lab-full", full === "window" && "lab-win"].filter(Boolean).join(" ");
+  const cls = [
+    "lab",
+    full && "lab-full",
+    full === "window" && "lab-win",
+    state === "missing" && "lab-still-only",
+  ]
+    .filter(Boolean)
+    .join(" ");
   return (
     <section className={cls} ref={box} aria-label="The Learning Taichi lab">
-      <div className="lab-bar">
-        {full ? (
-          <button type="button" className="btn" onClick={exit}>
-            Exit fullscreen
-          </button>
-        ) : (
-          state !== "missing" && (
+      {state !== "missing" && (
+        <div className="lab-bar">
+          {full ? (
+            <button type="button" className="btn" onClick={exit}>
+              Exit fullscreen
+            </button>
+          ) : (
             <button type="button" className="btn" onClick={enter}>
               <i className="lab-fs" aria-hidden="true" />
               Fullscreen
             </button>
-          )
-        )}
-      </div>
+          )}
+        </div>
+      )}
       <div className="lab-vp mx">
-        {!loaded && <img className="lab-still" src={still} alt="" width={1440} height={900} />}
+        {!loaded && (
+          <img
+            className="lab-still"
+            src={still}
+            alt={state === "missing" ? "The Learning Taichi dashboard, showing its task map" : ""}
+            width={1440}
+            height={900}
+          />
+        )}
         {state === "ok" && (
           <iframe
             ref={frame}
@@ -153,7 +176,7 @@ export default function Lab() {
             onLoad={() => setLoaded(true)}
           />
         )}
-        {!loaded && <Loading failed={state === "missing"} what="the lab" />}
+        {state !== "missing" && !loaded && <Loading />}
       </div>
     </section>
   );

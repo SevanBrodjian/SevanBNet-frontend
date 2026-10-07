@@ -23,11 +23,3 @@ export type Publication = {
   submission_date: string | null;
   citation: string | null;
 };
-
-export type Post = {
-  title: string;
-  slug: string;
-  description: string;
-  content: string;
-  published_date: string;
-};
