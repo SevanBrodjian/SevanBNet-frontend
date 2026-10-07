@@ -3,7 +3,10 @@ import { type CSSProperties, type ReactNode, useEffect, useState } from "react";
 import { Link } from "react-router";
 import StarSky from "../frame/StarSky";
 import Time from "../frame/Time";
-import type { Thumb as ThumbData } from "./earlier";
+import useApi from "../frame/useApi";
+import type { Project } from "../types";
+import { byRecent, type Thumb as ThumbData } from "./earlier";
+import { FLAGSHIPS } from "./meta";
 
 // Pieces every project page shares: the list thumbnail, the page header, the pager, and
 // the starry room the pages sit in.
@@ -161,6 +164,21 @@ export function Pager({ prev, next }: { prev: Near; next: Near }) {
       )}
     </nav>
   );
+}
+
+/** The pager for one project, walking the list in its order (flagships, then the rest). */
+export function ProjectPager({ slug }: { slug: string }) {
+  const { data } = useApi<Project[]>("projects/");
+  const order = [
+    ...FLAGSHIPS.map((f) => ({ to: `/projects/${f.slug}`, title: f.title })),
+    ...(data ?? [])
+      .slice()
+      .sort(byRecent)
+      .map((q) => ({ to: `/projects/${q.slug}`, title: q.title })),
+  ];
+  const i = order.findIndex((q) => q.to === `/projects/${slug}`);
+  if (i < 0) return null;
+  return <Pager prev={order[i - 1] ?? null} next={order[i + 1] ?? null} />;
 }
 
 /** API text as paragraphs: blank lines split paragraphs, single newlines break lines. */

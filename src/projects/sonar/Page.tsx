@@ -5,7 +5,7 @@ import poster from "../assets/sonar-demo-poster.webp";
 import overview from "../assets/sonar-overview-dark.webp";
 import result from "../assets/sonar-result-dark.webp";
 import rmse from "../assets/sonar-rmse-dark.webp";
-import { CopyButton, ProjectHead, ProjectRoom } from "../kit";
+import { CopyButton, ProjectHead, ProjectPager, ProjectRoom } from "../kit";
 import { flagshipBySlug } from "../meta";
 import SonarDemo from "./SonarDemo";
 import * as tex from "./tex";
@@ -241,6 +241,7 @@ export default function Page() {
           </pre>
         </div>
       </section>
+      <ProjectPager slug="sonar-inverse-rendering" />
     </ProjectRoom>
   );
 }

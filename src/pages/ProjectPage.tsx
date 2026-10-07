@@ -3,10 +3,10 @@ import { useParams } from "react-router";
 import Action from "../frame/Action";
 import Loading from "../frame/Loading";
 import useApi from "../frame/useApi";
-import { byRecent, EARLIER, type Media as MediaData } from "../projects/earlier";
-import { Pager, ProjectHead, ProjectRoom, paras, Span } from "../projects/kit";
+import { EARLIER, type Media as MediaData } from "../projects/earlier";
+import { ProjectHead, ProjectPager, ProjectRoom, paras, Span } from "../projects/kit";
 import Media from "../projects/Media";
-import { FLAGSHIPS, flagshipBySlug } from "../projects/meta";
+import { flagshipBySlug } from "../projects/meta";
 import { PAGES } from "../projects/pages";
 import { NAME, pageTitle } from "../site";
 import type { Project } from "../types";
@@ -46,7 +46,6 @@ function mediaFrom(p: Project): MediaData | undefined {
 
 function EarlierProject({ slug }: { slug: string }) {
   const { data: p, failed, missing } = useApi<Project>(`projects/${slug}/`);
-  const { data: all } = useApi<Project[]>("projects/");
   if (missing) return <NotFound />;
   if (!p) {
     return (
@@ -58,16 +57,6 @@ function EarlierProject({ slug }: { slug: string }) {
   }
   const look = EARLIER[p.slug];
   const media = look?.media ?? mediaFrom(p);
-
-  // Every project in the order of the list, so the pager walks it.
-  const order = [
-    ...FLAGSHIPS.map((f) => ({ to: `/projects/${f.slug}`, title: f.title })),
-    ...(all ?? [])
-      .slice()
-      .sort(byRecent)
-      .map((q) => ({ to: `/projects/${q.slug}`, title: q.title })),
-  ];
-  const i = order.findIndex((q) => q.to === `/projects/${p.slug}`);
 
   return (
     <ProjectRoom>
@@ -90,7 +79,7 @@ function EarlierProject({ slug }: { slug: string }) {
         // sanitized in paras()
         dangerouslySetInnerHTML={{ __html: paras(p.description) }}
       />
-      {i >= 0 && <Pager prev={order[i - 1] ?? null} next={order[i + 1] ?? null} />}
+      <ProjectPager slug={p.slug} />
     </ProjectRoom>
   );
 }

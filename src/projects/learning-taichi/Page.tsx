@@ -1,5 +1,5 @@
 import { pageTitle } from "../../site";
-import { ProjectHead, ProjectRoom, Span } from "../kit";
+import { ProjectHead, ProjectPager, ProjectRoom, Span } from "../kit";
 import { flagshipBySlug } from "../meta";
 import Lab from "./Lab";
 import "./lab.css";
@@ -29,6 +29,7 @@ export default function Page() {
           the solver that runs in the browser.
         </p>
       </div>
+      <ProjectPager slug="learning-taichi" />
     </ProjectRoom>
   );
 }
