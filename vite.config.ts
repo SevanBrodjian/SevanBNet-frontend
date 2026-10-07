@@ -1,6 +1,7 @@
 import react from "@vitejs/plugin-react";
 import { defineConfig, type ProxyOptions } from "vite";
 import { sitePages } from "./seo.ts";
+import { writingPosts } from "./src/writing/build.ts";
 
 // Railway sets RAILWAY_ENVIRONMENT_NAME at build time. Only the production build may
 // be indexed by search engines; every other build (the dev environment, local builds)
@@ -28,6 +29,8 @@ export default defineConfig(({ command }) => {
   return {
     plugins: [
       react(),
+      // Essays: content/writing/*.md, compiled to HTML at build time.
+      writingPosts(),
       // The build-time page generator fetches content itself, so it needs a full URL.
       sitePages({ apiUrl: apiUrl || apiTarget, indexable: railwayEnv === "production" }),
     ],

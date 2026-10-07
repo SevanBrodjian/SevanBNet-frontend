@@ -1,60 +1,493 @@
 /* Writing (/writing) and essays (/writing/<slug>). Owned by the Writing area.
-   Rooms: html[data-room="writing"], html[data-room="essay"]; set --r-g0 and friends there
-   to colour them (see the tokens in frame.css). */
+   The list sits on a warm ground with a garden growing in the margins; an essay is night:
+   a lamp-lit page in a darker room, the garden dim around it. */
 
-.writing {
-  padding-top: 48px;
-  padding-bottom: 96px;
+html[data-room="writing"] {
+  --r-g0: #1a1713;
+  --r-g1: #1f1c18;
+  --r-g2: #26231f;
+  --r-rule: #34302b;
+  --r-rule2: #4a4640;
+  --r-tx: #f3eee5;
+  --r-tx2: #d6cfc2; /* 11.6:1 on the ground */
+  --r-tx3: #aaa498; /* 7:1 */
+  --r-tx4: #6c675e;
 }
 
-.writing .rows {
+html[data-room="essay"] {
+  --r-g0: #130f0c;
+  --r-g1: #1d1814;
+  --r-g2: #25201b;
+  --r-rule: #2c2621;
+  --r-rule2: #433c35;
+  --r-tx: #f3ece0;
+  --r-tx2: #dcd4c5; /* 12.5:1 on the page */
+  --r-tx3: #a79f90; /* 6.9:1 on the page */
+  --r-tx4: #6a6257;
+}
+
+/* ---------- the room and its margins ---------- */
+.room-w {
+  position: relative;
+}
+
+.growth {
+  position: absolute;
+  top: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.growth canvas {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+.w-col {
+  position: relative;
+  z-index: 1;
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+/* ---------- an essay ---------- */
+.room-night {
+  padding-bottom: 8px;
+}
+
+html[data-room="essay"] .hdr {
+  border-bottom-color: #2a241e;
+}
+
+/* The reading line along the bottom of the header. */
+.w-progress {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 45;
+  width: 100%;
+  height: 2px;
+  background: var(--tx2);
+  transform: scaleX(0);
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+
+@media (min-width: 761px) {
+  .w-progress {
+    top: calc(var(--hdr) - 1px);
+  }
+}
+
+.leaf {
+  position: relative;
+  z-index: 1;
+  max-width: calc(34em + 2 * 72px);
+  margin: 56px auto 0;
+  padding: 64px 72px 56px;
+  background: var(--g1);
+  box-shadow:
+    0 0 0 1px var(--rule),
+    0 40px 120px rgb(0 0 0 / 0.55);
+  --fs: 20px;
+  font-size: var(--fs);
+}
+
+.essay {
+  color: var(--tx2);
+  font: var(--w4) var(--fs, 20px) / calc(1.66 * var(--k-lead)) var(--serif);
+}
+
+.essay header {
+  margin-bottom: 2.4em;
+}
+
+.essay .kick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  margin: 0 0 28px;
+  color: var(--tx3);
+  font: 500 11.5px / 1.4 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.essay h1 {
+  margin: 0;
+  color: var(--tx);
+  font: var(--w45) clamp(34px, 4.2vw, 54px) / calc(1.06 * var(--k-lead)) var(--serif);
+  font-variation-settings: "opsz" 60;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.essay .dek {
+  margin: 20px 0 0;
+  color: var(--tx2);
+  font-size: 1.05em;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.essay .body > p:first-of-type::first-letter {
+  float: left;
+  margin: 0.07em 0.09em 0 0;
+  color: var(--tx);
+  font: var(--w4) 3.55em / 0.82 var(--serif);
+}
+
+.essay p {
+  margin: 0 0 1em;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+
+.essay h2,
+.essay h3 {
+  margin: 2.6em 0 0.9em;
+  color: var(--tx);
+  font: var(--w6) 0.78em / 1.3 var(--sans);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.essay h2::before {
+  content: "\00a7\00a0";
+  color: var(--tx4);
+}
+
+.essay h3 {
+  letter-spacing: 0.06em;
+  text-transform: none;
+}
+
+.essay [id] {
+  scroll-margin-top: calc(var(--hdr) + 24px);
+}
+
+.essay b,
+.essay strong {
+  color: var(--tx);
+  font-weight: var(--w6);
+}
+
+.essay a {
+  color: var(--tx);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.essay a:hover {
+  text-decoration-thickness: 2px;
+}
+
+.essay blockquote {
+  margin: 1.4em 0;
+  padding-left: 1.2em;
+  border-left: 1px solid var(--rule2);
+  color: var(--tx2);
+  font-style: italic;
+}
+
+.essay blockquote .attr {
+  font-style: normal;
+  font-size: 0.9em;
+}
+
+.essay blockquote .attr em {
+  font-style: italic;
+}
+
+.essay ul,
+.essay ol {
+  margin: 0 0 1em;
+  padding-left: 1.3em;
+}
+
+.essay li {
+  margin: 0.25em 0;
+}
+
+.essay hr {
+  margin: 2.4em auto;
+  width: 4em;
+  border: 0;
+  border-top: 1px solid var(--rule2);
+}
+
+.essay code {
+  padding: 0.05em 0.3em;
+  background: var(--g2);
+  font: 0.82em var(--mono);
+}
+
+.essay pre {
+  overflow-x: auto;
+  margin: 1.4em 0;
+  padding: 14px 16px;
+  background: var(--g0);
+  box-shadow: 0 0 0 1px var(--rule);
+  font-size: 0.85em;
+  line-height: 1.5;
+}
+
+.essay pre code {
+  padding: 0;
+  background: none;
+}
+
+.essay figure {
+  margin: 1.8em 0;
+}
+
+.essay figure img,
+.essay .body img,
+.essay .body video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.essay figcaption {
+  margin-top: 10px;
+  color: var(--tx3);
+  font: 14px / 1.5 var(--sans);
+  text-align: center;
+}
+
+.essay table {
+  width: 100%;
+  margin: 1.4em 0;
+  border-collapse: collapse;
+  font: 0.8em / 1.45 var(--sans);
+}
+
+.essay th,
+.essay td {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+}
+
+.essay th {
+  color: var(--tx);
+  font-weight: var(--w6);
+}
+
+.essay .math {
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin: 1.2em 0;
+}
+
+.essay .katex {
+  font-size: 1.05em;
+}
+
+.essay sup {
+  line-height: 0;
+}
+
+.essay .footnotes {
+  margin-top: 3em;
+  padding-top: 1.2em;
+  border-top: 1px solid var(--rule);
+  font-size: 0.85em;
+}
+
+.essay .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The end: the margins' biome, changed with a press. */
+.essay .fin {
+  margin: 2.6em 0 0;
+  text-align: center;
+}
+
+.essay .biome {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  min-height: 32px;
+  padding: 5px 12px 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--tx3);
+  font: 500 11.5px / 1 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.essay .biome span[aria-hidden] {
+  color: var(--tx4);
+  font: 18px / 1 var(--serif);
+  letter-spacing: 0;
+  translate: 0 1px;
+}
+
+.essay .biome:hover {
+  color: var(--tx);
+  border-color: var(--rule2);
+}
+
+.essay .biome:active {
+  translate: 0 1px;
+}
+
+/* Earlier and later. */
+.essay-pager {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap);
+  max-width: calc(34em * 20 / 16 + 2 * 72px);
+  margin: 0 auto;
+}
+
+.essay-pager a {
+  display: block;
+  padding: 26px 0 22px;
+  color: var(--tx);
+  font: var(--w4) 19px / 1.35 var(--serif);
+  text-decoration: none;
+}
+
+.essay-pager a:last-child {
+  text-align: right;
+}
+
+.essay-pager .lbl {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.essay-pager a:hover .pt,
+.essay-pager a:focus-visible .pt {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.essay-all {
+  position: relative;
+  z-index: 1;
+  display: table;
+  margin: 18px auto 0;
+  padding: 8px 10px;
+  color: var(--tx3);
+  font: 500 11.5px / 1 var(--mono);
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.essay-all:hover {
+  color: var(--tx);
+}
+
+/* ---------- the list ---------- */
+.erows {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.post-row {
+.erow {
+  position: relative;
   display: grid;
-  grid-template-columns: 140px 1fr;
-  gap: 24px;
-  padding: 24px 0;
-  border-bottom: 1px solid var(--rule);
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: var(--gap);
+  padding: 30px 0 32px;
+  border-bottom: var(--hair) solid var(--rule);
+  background: var(--g0);
 }
 
-.post-row h2 {
-  margin: 8px 0;
-  font-size: 28px;
+.erow .dt {
+  color: var(--tx3);
+  font: 13px / 2.3 var(--mono);
+  letter-spacing: 0.02em;
 }
 
-.post-row a {
+.erow h2 {
+  margin: 0;
+  color: var(--tx);
+  font: var(--w45) 29px / calc(1.18 * var(--k-lead)) var(--serif);
+  letter-spacing: -0.008em;
+  text-wrap: balance;
+}
+
+.erow h2 a {
   text-decoration: none;
 }
 
-.essay {
-  max-width: 44rem;
-  margin: 0 auto;
-  padding: 64px var(--m) 96px;
-  font-family: var(--serif);
-  font-size: 19px;
-  line-height: 1.65;
+/* The whole row opens the essay; the title is the link. */
+.erow h2 a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
 }
 
-.essay-nav {
-  display: flex;
-  justify-content: space-between;
-  gap: 24px;
-  margin-top: 64px;
-  font-family: var(--sans);
-  font-size: 15px;
+.erow p {
+  max-width: 42em;
+  margin: 10px 0 0;
+  color: var(--tx2);
+  font: italic var(--w4) 17.5px / calc(1.5 * var(--k-lead)) var(--serif);
 }
 
-.essay .prose img {
-  height: auto;
+.erow:hover h2 a,
+.erow h2 a:focus-visible {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+}
+
+.erow:hover .dt {
+  color: var(--tx2);
+}
+
+.erow:active h2 {
+  translate: 0 1px;
 }
 
 @media (max-width: 760px) {
-  .post-row {
+  .erow {
     grid-template-columns: 1fr;
-    gap: 8px;
+    gap: 6px;
+    padding: 24px 0 26px;
+  }
+
+  .erow .dt {
+    line-height: 1.5;
+  }
+
+  .erow h2 {
+    font-size: 24px;
+  }
+
+  .erow p {
+    font-size: 16.5px;
+  }
+
+  .leaf {
+    margin: 0 calc(var(--m) * -1);
+    padding: 36px var(--m) 40px;
+    box-shadow: 0 1px 0 var(--rule);
+    --fs: 18.5px;
+  }
+
+  .essay-pager a {
+    font-size: 17px;
   }
 }
