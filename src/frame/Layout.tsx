@@ -56,17 +56,17 @@ export default function Layout({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // --hdr-b: where the header ends, for frames and anything pinned under it.
-  useLayoutEffect(() => {
+  // --hdr-b: where the header ends, for frames and anything pinned under it. CSS gives
+  // the usual value; this corrects it if the header is ever another height. Observed, not
+  // measured on mount: reading layout here would lay out the whole first page in one go.
+  useEffect(() => {
     const el = header.current;
     if (!el) return;
-    const set = () =>
-      document.documentElement.style.setProperty(
-        "--hdr-b",
-        `${Math.round(el.getBoundingClientRect().height)}px`,
-      );
-    set();
-    const ro = new ResizeObserver(set);
+    const ro = new ResizeObserver(([e]) => {
+      const h = Math.round(e.borderBoxSize?.[0]?.blockSize ?? el.offsetHeight);
+      const css = document.documentElement.style;
+      if (css.getPropertyValue("--hdr-b") !== `${h}px`) css.setProperty("--hdr-b", `${h}px`);
+    });
     ro.observe(el);
     return () => ro.disconnect();
   }, []);

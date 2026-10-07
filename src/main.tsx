@@ -1,7 +1,7 @@
 import "@fontsource-variable/archivo/wdth.css";
 import "@fontsource-variable/source-serif-4/opsz.css";
 import "@fontsource-variable/source-serif-4/opsz-italic.css";
-import { StrictMode } from "react";
+import { StrictMode, startTransition } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles/frame.css";
 import "./styles/controls.css";
@@ -18,10 +18,15 @@ const mount = () => {
   // crawlers that never run JavaScript. React renders its own per page and does not
   // replace existing head tags, so drop the static ones to avoid duplicates.
   for (const el of document.head.querySelectorAll("[data-static]")) el.remove();
-  createRoot(root).render(
-    <StrictMode>
-      <App />
-    </StrictMode>,
+  // As a transition, React renders in slices and yields between them, so the first render
+  // is not one long task.
+  const app = createRoot(root);
+  startTransition(() =>
+    app.render(
+      <StrictMode>
+        <App />
+      </StrictMode>,
+    ),
   );
 };
 preloadPath(location.pathname).then(mount, mount);

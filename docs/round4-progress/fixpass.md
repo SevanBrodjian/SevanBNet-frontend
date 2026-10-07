@@ -30,3 +30,12 @@ public/lab/). Resume from the first unchecked item.
 - Checkpoint 1: items 1-11 done. Main bundle 372 KB -> 286 KB. Papers: off-site titles are
   plain text; sonar keeps title link + "Project page" button (a title plus one button is
   not the Watch/Read problem). Next: full browser sweep, perf at 6x, final screenshots.
+- Checkpoint 2: first render as a transition + first page/essay/fonts preloaded with the
+  page; header height observed (no forced layout on mount); sonar sections
+  content-visibility; StarSky skips text blocks. Prod-like server (serve-handler +
+  serve.json + /api proxy, scratchpad/fx-server.mjs): CLS 0 on every route (desktop 4x,
+  mobile 6x); mobile 6x leaves one ~50-54 ms module-evaluation task; desktop 4x none except
+  an occasional ~54 ms essay layout and the lab's own boot. Stale chunks: page reloads
+  once, then shows "Couldn't load this page. Reload"; panel fails quietly. The lab works
+  through serve's cleanUrls with the injected <base>; without the lab the still shows.
+  Next: full sweep of views/pages/sizes, controls both ways, final screenshots.

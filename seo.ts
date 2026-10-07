@@ -541,7 +541,15 @@ export function sitePages({ apiUrl, indexable }: { apiUrl: string; indexable: bo
     async generateBundle(_options, bundle) {
       const asset = bundle["index.html"];
       if (asset?.type !== "asset") throw new Error("[seo] index.html not in bundle");
-      const template = String(asset.source);
+      // The type every page uses, asked for with the page so text rarely re-flows when it
+      // arrives; the serif too on the pages that read in it.
+      const fontFile = (re: RegExp) =>
+        Object.values(bundle).find((c) => c.type === "asset" && re.test(c.fileName))?.fileName;
+      const fontTag = (f: string | undefined) =>
+        f ? `<link rel="preload" as="font" type="font/woff2" crossorigin href="/${f}" />` : "";
+      const sans = fontTag(fontFile(/archivo-latin-wdth-normal-[\w-]+\.woff2$/));
+      const serif = fontTag(fontFile(/source-serif-4-latin-opsz-normal-[\w-]+\.woff2$/));
+      const template = String(asset.source).replace("<head>", `<head>\n    ${sans}`);
 
       const [projects, publications] = await Promise.all([
         fetchJson<Project>(apiUrl, "projects/"),
@@ -559,7 +567,8 @@ export function sitePages({ apiUrl, indexable }: { apiUrl: string; indexable: bo
         this.emitFile({ type: "asset", fileName, source });
 
       // Each page's own code (pages load lazily, see src/routes.ts): asked for with the
-      // page, so the app does not wait for the main script to discover it.
+      // page, so the app does not wait for the main script to discover it. crossorigin
+      // matches how Vite's loader asks for them, so the preloads are reused.
       const entry = Object.values(bundle).find((c) => c.type === "chunk" && c.isEntry);
       const loaded = new Set(entry?.type === "chunk" ? [entry.fileName, ...entry.imports] : []);
       const chunkOf = (file: string) => {
@@ -593,10 +602,14 @@ export function sitePages({ apiUrl, indexable }: { apiUrl: string; indexable: bo
           for (const name of [c.fileName, ...c.imports]) if (!loaded.has(name)) js.add(name);
           for (const name of c.viteMetadata?.importedCss ?? []) css.add(name);
         }
+        const reads = /^\/(about|writing|projects\/)/.test(path);
         return [
-          ...[...css].map((f) => `<link rel="preload" as="style" href="/${f}" />`),
-          ...[...js].map((f) => `<link rel="modulepreload" href="/${f}" />`),
-        ].join("\n    ");
+          reads ? serif : "",
+          ...[...css].map((f) => `<link rel="preload" as="style" crossorigin href="/${f}" />`),
+          ...[...js].map((f) => `<link rel="modulepreload" crossorigin href="/${f}" />`),
+        ]
+          .filter(Boolean)
+          .join("\n    ");
       };
 
       // index.html (home) is replaced in place; Vite has already emitted it.

@@ -117,6 +117,7 @@
   --gap: 24px; /* grid gutter */
   --maxw: 1440px;
   --hdr: 64px;
+  --hdr-b: 65px; /* where the header ends (Layout corrects it if it differs) */
   --hair: var(--k-hair, 1px);
   color-scheme: dark;
 }
@@ -125,6 +126,7 @@
   :root {
     --m: 20px;
     --gap: 16px;
+    --hdr-b: 103px; /* the header wraps to two rows */
   }
 }
 
@@ -1187,7 +1189,12 @@ html[data-framed] .ftr-in .ext-mark {
   min-height: 100vh;
   background: #141619;
   color: #d3cfc6;
-  font: 430 16px / 1.55 var(--sans);
+  /* The system's sans: a web font arriving later would re-flow the text. */
+  font:
+    430 16px / 1.55 system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
 }
 
 #root > .static-page a {

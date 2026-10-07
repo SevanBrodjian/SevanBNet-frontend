@@ -67,6 +67,9 @@ export default function StarSky({
       blocks = [];
       if (!quiet) return;
       for (const el of document.querySelectorAll(quiet)) {
+        // Words in a part of the page not laid out yet (content-visibility) are off
+        // screen; measuring them would lay them out. They are measured once they show.
+        if (el.checkVisibility && !el.checkVisibility({ contentVisibilityAuto: true })) continue;
         const r = el.getBoundingClientRect();
         if (r.width && r.height)
           blocks.push([r.left - 10, r.top + scrollY - 8, r.width + 20, r.height + 16]);
@@ -76,7 +79,7 @@ export default function StarSky({
     const main = document.querySelector("main");
     const ro = new ResizeObserver(measure);
     if (main) ro.observe(main);
-    const every = window.setInterval(measure, 2500);
+    const every = window.setInterval(measure, 1200);
 
     const stars: Star[] = [];
     // Lean of the fall, in radians from straight down (positive: toward the right).
@@ -216,7 +219,13 @@ export default function StarSky({
     addEventListener("resize", onResize);
     // A still sky is redrawn when the page scrolls, so the words stay clear.
     let sq = 0;
+    let lastMeasure = 0;
     const onScroll = () => {
+      const now = performance.now();
+      if (now - lastMeasure > 400) {
+        lastMeasure = now;
+        measure();
+      }
       if (STILL && !sq)
         sq = requestAnimationFrame(() => {
           sq = 0;

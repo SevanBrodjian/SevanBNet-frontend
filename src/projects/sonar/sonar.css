@@ -102,6 +102,12 @@
   margin-top: 56px;
 }
 
+/* The paper's sections below the first: laid out only when they come near the screen. */
+.sr-sec + .sr-sec {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}
+
 .sr-sec h2 {
   margin: 4px 0 0;
   color: var(--tx2);

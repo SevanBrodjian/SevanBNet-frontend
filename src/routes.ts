@@ -22,7 +22,12 @@ export function preloadPath(path: string): Promise<unknown> {
     if (own) loads.push(own.preload());
   } else if (top === "projects") loads.push(Projects.preload());
   else if (top === "papers" || top === "research") loads.push(Papers.preload());
-  else if ((top === "writing" || top === "blog") && slug) loads.push(Essay.preload());
+  else if ((top === "writing" || top === "blog") && slug)
+    loads.push(
+      Essay.preload(),
+      // The essay itself too, so it is there when the page first renders.
+      import("./writing/posts").then((m) => m.loadBody(slug)),
+    );
   else if (top === "writing" || top === "blog") loads.push(Writing.preload());
   else if (top === "about") loads.push(About.preload());
   return Promise.all(loads);
