@@ -415,7 +415,7 @@ export function createEco(o: EcoOptions): Eco {
       case STEM:
         return sp ? mix(shade(sp.stemC, 0.85 + h * 0.3), C.fresh, a * 0.55) : C.dry[0];
       case HYP:
-        return mix(shade(SP.hypha.stemC, 0.55 + h * 0.45), C.wing, a * 0.4);
+        return mix(shade(SP.hypha.stemC, 0.42 + h * 0.36), C.wing, a * 0.3);
       case LEAF:
         return sp ? mix(leafCol(sp, i), C.fresh, a * 0.5) : C.dry[0];
       case PET:
@@ -1673,9 +1673,10 @@ export function createEco(o: EcoOptions): Eco {
       setTimeout(run, 0);
     });
   }
-  function* pregrow(n: number): Generator<void> {
+  /** Grow n steps over the whole page; stops early if a newer garden replaces this one. */
+  function* pregrow(n: number, token: number): Generator<void> {
     const b: [number, number] = [0, Math.max(10, ...sides.map((s) => s.rows))];
-    for (let k = 0; k < n; k++) {
+    for (let k = 0; k < n && token === growing; k++) {
       pregrowing = true;
       stepAll(b, true);
       pregrowing = false;
@@ -1791,18 +1792,28 @@ export function createEco(o: EcoOptions): Eco {
     live.setPaused(true);
     // nights start grown; days start young and grow in (still: grown, then drawn once)
     const n = night || STILL ? (NARROW ? 300 : 420) : NARROW ? 160 : 200;
-    chunk(pregrow(n), 4).then(() => {
+    chunk(pregrow(n, my), 4).then(() => {
       if (growing !== my || disposed) return;
       ready = true;
       bornAt = performance.now();
-      if (night) {
-        // a night begins with what already glows
-        const b: [number, number] = [0, Math.max(...sides.map((s) => s.rows))];
-        for (let k = 0; k < 40; k++) for (const s of sides) if (s.ok) glowing(s, b);
-      }
+      if (night) seedNight();
       redraw();
       if (!STILL) live.setPaused(false);
     });
+  }
+  /** A night begins with what already glows (and, held still, a few fireflies mid-flash). */
+  function seedNight() {
+    const b: [number, number] = [0, Math.max(...sides.map((s) => s.rows))];
+    for (let k = 0; k < 40; k++) for (const s of sides) if (s.ok) glowing(s, b);
+    if (!STILL || bio.sp[0] !== "vetch") return;
+    for (const s of sides) {
+      if (!s.ok || s.cols < 14) continue;
+      for (let y = 40 + rnd() * 120; y < s.rows - 10; y += 90 + rnd() * 160) {
+        const c = newCrit("firefly", 2 + rnd() * (s.cols - 4), y);
+        c.on = rnd() < 0.6 ? 1 : 0;
+        s.crit.push(c);
+      }
+    }
   }
   let rt = 0;
   const ro = new ResizeObserver(() => {
@@ -1835,10 +1846,7 @@ export function createEco(o: EcoOptions): Eco {
         s.pulses = [];
         s.lights = [];
       }
-      if (n && ready) {
-        const b: [number, number] = [0, Math.max(...sides.map((s) => s.rows))];
-        for (let k = 0; k < 40; k++) for (const s of sides) if (s.ok) glowing(s, b);
-      }
+      if (n && ready) seedNight();
       if (ready) redraw();
     },
     seasonChanged() {

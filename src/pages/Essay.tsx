@@ -77,7 +77,7 @@ function EssayPage({ post }: { post: PostMeta }) {
 
   const { earlier, later } = neighbours(post.slug);
   return (
-    <div ref={room} className="room-w room-night" data-slot="writing.ecosystem">
+    <div ref={room} className="room-w room-night">
       <title>{pageTitle(post.title)}</title>
       {html !== null && <Ecosystem host={room} column=".leaf" night />}
       {html !== null && <ReadingProgress target={leaf} />}
@@ -86,7 +86,6 @@ function EssayPage({ post }: { post: PostMeta }) {
           <header>
             <p className="kick">
               <Time iso={post.date} f="long" />
-              {post.series && <span>{post.series}</span>}
             </p>
             <h1>{post.title}</h1>
             <p className="dek">{post.dek}</p>

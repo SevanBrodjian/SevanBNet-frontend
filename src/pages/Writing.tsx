@@ -9,7 +9,7 @@ import "../styles/writing.css";
 export default function Writing() {
   const room = useRef<HTMLDivElement>(null);
   return (
-    <div ref={room} className="room-w" data-slot="writing.ecosystem">
+    <div ref={room} className="room-w">
       <title>{PAGES.writing.title}</title>
       <Ecosystem host={room} column=".w-col" night={false} />
       <div className="wrap">

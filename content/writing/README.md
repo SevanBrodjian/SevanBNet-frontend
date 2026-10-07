@@ -11,7 +11,7 @@ the next deploy publishes it (the list, the page, the sitemap and llms.txt).
 title: The Direction of Science
 date: 2023-12-18
 description: How our choices shape the Universe we understand.
-series: Science and Consciousness   # optional
+series: Science and Consciousness   # optional: parts of one essay (not shown yet)
 slug: the-direction-of-science      # optional: use when the file name is a title
 draft: true                         # optional: only shown by `npm run dev`
 ---

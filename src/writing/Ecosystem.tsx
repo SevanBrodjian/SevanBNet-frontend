@@ -28,25 +28,33 @@ export default function Ecosystem({
   const light = useControl("writing.light");
   const dark = light === "night" ? true : light === "day" ? false : night;
   const eco = useRef<Eco | null>(null);
-  const start = useRef({ biome, dark });
-  start.current = { biome, dark };
+  const begin = useRef({ biome, dark });
+  begin.current = { biome, dark };
 
   useEffect(() => {
     const el = host.current;
     if (!el) return;
-    const e = createEco({
-      host: el,
-      column: () => el.querySelector(column),
-      night: start.current.dark,
-      biome: start.current.biome,
-      phase,
-      cycle,
-      tempo,
-    });
-    eco.current = e;
-    if (import.meta.env.DEV) (window as unknown as { eco?: Eco }).eco = e;
+    let e: Eco | null = null;
+    // After the page has painted: the text first, then the garden.
+    const start = () => {
+      e = createEco({
+        host: el,
+        column: () => el.querySelector(column),
+        night: begin.current.dark,
+        biome: begin.current.biome,
+        phase,
+        cycle,
+        tempo,
+      });
+      eco.current = e;
+      if (import.meta.env.DEV) (window as unknown as { eco?: Eco }).eco = e;
+    };
+    const idle = "requestIdleCallback" in window;
+    const id = idle ? requestIdleCallback(start, { timeout: 500 }) : window.setTimeout(start, 60);
     return () => {
-      e.dispose();
+      if (idle) cancelIdleCallback(id);
+      else clearTimeout(id);
+      e?.dispose();
       eco.current = null;
     };
   }, [host, column]);

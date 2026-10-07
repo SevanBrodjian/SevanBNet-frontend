@@ -9,13 +9,13 @@ src/styles/writing.css, the writing parts of seo.ts and vite.config.ts, package.
       (virtual:writing index + one lazy chunk per post; images hashed by Vite; KaTeX only
       in posts with math), Obsidian embeds/wikilinks/comments, 6 posts migrated from the
       API into content/writing/*.md, content/writing/README.md.
-- [~] 2. Writing index + Essay pages on the markdown posts (no API), progress bar, pager,
+- [x] 2. Writing index + Essay pages on the markdown posts (no API), progress bar, pager,
       biome toggle at the end of an essay, no reading time.
 - [~] 3. Ecosystem (src/writing/eco/*): port of F's eco.js to TS on the shared loop; more
       alive; season from today's date; biome rolled at random and kept for days; settings
       only in the hidden controls (writing.biome / writing.season / writing.tempo).
 - [~] 4. Essay night: dim margins, biome-specific bioluminescence lighting its surroundings.
-- [ ] 5. seo.ts on markdown posts (static pages, sitemap, llms.txt, no writing/:slug shell
+- [~] 5. seo.ts on markdown posts (static pages, sitemap, llms.txt, no writing/:slug shell
       fallback), browser checks (1440x900, 390x844, four views, reduced motion, perf),
       npm run check + production build.
 
@@ -30,3 +30,11 @@ src/styles/writing.css, the writing parts of seo.ts and vite.config.ts, package.
   A local test post content/writing/zz-test-draft(.md|/) is NOT committed (draft: true);
   delete it before finishing.
   Next: tune day density/aliveness, check views + mobile + reduced motion, seo.ts.
+- Checkpoint 2: seo.ts reads content/writing (static essay pages carry the compiled HTML
+  and modulepreload their chunk; no writing/:slug shell fallback; llms.txt "## Writing").
+  Ecosystem starts in requestIdleCallback (keeps essay load free of long tasks at 4x);
+  superseded pregrows stop; reduced motion draws one still frame (with a few lit
+  fireflies at night). Checked: 4 views, 390x844, panel group + Reset, 40 rapid biome
+  toggles and 12 rapid essay navigations at 4x CPU (no long tasks, no leaks).
+  Next: final look pass (density, mycelium brightness), remove zz-test-draft, final
+  check/build, summary.

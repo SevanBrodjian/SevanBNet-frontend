@@ -8,13 +8,15 @@
 // It also emits sitemap.xml, llms.txt, robots handling, and the serve.json that routes
 // requests and returns real 404s.
 //
-// Content comes from src/site.js and, best effort, from the API at build time. If the
-// API is unreachable the build still succeeds with the static parts only. Content edited
-// in the admin reaches these files on the next deploy.
+// Content comes from src/site.js, the essays in content/writing/ (src/writing/build.ts)
+// and, best effort, from the API at build time. If the API is unreachable the build still
+// succeeds without its parts. Content edited in the admin reaches these files on the next
+// deploy.
 
 import type { Plugin } from "vite";
 import { FLAGSHIPS } from "./src/projects/meta.js";
 import { ABOUT, LINE, NAME, PAGES, PROFILES, pageTitle, ROLE, SITE_URL } from "./src/site.js";
+import { staticPosts } from "./src/writing/build.ts";
 
 type Project = {
   title: string;
@@ -44,7 +46,14 @@ type Post = {
   content: string;
   published_date: string;
 };
-type Content = { projects: Project[]; publications: Publication[]; posts: Post[] };
+type Content = {
+  projects: Project[];
+  publications: Publication[];
+  /** Oldest first; `content` is the essay as HTML (no images, math as TeX). */
+  posts: Post[];
+  /** The script (and stylesheets) an essay's page loads, to fetch them with the page. */
+  postAssets?: (slug: string) => string[];
+};
 
 type Page = {
   path: string;
@@ -226,7 +235,7 @@ function pages({ projects, publications, posts }: Content): Page[] {
     );
   });
 
-  // The blog page lists newest first; the API returns oldest first.
+  // The Writing page lists newest first; posts come oldest first.
   const postItems = [...posts]
     .reverse()
     .map(
@@ -337,7 +346,7 @@ function pages({ projects, publications, posts }: Content): Page[] {
 // Project and blog post pages. Written under _pages/ and reached through per-slug
 // rewrites in serve.json: serve re-applies rewrites to their own output, so a file at
 // projects/<slug>.html would be re-matched by the generic projects/:slug fallback.
-function detailPages({ projects, posts }: Content): Page[] {
+function detailPages({ projects, posts, postAssets }: Content): Page[] {
   const projectPages = projects
     .filter((p) => plainSlug(p.slug))
     .map((p) => ({
@@ -359,7 +368,15 @@ function detailPages({ projects, posts }: Content): Page[] {
       file: `_pages/writing/${p.slug}.html`,
       title: pageTitle(p.title),
       description: truncate(plain(p.description), 160),
-      body: page(`<h1>${esc(p.title)}</h1>${paragraphs(p.content)}`),
+      // The essay's own HTML, compiled and sanitized from Markdown at build time.
+      body: page(`<h1>${esc(p.title)}</h1><p>${esc(day(p.published_date))}</p>${p.content}`),
+      extraHead: (postAssets?.(p.slug) ?? [])
+        .map((f) =>
+          f.endsWith(".css")
+            ? `<link rel="stylesheet" href="/${f}" />`
+            : `<link rel="modulepreload" href="/${f}" />`,
+        )
+        .join("\n    "),
       jsonLd: {
         "@context": "https://schema.org",
         "@type": "BlogPosting",
@@ -468,7 +485,7 @@ function llmsTxt({ projects, publications, posts }: Content) {
     }
   }
   if (posts.length) {
-    lines.push("", "## Blog posts", "");
+    lines.push("", "## Writing", "");
     for (const p of [...posts].reverse())
       lines.push(`- [${md(p.title)}](${SITE_URL}/writing/${p.slug})`);
   }
@@ -506,12 +523,18 @@ export function sitePages({ apiUrl, indexable }: { apiUrl: string; indexable: bo
       if (!asset || asset.type !== "asset") throw new Error("[seo] index.html not in bundle");
       const template = String(asset.source);
 
-      const [projects, publications, posts] = await Promise.all([
+      const [projects, publications] = await Promise.all([
         fetchJson<Project>(apiUrl, "projects/"),
         fetchJson<Publication>(apiUrl, "publications/"),
-        fetchJson<Post>(apiUrl, "blogposts/"),
       ]);
-      const content = { projects, publications, posts };
+      // Each essay's chunk (virtual:writing/post/<slug>, see src/writing/build.ts).
+      const postAssets = (slug: string) => {
+        for (const c of Object.values(bundle))
+          if (c.type === "chunk" && c.facadeModuleId === `\0virtual:writing/post/${slug}`)
+            return [c.fileName, ...(c.viteMetadata?.importedCss ?? [])];
+        return [];
+      };
+      const content = { projects, publications, posts: staticPosts(), postAssets };
       const emit = (fileName: string, source: string) =>
         this.emitFile({ type: "asset", fileName, source });
 
@@ -546,13 +569,13 @@ export function sitePages({ apiUrl, indexable }: { apiUrl: string; indexable: bo
           trailingSlash: false,
           directoryListing: false,
           rewrites: [
-            // Known pages first; the generic fallbacks cover content published since the
-            // last deploy (served the app shell until the next build includes it).
+            // Known pages first; the generic fallback covers projects published since the
+            // last deploy (served the app shell until the next build includes it). Essays
+            // only exist once deployed, so an unknown essay is a real 404.
             ...all
               .filter((p) => p.file.startsWith("_pages/"))
               .map((p) => ({ source: p.path.slice(1), destination: `/${p.file}` })),
             { source: "projects/:slug", destination: "/_shell.html" },
-            { source: "writing/:slug", destination: "/_shell.html" },
           ],
           redirects: [
             { source: "/home", destination: "/", type: 301 },
