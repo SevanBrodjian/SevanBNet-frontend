@@ -3,8 +3,8 @@ import { createPortal } from "react-dom";
 import { living, STILL } from "./live";
 import { clamp } from "./util";
 
-// The plain frame around the home page and About: a hairline bezel inset from the window,
-// with tick marks along its inner edge. It holds still.
+// The plain frame around the home page and About: a hairline bezel inset from the window.
+// It holds still.
 // With `glow`, one corner is warm: keep the pointer near the lower left corner and the
 // border slowly lights blue from there; move away and it cools again. Under reduced
 // motion it simply lights after a moment, without spreading.

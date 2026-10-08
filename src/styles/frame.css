@@ -1097,8 +1097,9 @@ html:has(.doc[open]) {
 }
 
 /* ---------- the page frame (PageFrame.tsx) ----------
-   A hairline bezel inset from the window, ticks along its inner edge; on the home page,
-   the lit layer (--lit, 0..1) spreads blue from the lower left corner. */
+   A plain hairline bezel inset from the window. On the home page, the lit layer
+   (--lit, 0..1) glows blue from the lower left corner while the pointer stays near it:
+   a soft bloom at the corner, and light spreading along the border from there. */
 .pframe {
   --g: 18px;
   position: absolute;
@@ -1111,45 +1112,39 @@ html:has(.doc[open]) {
   pointer-events: none;
 }
 
-.pframe::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    repeating-linear-gradient(90deg, var(--rule2) 0 1px, transparent 1px 80px) left top / 100% 7px
-    no-repeat,
-    repeating-linear-gradient(90deg, var(--rule) 0 1px, transparent 1px 16px) left top / 100% 4px
-    no-repeat,
-    repeating-linear-gradient(90deg, var(--rule2) 0 1px, transparent 1px 80px) left bottom / 100%
-    7px no-repeat,
-    repeating-linear-gradient(90deg, var(--rule) 0 1px, transparent 1px 16px) left bottom / 100% 4px
-    no-repeat,
-    repeating-linear-gradient(180deg, var(--rule2) 0 1px, transparent 1px 80px) left top / 7px 100%
-    no-repeat,
-    repeating-linear-gradient(180deg, var(--rule) 0 1px, transparent 1px 16px) left top / 4px 100%
-    no-repeat,
-    repeating-linear-gradient(180deg, var(--rule2) 0 1px, transparent 1px 80px) right top / 7px 100%
-    no-repeat,
-    repeating-linear-gradient(180deg, var(--rule) 0 1px, transparent 1px 16px) right top / 4px 100%
-    no-repeat;
-}
-
 .pframe-lit {
   --lit: 0;
-  --reach: calc(var(--lit) * 260%);
+  --reach: calc(var(--lit) * 230%);
   position: absolute;
   inset: calc(-1 * var(--hair));
-  border: var(--hair) solid color-mix(in oklab, var(--acc) 85%, var(--tx));
+  border: 1px solid color-mix(in oklab, var(--acc) 90%, var(--tx));
   box-shadow:
-    0 0 14px -3px color-mix(in oklab, var(--acc) 55%, transparent),
-    inset 0 0 14px -5px color-mix(in oklab, var(--acc) 40%, transparent);
-  opacity: min(1, calc(var(--lit) * 3));
+    0 0 16px -2px color-mix(in oklab, var(--acc) 60%, transparent),
+    inset 0 0 20px -6px color-mix(in oklab, var(--acc) 45%, transparent);
+  opacity: var(--lit);
   mask-image: radial-gradient(
     ellipse var(--reach) var(--reach) at 0% 100%,
     #000 0,
-    #000 55%,
+    #000 30%,
     transparent 100%
   );
+}
+
+/* The bloom at the corner itself. */
+.pframe-lit::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 360px;
+  height: 360px;
+  translate: -50% 50%;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in oklab, var(--acc) 26%, transparent),
+    transparent
+  );
+  mix-blend-mode: screen;
 }
 
 @media (max-width: 760px) {
