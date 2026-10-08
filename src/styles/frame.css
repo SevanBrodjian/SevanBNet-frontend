@@ -354,7 +354,7 @@ h3 {
 .mark {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 16px;
   color: var(--tx);
   font: var(--w5) 18px / 1 var(--sans);
   letter-spacing: 0.002em;
@@ -362,12 +362,11 @@ h3 {
   white-space: nowrap;
 }
 
-/* The site's mascot: 16x16 pixel art at 1.5x (exactly 3 device pixels per cell on
-   high-density screens), so every pixel stays square. */
+/* The site's mascot: 16x16 pixel art, drawn crisp (shape-rendering in the SVG). */
 .mark-logo {
   flex: none;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
 }
 
 .nav {
