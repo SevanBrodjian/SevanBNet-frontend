@@ -362,6 +362,14 @@ h3 {
   white-space: nowrap;
 }
 
+/* The site's mascot: 16x16 pixel art drawn at an exact 2x so every pixel stays square. */
+.mark-logo {
+  align-self: center;
+  width: 32px;
+  height: 32px;
+  margin-right: 0.3em;
+}
+
 .mark .brc {
   color: var(--tx4);
   font-weight: var(--w3);
