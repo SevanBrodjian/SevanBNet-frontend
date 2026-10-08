@@ -1112,6 +1112,7 @@ html:has(.doc[open]) {
   left: -48px;
   top: -48px;
   pointer-events: none;
+  mix-blend-mode: screen;
 }
 
 @media (max-width: 760px) {

@@ -98,40 +98,102 @@ export default function PageFrame({ glow = false }: { glow?: boolean }) {
       tmp = new Float32Array(h.length);
     };
 
+    // The look: the border's own 1px line turning blue, a soft haze on both sides of it
+    // (like the CSS box-shadows this replaced), and a wide bloom where it is hottest.
+    // Every part is scaled by the local heat, so cool border is untouched.
+    const OUT = 16; // px of haze outside the border
+    const IN = 20; // px of haze inside it
+    const strip = (len: number, peak: number, atStart: boolean, vertical: boolean) => {
+      const c = document.createElement("canvas");
+      c.width = vertical ? 1 : len;
+      c.height = vertical ? len : 1;
+      const g = c.getContext("2d");
+      if (!g) return c;
+      const grad = vertical
+        ? g.createLinearGradient(0, 0, 0, len)
+        : g.createLinearGradient(0, 0, len, 0);
+      const [r, gr, b] = rgb;
+      const near = `rgba(${r},${gr},${b},${peak})`;
+      const far = `rgba(${r},${gr},${b},0)`;
+      grad.addColorStop(0, atStart ? near : far);
+      grad.addColorStop(1, atStart ? far : near);
+      g.fillStyle = grad;
+      g.fillRect(0, 0, c.width, c.height);
+      return c;
+    };
+    let strips: Record<string, HTMLCanvasElement> = {};
+    const buildStrips = () => {
+      strips = {
+        outV0: strip(OUT, 0.34, true, true),
+        outV1: strip(OUT, 0.34, false, true),
+        outH0: strip(OUT, 0.34, true, false),
+        outH1: strip(OUT, 0.34, false, false),
+        inV0: strip(IN, 0.17, true, true),
+        inV1: strip(IN, 0.17, false, true),
+        inH0: strip(IN, 0.17, true, false),
+        inH1: strip(IN, 0.17, false, false),
+      };
+    };
+
+    /** Draw one straight piece of border [s0, s1] (all on one edge) at heat v. */
+    const piece = (s0: number, s1: number, v: number) => {
+      const [x0, y0] = at(s0);
+      const [x1, y1] = at(s1 - 1e-6);
+      ctx.globalAlpha = v;
+      if (s0 < W) {
+        // top edge: line on the border's first pixel row
+        const x = Math.min(x0, x1);
+        const len = Math.abs(x1 - x0);
+        ctx.drawImage(strips.outV1, x, -OUT, len, OUT);
+        ctx.drawImage(strips.inV0, x, 1, len, IN);
+        ctx.fillRect(x, 0, len, 1);
+      } else if (s0 < W + H) {
+        const y = Math.min(y0, y1);
+        const len = Math.abs(y1 - y0);
+        ctx.drawImage(strips.outH0, W, y, OUT, len);
+        ctx.drawImage(strips.inH1, W - 1 - IN, y, IN, len);
+        ctx.fillRect(W - 1, y, 1, len);
+      } else if (s0 < 2 * W + H) {
+        const x = Math.min(x0, x1);
+        const len = Math.abs(x1 - x0);
+        ctx.drawImage(strips.outV0, x, H, len, OUT);
+        ctx.drawImage(strips.inV1, x, H - 1 - IN, len, IN);
+        ctx.fillRect(x, H - 1, len, 1);
+      } else {
+        const y = Math.min(y0, y1);
+        const len = Math.abs(y1 - y0);
+        ctx.drawImage(strips.outH1, -OUT, y, OUT, len);
+        ctx.drawImage(strips.inH0, 1, y, IN, len);
+        ctx.fillRect(0, y, 1, len);
+      }
+    };
+
     const draw = () => {
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.setTransform(dpr, 0, 0, dpr, PAD * dpr, PAD * dpr);
       const [r, g, b] = rgb;
       const n = h.length;
-      // Border segments, batched into a few heat levels so each level is one stroke.
-      const LEVELS = 8;
-      for (let lv = 1; lv <= LEVELS; lv++) {
-        const lo = (lv - 1) / LEVELS;
-        const hi = lv / LEVELS;
-        const k = (lo + hi) / 2;
-        ctx.beginPath();
-        let any = false;
-        for (let i = 0; i < n; i++) {
-          if (h[i] <= Math.max(lo, 0.01) || h[i] > hi) continue;
-          const [x0, y0] = at(i * CELL);
-          const [x1, y1] = at((i + 1) * CELL);
-          ctx.moveTo(x0, y0);
-          ctx.lineTo(x1, y1);
-          any = true;
+      // The line itself: the accent mixed a little toward the text colour, as before.
+      ctx.fillStyle = `rgb(${Math.round(0.9 * r + 24)},${Math.round(0.9 * g + 24)},${Math.round(0.9 * b + 23)})`;
+      const corners = [0, W, W + H, 2 * W + H, P];
+      for (let i = 0; i < n; i++) {
+        // a well-warmed spot reaches the full look; a barely warm one stays faint
+        const v = Math.min(1, h[i] * 1.6);
+        if (v < 0.015) continue;
+        const s0 = i * CELL;
+        const s1 = Math.min(P, s0 + CELL);
+        // split a cell that wraps a corner into its two edges
+        let a = s0;
+        for (const c of corners) {
+          if (c > a && c < s1) {
+            piece(a, c, v);
+            a = c;
+          }
         }
-        if (!any) continue;
-        ctx.lineCap = "round";
-        ctx.shadowColor = `rgba(${r},${g},${b},${(0.9 * k).toFixed(3)})`;
-        ctx.shadowBlur = 14 * dpr * k + 4;
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = `rgba(${r},${g},${b},${(0.7 * k).toFixed(3)})`;
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = `rgba(${Math.min(255, r + 60)},${Math.min(255, g + 50)},${Math.min(255, b + 40)},${k.toFixed(3)})`;
-        ctx.stroke();
+        piece(a, s1, v);
       }
+      ctx.globalAlpha = 1;
       // A soft bloom where the metal is hottest (local peaks only).
       const R = Math.round(36 / CELL);
       for (let i = 0; i < n; i++) {
@@ -141,9 +203,9 @@ export default function PageFrame({ glow = false }: { glow?: boolean }) {
         for (let j = -R; j <= R && peak; j++) if (j && h[(i + j + n) % n] > v) peak = false;
         if (!peak) continue;
         const [x, y] = at((i + 0.5) * CELL);
-        const rad = 40 + 110 * v;
+        const rad = 160;
         const grad = ctx.createRadialGradient(x, y, 0, x, y, rad);
-        grad.addColorStop(0, `rgba(${r},${g},${b},${(0.22 * v).toFixed(3)})`);
+        grad.addColorStop(0, `rgba(${r},${g},${b},${(0.24 * Math.min(1, v * 1.6)).toFixed(3)})`);
         grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
         ctx.fillStyle = grad;
         ctx.fillRect(x - rad, y - rad, 2 * rad, 2 * rad);
@@ -238,7 +300,10 @@ export default function PageFrame({ glow = false }: { glow?: boolean }) {
         }
         return;
       }
-      if (s !== null && was === null) rgb = accent();
+      if (s !== null && was === null) {
+        rgb = accent();
+        buildStrips();
+      }
       if (s !== null) live.setPaused(false);
     };
 
@@ -265,6 +330,7 @@ export default function PageFrame({ glow = false }: { glow?: boolean }) {
     });
 
     layout();
+    buildStrips();
     ro.observe(box);
     addEventListener("pointermove", onMove, { passive: true });
     addEventListener("pointerdown", onDown, { passive: true });
