@@ -5,13 +5,13 @@ import { clamp } from "./util";
 
 // The plain frame around the home page and About: a hairline bezel inset from the window.
 // It holds still.
-// With `glow`, one corner is warm: keep the pointer near the lower left corner and the
-// border slowly lights blue from there; move away and it cools again. Under reduced
-// motion it simply lights after a moment, without spreading.
+// With `glow`, the border is warm: keep the pointer near it and the border slowly lights
+// blue around the nearest point, following the pointer along it; move away and it cools
+// again. Under reduced motion it simply lights after a moment, without spreading.
 // Rendered into <body>, so no view can transform it; the page's footer sits inside it.
 
-/** Distance from the corner, in px, that counts as near. */
-const NEAR = 150;
+/** Distance from the border, in px, that counts as near. */
+const NEAR = 120;
 /** Seconds of holding near to light the whole border, and to cool from full. */
 const RISE = 7;
 const FALL = 2.6;
@@ -51,9 +51,29 @@ export default function PageFrame({ glow = false }: { glow?: boolean }) {
           live.setPaused(true);
       },
     });
+    // The point on the border nearest the pointer: it becomes the centre of the light.
     const isNear = (x: number, y: number) => {
       const r = box.getBoundingClientRect();
-      return Math.hypot(x - r.left, y - r.bottom) < NEAR;
+      // The navbar sits just above the top edge; using it should not light the frame.
+      const hdr = document.querySelector(".hdr")?.getBoundingClientRect();
+      if (hdr && y < hdr.bottom) return false;
+      let px = clamp(x, r.left, r.right);
+      let py = clamp(y, r.top, r.bottom);
+      if (px === x && py === y) {
+        // inside the frame: project onto the closest edge
+        const edges = [x - r.left, r.right - x, y - r.top, r.bottom - y];
+        const k = edges.indexOf(Math.min(...edges));
+        if (k === 0) px = r.left;
+        else if (k === 1) px = r.right;
+        else if (k === 2) py = r.top;
+        else py = r.bottom;
+      }
+      const close = Math.hypot(x - px, y - py) < NEAR;
+      if (close) {
+        light.style.setProperty("--gx", `${(px - r.left).toFixed(1)}px`);
+        light.style.setProperty("--gy", `${(py - r.top).toFixed(1)}px`);
+      }
+      return close;
     };
     const update = (next: boolean) => {
       if (next === near) return;

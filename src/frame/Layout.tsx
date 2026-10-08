@@ -83,14 +83,8 @@ export default function Layout({ children }: { children: ReactNode }) {
       <header ref={header} className="hdr">
         <div className="hdr-in">
           <Link to="/" className="mark" aria-label="SevanB.net, home">
-            <img className="mark-logo" src="/sneb.svg" alt="" width={32} height={32} />
-            <span className="brc" aria-hidden="true">
-              {"{"}
-            </span>
+            <img className="mark-logo" src="/sneb.svg" alt="" width={24} height={24} />
             SevanB.net
-            <span className="brc" aria-hidden="true">
-              {"}"}
-            </span>
           </Link>
           <nav aria-label="Main">
             <ul className="nav">
