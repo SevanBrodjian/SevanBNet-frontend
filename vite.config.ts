@@ -45,7 +45,9 @@ export default defineConfig(({ command }) => {
       "import.meta.env.VITE_API_URL": JSON.stringify(apiUrl),
       "import.meta.env.VITE_LAB_URL": JSON.stringify(labUrl),
     },
-    server: { proxy },
-    preview: { proxy },
+    // Fixed local addresses (never drift to another port): the site is always
+    // http://localhost:5173 and a local production preview http://localhost:4173.
+    server: { port: 5173, strictPort: true, proxy },
+    preview: { port: 4173, strictPort: true, proxy },
   };
 });
