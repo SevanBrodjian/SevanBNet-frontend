@@ -1,24 +1,28 @@
 # Writing
 
-Each essay is one Markdown file here. The file name is its address:
-`the-direction-of-science.md` is www.sevanb.net/writing/the-direction-of-science. Push it and
-the next deploy publishes it (the list, the page, the sitemap and llms.txt).
+Each essay is one Markdown file here, named after its slug:
+`the-direction-of-science.md` is www.sevanb.net/writing/the-direction-of-science.
+
+Its title, date, description and visibility are set in the control panel (Writing), under
+the same slug. An essay is published only while the control panel has a visible post with
+its slug: then the next deploy (or "Rebuild site") adds it to the list, its page, the
+sitemap and llms.txt. Hiding the post takes it off the site at once and out of those
+files on the next deploy. A file the control panel doesn't list is not published.
 
 ## Front matter
 
+Optional. Only these count for a published essay:
+
 ```yaml
 ---
-title: The Direction of Science
-date: 2023-12-18
-description: How our choices shape the Universe we understand.
-series: Science and Consciousness   # optional: parts of one essay (not shown yet)
-slug: the-direction-of-science      # optional: use when the file name is a title
-draft: true                         # optional: only shown by `npm run dev`
+slug: the-direction-of-science      # when the file name isn't the slug
+series: Science and Consciousness   # parts of one essay (not shown yet)
 ---
 ```
 
-`title`, `date` (YYYY-MM-DD) and `description` are required. A description may have
-several paragraphs (use `description: |-` and indent them); the list shows the first.
+`npm run dev` also shows files the control panel doesn't list yet, as drafts, so an essay
+can be previewed before its post exists; for those it reads `title`, `date`
+(YYYY-MM-DD) and `description` from the front matter if they are there.
 
 ## Writing
 
