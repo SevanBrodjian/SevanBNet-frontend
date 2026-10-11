@@ -2,9 +2,8 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from "
 import Layout from "./frame/Layout";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
-import { FLAGSHIPS } from "./projects/meta";
 import { About, Essay, Papers, ProjectPage, Projects, Writing } from "./routes";
-import { SITE_URL } from "./site";
+import { REDIRECTS, SITE_URL } from "./site";
 
 // Every copy of the site (www, preview domains) names the same www.sevanb.net URL as
 // canonical, so duplicates never compete with the real site.
@@ -25,10 +24,7 @@ const LEGACY = [
   { from: "/home", to: "/" },
   { from: "/blog", to: "/writing" },
   { from: "/research", to: "/papers" },
-  ...FLAGSHIPS.filter((p) => p.legacyPath).map((p) => ({
-    from: p.legacyPath as string,
-    to: `/projects/${p.slug}`,
-  })),
+  ...REDIRECTS,
 ];
 
 export default function App() {

@@ -27,6 +27,18 @@ function ask(path: string) {
   return p;
 }
 
+/**
+ * Fetch an API path ahead of time (with the page that shows it), so the page has it when
+ * it first renders. Waits at most `ms`: a slow answer still arrives, just not on time.
+ */
+export function prefetchApi(path: string, ms = 1500): Promise<unknown> {
+  if (answers.has(path)) return Promise.resolve();
+  return Promise.race([
+    ask(path).catch(() => {}),
+    new Promise((resolve) => setTimeout(resolve, ms)),
+  ]);
+}
+
 const known = <T>(path: string | null): State<T> => ({
   data: path && answers.has(path) ? (answers.get(path) as T) : null,
   failed: false,

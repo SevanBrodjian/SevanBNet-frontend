@@ -1,20 +1,14 @@
 import { pageTitle } from "../../site";
-import { ProjectHead, ProjectPager, ProjectRoom, Span } from "../kit";
-import { flagshipBySlug } from "../meta";
+import { ProjectHead, ProjectPager, ProjectRoom, When } from "../kit";
+import type { CustomPageProps } from "../pages";
 import Lab from "./Lab";
 import "./lab.css";
 
-const meta = flagshipBySlug["learning-taichi"];
-
-export default function Page() {
+export default function Page({ project: p }: CustomPageProps) {
   return (
     <ProjectRoom className="lt">
-      <title>{pageTitle(meta.title)}</title>
-      <ProjectHead
-        when={<Span start={meta.start ?? meta.year} end={null} />}
-        title={meta.title}
-        line={meta.line}
-      />
+      <title>{pageTitle(p.title)}</title>
+      <ProjectHead when={<When p={p} />} title={p.title} line={p.summary ?? undefined} />
       <Lab />
       <div className="prose pj-notes lt-notes">
         <p>
@@ -28,7 +22,7 @@ export default function Page() {
           the solver that runs in the browser.
         </p>
       </div>
-      <ProjectPager slug="learning-taichi" />
+      <ProjectPager slug={p.slug} />
     </ProjectRoom>
   );
 }

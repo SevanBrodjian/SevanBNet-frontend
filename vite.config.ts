@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import react from "@vitejs/plugin-react";
-import { defineConfig, type ProxyOptions } from "vite";
+import { defineConfig, type PluginOption, type ProxyOptions } from "vite";
+import { API_BASES, LOCAL_BACKEND, loadContent, siteText } from "./content.ts";
 import { sitePages } from "./seo.ts";
 import { writingPosts } from "./src/writing/build.ts";
 
@@ -9,15 +10,10 @@ import { writingPosts } from "./src/writing/build.ts";
 // tells crawlers to stay away, so preview sites never outrank www.sevanb.net.
 const railwayEnv = process.env.RAILWAY_ENVIRONMENT_NAME;
 
-const API_URLS: Record<string, string> = {
-  production: "https://sevanbnet-backend-production.up.railway.app",
-  development: "https://sevanbnet-backend-development.up.railway.app",
-};
-
-// Local servers (`vite`, `vite preview`) forward /api to a real backend, so the app can
-// call relative /api from any port; the backend's CORS only allows the real domains.
-// VITE_API_TARGET picks the backend, e.g. http://127.0.0.1:8000 for a local Django.
-const apiTarget = process.env.VITE_API_TARGET ?? API_URLS.production;
+// Local servers (`vite`, `vite preview`) forward /api to a backend, so the app can call
+// relative /api from any port. By default that is the local backend (always port 8000);
+// VITE_API_TARGET picks another, e.g. https://dev-admin.sevanb.net.
+const apiTarget = (process.env.VITE_API_TARGET ?? LOCAL_BACKEND).replace(/\/$/, "");
 const proxy: Record<string, ProxyOptions> = {
   "/api": { target: apiTarget, changeOrigin: true, secure: true },
 };
@@ -28,21 +24,34 @@ const proxy: Record<string, ProxyOptions> = {
 const LOCAL_LAB = "/lab/learning-taichi/index.html";
 const labUrl = process.env.VITE_LAB_URL ?? (existsSync(`public${LOCAL_LAB}`) ? LOCAL_LAB : "");
 
-export default defineConfig(({ command }) => {
-  // An explicit VITE_API_URL wins (an empty value means relative /api, which suits a
-  // local `vite preview`); otherwise dev uses the proxy and builds follow Railway.
-  const apiUrl =
-    process.env.VITE_API_URL ?? (command === "serve" ? "" : API_URLS[railwayEnv ?? "production"]);
+export default defineConfig(async ({ command, isPreview }) => {
+  // Where the app calls the API. An explicit VITE_API_URL wins (empty means relative
+  // /api, which suits a local `vite preview`); otherwise `vite` uses the proxy and builds
+  // follow Railway's environment, production unless told otherwise.
+  const apiUrl = (
+    process.env.VITE_API_URL ??
+    (command === "serve" ? "" : (API_BASES[railwayEnv ?? "production"] ?? API_BASES.development))
+  ).replace(/\/$/, "");
+  const apiBase = apiUrl || "/api";
+  // The build reads content from the same API, through the proxy's target when relative.
+  const contentApi = apiBase.startsWith("/") ? `${apiTarget}${apiBase}` : apiBase;
+  const plugins: PluginOption[] = [react()];
+  if (!isPreview) {
+    const content = await loadContent(contentApi, {
+      save: contentApi === API_BASES.production,
+    });
+    plugins.push(
+      siteText(content.site),
+      // Essays: content/writing/<slug>.md, compiled to HTML at build time, published when
+      // the control panel lists them.
+      writingPosts(content.posts),
+      sitePages({ content, indexable: railwayEnv === "production" }),
+    );
+  }
   return {
-    plugins: [
-      react(),
-      // Essays: content/writing/*.md, compiled to HTML at build time.
-      writingPosts(),
-      // The build-time page generator fetches content itself, so it needs a full URL.
-      sitePages({ apiUrl: apiUrl || apiTarget, indexable: railwayEnv === "production" }),
-    ],
+    plugins,
     define: {
-      "import.meta.env.VITE_API_URL": JSON.stringify(apiUrl),
+      "import.meta.env.VITE_API_URL": JSON.stringify(apiBase),
       "import.meta.env.VITE_LAB_URL": JSON.stringify(labUrl),
     },
     // Fixed local addresses (never drift to another port): the site is always

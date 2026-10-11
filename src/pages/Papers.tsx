@@ -1,55 +1,35 @@
-import {
-  type FocusEvent,
-  type MouseEvent,
-  type PointerEvent,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { type FocusEvent, type MouseEvent, type PointerEvent, useRef, useState } from "react";
 import { Link } from "react-router";
-import { onSitePath, paperUrl } from "../format";
+import { SEVAN, venueLine } from "../format";
 import Action, { Actions } from "../frame/Action";
 import Loading from "../frame/Loading";
 import Time from "../frame/Time";
 import useApi from "../frame/useApi";
 import PaperWidget from "../papers/PaperWidget";
-import { type Paper, WIDGETS, withOverrides } from "../papers/registry";
-import { NAME, PAGES } from "../site";
-import type { Publication } from "../types";
+import { WIDGETS } from "../papers/registry";
+import { PAGES } from "../site";
+import type { Paper } from "../types";
 import "../styles/papers.css";
 
-const dateOf = (p: Publication) => p.publication_date ?? p.submission_date ?? "";
+/** The paper's project page on this site, while that project is visible. */
+const projectPath = (p: Paper) => (p.project ? `/projects/${p.project.slug}` : null);
 
-// A paper with a page on this site is named by a link to it; the rest are plain titles
-// (their Paper button goes to arXiv).
+// A paper with a project page on this site is named by a link to it; the rest are plain
+// titles (their Paper button goes to arXiv).
 function Title({ p }: { p: Paper }) {
-  const internal = onSitePath(p);
-  return internal ? <Link to={internal}>{p.title}</Link> : p.title;
+  const page = projectPath(p);
+  return page ? <Link to={page}>{p.title}</Link> : p.title;
 }
 
 /** The author list with Sevan's name picked out. */
 function Authors({ text }: { text: string }) {
-  const parts = text.split(NAME);
   return (
     <p className="pa-au">
-      {parts.map((part, i) => (
+      {text.split(SEVAN).map((part, i) =>
+        // Odd pieces are the name (the split keeps what it matched).
         // biome-ignore lint/suspicious/noArrayIndexKey: the split never reorders
-        <span key={i}>
-          {i > 0 && <b>{NAME}</b>}
-          {part}
-        </span>
-      ))}
-    </p>
-  );
-}
-
-function Venue({ p }: { p: Paper }) {
-  const accepted = /accept/i.test(p.status);
-  const kind = accepted ? (p.status.match(/\(([^)]+)\)/)?.[1] ?? "Accepted") : p.status;
-  return (
-    <p className="pa-ve">
-      <span className={accepted ? "lamp on" : "lamp"} aria-hidden="true" />
-      {[p.journal_name ?? "arXiv", kind].filter(Boolean).join(" · ")}
+        i % 2 ? <b key={i}>{part}</b> : <span key={i}>{part}</span>,
+      )}
     </p>
   );
 }
@@ -88,33 +68,36 @@ type Handlers = {
 
 function Entry({ p, active, on }: { p: Paper; active: boolean; on: Handlers }) {
   const [bib, setBib] = useState(false);
-  const internal = onSitePath(p);
-  const paper = paperUrl(p);
-  const widget = p.arxiv && WIDGETS[p.arxiv] ? p.arxiv : null;
+  const page = projectPath(p);
+  const widget = p.key && WIDGETS[p.key] ? p.key : null;
   const bibId = `bib-${p.id}`;
   return (
     <li className={widget ? "pa" : "pa pa-plain"} data-active={active || undefined} {...on}>
       <div className="pa-dt">
-        <Time iso={dateOf(p)} f="ym" />
+        <Time iso={p.date ?? ""} f="ym" />
       </div>
       <div className="pa-main">
         <h2 className="pa-ti">
           <Title p={p} />
         </h2>
-        {p.authors_str && <Authors text={p.authors_str} />}
-        <Venue p={p} />
+        {p.authors && <Authors text={p.authors} />}
+        <p className="pa-ve">{venueLine(p)}</p>
         {p.description && <p className="pa-ds">{p.description}</p>}
         <Actions className="pa-acts">
-          {internal && <Action to={internal}>Project page</Action>}
-          {paper && <Action href={paper}>Paper</Action>}
-          {p.code && <Action href={p.code}>Code</Action>}
-          {p.citation && (
+          {p.paper_url && <Action href={p.paper_url}>Paper</Action>}
+          {page ? (
+            <Action to={page}>Project</Action>
+          ) : (
+            p.project_url && <Action href={p.project_url}>Project</Action>
+          )}
+          {p.project?.source && <Action href={p.project.source}>Code</Action>}
+          {p.bibtex && (
             <Action onClick={() => setBib((b) => !b)} pressed={bib}>
               BibTeX
             </Action>
           )}
         </Actions>
-        {bib && p.citation && <Bib text={p.citation} id={bibId} />}
+        {bib && p.bibtex && <Bib text={p.bibtex} id={bibId} />}
       </div>
       {widget && (
         <div className="pa-w">
@@ -127,13 +110,9 @@ function Entry({ p, active, on }: { p: Paper; active: boolean; on: Handlers }) {
 
 const INTERACTIVE = "a, button, input, select, textarea, pre, [tabindex]";
 
+// The control panel's order: ranked papers first, then newest.
 export default function Papers() {
-  const { data, failed } = useApi<Publication[]>("publications/");
-  const papers = useMemo(
-    () =>
-      data ? [...data].sort((a, b) => dateOf(b).localeCompare(dateOf(a))).map(withOverrides) : null,
-    [data],
-  );
+  const { data: papers, failed } = useApi<Paper[]>("papers/");
   // One paper is alive at a time: the one under the pointer, holding focus, or tapped.
   const [active, setActive] = useState<number | null>(null);
   const pointer = useRef("mouse");

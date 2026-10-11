@@ -1,15 +1,23 @@
-import DOMPurify from "dompurify";
 import { type CSSProperties, type ReactNode, useEffect, useState } from "react";
 import { Link } from "react-router";
 import StarSky from "../frame/StarSky";
 import Time from "../frame/Time";
 import useApi from "../frame/useApi";
 import type { Project } from "../types";
-import { byRecent, type Thumb as ThumbData } from "./earlier";
-import { FLAGSHIPS } from "./meta";
 
 // Pieces every project page shares: the list thumbnail, the page header, the pager, and
 // the starry room the pages sit in.
+
+/** A list thumbnail: an image, a line of terminal text drawn in HTML, or just a name. */
+export type ThumbData = { src: string } | { term: string } | { name: string };
+
+/** A project's thumbnail; without one, its command on a terminal tile, or its name. */
+export const thumbOf = (p: Project): ThumbData =>
+  p.thumbnail
+    ? { src: p.thumbnail }
+    : p.media?.kind === "code"
+      ? { term: p.media.text }
+      : { name: p.title };
 
 /** A list thumbnail. Dim at rest; in colour, with a glow, when its entry is pointed at. */
 export function Thumb({ thumb }: { thumb: ThumbData }) {
@@ -41,6 +49,13 @@ export function Thumb({ thumb }: { thumb: ThumbData }) {
       <img src={thumb.src} alt="" width={560} height={350} loading="lazy" decoding="async" />
     </span>
   );
+}
+
+/** When a project ran; an undated one shows where its paper appeared. */
+export function When({ p }: { p: Project }) {
+  const start = p.start ?? p.end;
+  if (start) return <Span start={start} end={p.end} />;
+  return <>{p.papers[0]?.venue ?? ""}</>;
 }
 
 /** When a project ran: 2023.12 – 2024.01, a single month, or 2026.05 – Ongoing. */
@@ -166,33 +181,15 @@ export function Pager({ prev, next }: { prev: Near; next: Near }) {
   );
 }
 
-/** The pager for one project, walking the list in its order (flagships, then the rest). */
+/** The pager for one project, walking the Projects list in its order. */
 export function ProjectPager({ slug }: { slug: string }) {
   const { data } = useApi<Project[]>("projects/");
-  const order = [
-    ...FLAGSHIPS.map((f) => ({ to: `/projects/${f.slug}`, title: f.title })),
-    ...(data ?? [])
-      .slice()
-      .sort(byRecent)
-      .map((q) => ({ to: `/projects/${q.slug}`, title: q.title })),
-  ];
+  const order = (data ?? [])
+    .filter((q) => q.listed)
+    .map((q) => ({ to: `/projects/${q.slug}`, title: q.title }));
   const i = order.findIndex((q) => q.to === `/projects/${slug}`);
   if (i < 0) return null;
   return <Pager prev={order[i - 1] ?? null} next={order[i + 1] ?? null} />;
-}
-
-/** API text as paragraphs: blank lines split paragraphs, single newlines break lines. */
-export function paras(text: string | null | undefined) {
-  const html = String(text ?? "")
-    .replace(/\r\n?/g, "\n")
-    .trim()
-    .split(/\n{2,}/)
-    .map((p) => p.trim())
-    .filter(Boolean)
-    .map((p) => (/^<(p|ul|ol|h\d|blockquote|pre|figure|div)\b/i.test(p) ? p : `<p>${p}</p>`))
-    .join("")
-    .replace(/(?<!>)\n(?!<)/g, "<br>");
-  return DOMPurify.sanitize(html);
 }
 
 /** Copy a block of text; the button says so for a moment. */

@@ -1,23 +1,34 @@
+import DOMPurify from "dompurify";
 import { Suspense } from "react";
 import { useParams } from "react-router";
 import Action from "../frame/Action";
 import Loading from "../frame/Loading";
 import useApi from "../frame/useApi";
-import { EARLIER, type Media as MediaData } from "../projects/earlier";
-import { ProjectHead, ProjectPager, ProjectRoom, paras, Span } from "../projects/kit";
+import { ProjectHead, ProjectPager, ProjectRoom, When } from "../projects/kit";
 import Media from "../projects/Media";
-import { flagshipBySlug } from "../projects/meta";
-import { PAGES } from "../projects/pages";
+import { CUSTOM_PAGES } from "../projects/pages";
 import { NAME, pageTitle } from "../site";
 import type { Project } from "../types";
 import NotFound from "./NotFound";
 import "../styles/projects.css";
 
-// Flagship projects render their own hand-built page; earlier projects share this
-// template, fed by the API.
+// Any visible project has a page, listed or not; a hidden one is not in the API, so its
+// page is a 404. Projects with a hand-built page (see projects/pages.ts) render it;
+// the rest share the default page: media, then the description.
 export default function ProjectPage() {
   const { slug = "" } = useParams();
-  const Custom = flagshipBySlug[slug] ? PAGES[slug] : null;
+  const { data, failed } = useApi<Project[]>("projects/");
+  const p = data?.find((q) => q.slug === slug);
+  if (data && !p) return <NotFound />;
+  if (!p) {
+    return (
+      <ProjectRoom>
+        <title>{NAME}</title>
+        <Loading failed={failed} what="this project" />
+      </ProjectRoom>
+    );
+  }
+  const Custom = CUSTOM_PAGES[slug];
   if (Custom) {
     return (
       <Suspense
@@ -27,57 +38,34 @@ export default function ProjectPage() {
           </div>
         }
       >
-        <Custom />
+        <Custom project={p} />
       </Suspense>
     );
   }
-  return <EarlierProject key={slug} slug={slug} />;
+  return <DefaultPage key={slug} p={p} />;
 }
 
-/** What the API's `img` holds, for a project the site has no notes on yet. */
-function mediaFrom(p: Project): MediaData | undefined {
-  const img = p.img ?? "";
-  const yt = img.match(/youtube(?:-nocookie)?\.com\/embed\/([\w-]{6,})/);
-  if (yt) return { kind: "youtube", id: yt[1] };
-  if (/\.mp4$/i.test(img)) return { kind: "video", src: img, poster: "", width: 16, height: 9 };
-  if (img) return { kind: "image", src: img, width: 1600, height: 900, alt: "" };
-  return undefined;
-}
-
-function EarlierProject({ slug }: { slug: string }) {
-  const { data: p, failed, missing } = useApi<Project>(`projects/${slug}/`);
-  if (missing) return <NotFound />;
-  if (!p) {
-    return (
-      <ProjectRoom>
-        <title>{NAME}</title>
-        <Loading failed={failed} what="this project" />
-      </ProjectRoom>
-    );
-  }
-  const look = EARLIER[p.slug];
-  const media = look?.media ?? mediaFrom(p);
-
+function DefaultPage({ p }: { p: Project }) {
   return (
     <ProjectRoom>
       <title>{pageTitle(p.title)}</title>
       <ProjectHead
-        when={<Span start={p.start} end={p.end} />}
+        when={<When p={p} />}
         title={p.title}
-        line={look?.line}
+        line={p.summary ?? undefined}
         actions={
-          p.link && (
-            <Action href={p.link} primary>
+          p.source && (
+            <Action href={p.source} primary>
               Code
             </Action>
           )
         }
       />
-      {media && <Media media={media} title={p.title} />}
+      {p.media && <Media media={p.media} title={p.title} />}
       <div
         className="prose pj-notes"
-        // sanitized in paras()
-        dangerouslySetInnerHTML={{ __html: paras(p.description) }}
+        // Sanitized by the backend; DOMPurify is a second layer.
+        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(p.description_html ?? "") }}
       />
       <ProjectPager slug={p.slug} />
     </ProjectRoom>

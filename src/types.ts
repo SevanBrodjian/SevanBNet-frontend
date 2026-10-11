@@ -1,25 +1,84 @@
-// Shapes of the backend API responses used by the site.
-export type Project = {
+// Shapes of the backend API responses (see the backend's docs/api.md). Optional text
+// left blank in the control panel arrives as null. Dates are YYYY-MM-DD.
+
+/** What sits at the top of a project's default page. */
+export type Media =
+  | {
+      kind: "image";
+      src: string;
+      alt: string | null;
+      width: number | null;
+      height: number | null;
+    }
+  | {
+      kind: "video";
+      src: string;
+      poster: string | null;
+      width: number | null;
+      height: number | null;
+    }
+  | { kind: "youtube"; id: string | null }
+  | { kind: "code"; text: string };
+
+/** A paper as listed under the project it links to. */
+export type ProjectPaper = {
+  key: string | null;
   title: string;
-  slug: string;
-  start: string;
-  end: string | null;
-  description: string | null;
-  img: string | null;
-  link: string | null;
+  venue: string | null;
+  status: string | null;
+  date: string | null;
+  paper_url: string | null;
 };
 
-export type Publication = {
-  id: number;
+/** Every visible project; the Projects page shows the `listed` ones. */
+export type Project = {
+  slug: string;
   title: string;
-  authors_str: string | null;
-  journal_name: string | null;
-  status: string;
+  listed: boolean;
+  rank: number | null;
+  start: string | null;
+  end: string | null;
+  summary: string | null;
+  thumbnail: string | null;
+  glow: string | null;
+  media: Media | null;
+  source: string | null;
   description: string | null;
-  url: string | null;
-  doi: string | null;
-  site_path: string | null;
-  publication_date: string | null;
-  submission_date: string | null;
-  citation: string | null;
+  description_html: string | null;
+  papers: ProjectPaper[];
+};
+
+export type Paper = {
+  id: number;
+  /** Which widget in src/papers/registry.ts belongs to this paper. */
+  key: string | null;
+  title: string;
+  authors: string | null;
+  venue: string | null;
+  status: string | null;
+  date: string | null;
+  paper_url: string | null;
+  /** The project page on this site; null when there is none or it is hidden. */
+  project: { slug: string; title: string; source: string | null } | null;
+  /** A project page hosted elsewhere. */
+  project_url: string | null;
+  bibtex: string | null;
+  description: string | null;
+  rank: number | null;
+};
+
+/** An essay's metadata; its text is content/writing/<slug>.md. */
+export type Post = {
+  slug: string;
+  title: string;
+  description: string | null;
+  date: string;
+};
+
+/** Site-wide text, edited under Site settings. */
+export type Site = {
+  home_line: string;
+  role: string;
+  /** The About page, one string per paragraph. */
+  about: string[];
 };

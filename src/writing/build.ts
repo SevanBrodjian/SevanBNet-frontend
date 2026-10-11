@@ -1,4 +1,6 @@
-// Essays are Markdown files in content/writing/, compiled when the site is built.
+// Essays are Markdown files in content/writing/, compiled when the site is built. Their
+// title, date, description and visibility are set in the control panel (Writing); a file
+// is published only while the control panel has a visible post with its slug.
 //
 // The browser gets HTML, never a Markdown parser:
 // - `virtual:writing` lists every post (title, date, description) and how to load each one;
@@ -30,6 +32,8 @@ import { unified } from "unified";
 import { SKIP, visit } from "unist-util-visit";
 import type { Plugin } from "vite";
 import { parse as parseYaml } from "yaml";
+import type { Post } from "../types.ts";
+import { dekOf } from "./dek.ts";
 
 export const CONTENT_DIR = resolve(import.meta.dirname, "../../content/writing");
 
@@ -38,14 +42,16 @@ export type PostMeta = {
   title: string;
   /** YYYY-MM-DD */
   date: string;
-  /** The full description from the front matter (paragraphs separated by a blank line). */
+  /** The full description (paragraphs separated by a blank line). */
   description: string;
   /** The description as one short paragraph, for the list and the essay's header. */
   dek: string;
   series?: string;
+  /** Not in the control panel yet: shown only by `npm run dev`. */
+  draft?: true;
 };
 
-type Source = PostMeta & { file: string; body: string; draft: boolean };
+type Source = PostMeta & { file: string; body: string };
 
 const IMAGE = /\.(png|jpe?g|gif|webp|avif|svg)$/i;
 const VIDEO = /\.(mp4|webm|mov|m4v)$/i;
@@ -61,12 +67,21 @@ const slugify = (s: string) =>
 // ---------------------------------------------------------------------------------
 // Reading the files
 
+/** Front matter is optional: only `slug` (and `series`) count once a post is published. */
 function splitFrontMatter(text: string, file: string) {
   const m = text.match(/^\uFEFF?---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
-  if (!m) throw new Error(`[writing] ${file}: missing front matter (--- title, date ... ---)`);
+  if (!m) return { data: {} as Record<string, unknown>, body: text };
   const data = parseYaml(m[1]) as Record<string, unknown> | null;
+  if (data !== null && typeof data !== "object")
+    throw new Error(`[writing] ${file}: front matter must be "key: value" lines`);
   return { data: data ?? {}, body: m[2] };
 }
+
+const warned = new Set<string>();
+const warnOnce = (message: string) => {
+  if (!warned.has(message)) console.warn(message);
+  warned.add(message);
+};
 
 const asDate = (v: unknown) => {
   if (v instanceof Date) return v.toISOString().slice(0, 10);
@@ -74,51 +89,41 @@ const asDate = (v: unknown) => {
   return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : "";
 };
 
-const paras = (s: string) =>
-  s
-    .replace(/\r\n?/g, "\n")
-    .split(/\n\s*\n/)
-    .map((p) => p.replace(/\s+/g, " ").trim())
-    .filter(Boolean);
-
-/** One short paragraph: the first; if that is only a line, add the next one's first sentence. */
-export function dekOf(description: string) {
-  const ps = paras(description);
-  if (!ps.length) return "";
-  if (ps[0].length >= 60 || !ps[1]) return ps[0];
-  const first = ps[1].match(/^.+?[.!?](?=\s|$)/);
-  return `${ps[0]} ${first ? first[0] : ps[1]}`;
-}
-
-/** Every post, newest first. Drafts only when `drafts` is true. */
-export function readPosts(drafts = false): Source[] {
+/**
+ * Every published post, newest first: each Markdown file joined by slug with its post in
+ * the control panel (`entries`, visible posts only), which supplies the title, date and
+ * description. With `drafts` (`npm run dev`), files the control panel doesn't list yet
+ * are included too, described by their front matter.
+ */
+export function readPosts(entries: Post[], drafts = false): Source[] {
   if (!existsSync(CONTENT_DIR)) return [];
+  const bySlug = new Map(entries.map((e) => [e.slug, e]));
   const out: Source[] = [];
   for (const name of readdirSync(CONTENT_DIR)) {
     if (!name.endsWith(".md") || name.toLowerCase() === "readme.md") continue;
     const file = join(CONTENT_DIR, name);
     const { data, body } = splitFrontMatter(readFileSync(file, "utf8"), name);
-    const title = String(data.title ?? "").trim();
-    const date = asDate(data.date);
-    const description = String(data.description ?? "").trim();
     const slug = String(data.slug ?? "").trim() || slugify(basename(name, ".md"));
-    if (!title) throw new Error(`[writing] ${name}: front matter needs a title`);
-    if (!date) throw new Error(`[writing] ${name}: front matter needs date: YYYY-MM-DD`);
-    if (!description) throw new Error(`[writing] ${name}: front matter needs a description`);
     if (!plainSlug(slug))
       throw new Error(`[writing] ${name}: slug "${slug}" must be lowercase words and dashes`);
-    const draft = data.draft === true;
-    if (draft && !drafts) continue;
+    const entry = bySlug.get(slug);
+    if (!entry && !drafts) {
+      warnOnce(
+        `[writing] ${name} is not published: no visible post "${slug}" in the control panel`,
+      );
+      continue;
+    }
+    const description = entry ? (entry.description ?? "") : String(data.description ?? "").trim();
     out.push({
       slug,
-      title,
-      date,
+      title: entry ? entry.title : String(data.title ?? "").trim() || slug,
+      date: entry ? entry.date : asDate(data.date) || new Date().toISOString().slice(0, 10),
       description,
       dek: dekOf(description),
-      series: data.series ? String(data.series).trim() : undefined,
+      ...(data.series ? { series: String(data.series).trim() } : {}),
+      ...(entry ? {} : { draft: true as const }),
       file,
       body,
-      draft,
     });
   }
   const seen = new Set<string>();
@@ -126,6 +131,11 @@ export function readPosts(drafts = false): Source[] {
     if (seen.has(p.slug)) throw new Error(`[writing] two posts have the slug "${p.slug}"`);
     seen.add(p.slug);
   }
+  for (const e of entries)
+    if (!seen.has(e.slug))
+      warnOnce(
+        `[writing] the control panel lists "${e.slug}", but content/writing/${e.slug}.md is missing`,
+      );
   return out.sort((a, b) => b.date.localeCompare(a.date) || a.title.localeCompare(b.title));
 }
 
@@ -405,25 +415,18 @@ function compile(post: Source, posts: PostMeta[], mode: Mode): Compiled {
   return out;
 }
 
-const meta = ({ slug, title, date, description, dek, series }: Source): PostMeta => ({
-  slug,
-  title,
-  date,
-  description,
-  dek,
-  ...(series ? { series } : {}),
-});
+const meta = ({ file: _file, body: _body, ...m }: Source): PostMeta => m;
 
-/** For seo.ts: posts in the API's old shape (oldest first), body as plain HTML. */
-export function staticPosts() {
-  const posts = readPosts(false);
+/** For seo.ts: the published posts (oldest first), each body as plain HTML. */
+export function staticPosts(entries: Post[]) {
+  const posts = readPosts(entries);
   const metas = posts.map(meta);
   return posts
     .map((p) => ({
       title: p.title,
       slug: p.slug,
       description: p.description,
-      published_date: p.date,
+      date: p.date,
       content: compile(p, metas, "static").html,
     }))
     .reverse();
@@ -435,9 +438,10 @@ export function staticPosts() {
 const INDEX = "virtual:writing";
 const POST = "virtual:writing/post/";
 
-export function writingPosts(): Plugin {
+/** `entries`: the control panel's visible posts (see content.ts). */
+export function writingPosts(entries: Post[]): Plugin {
   let drafts = false;
-  const load = () => readPosts(drafts);
+  const load = () => readPosts(entries, drafts);
   return {
     name: "writing-posts",
     configResolved(config) {

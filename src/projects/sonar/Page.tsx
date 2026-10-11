@@ -6,15 +6,12 @@ import overview from "../assets/sonar-overview-dark.webp";
 import result from "../assets/sonar-result-dark.webp";
 import rmse from "../assets/sonar-rmse-dark.webp";
 import { CopyButton, ProjectHead, ProjectPager, ProjectRoom } from "../kit";
-import { flagshipBySlug } from "../meta";
+import type { CustomPageProps } from "../pages";
 import SonarDemo from "./SonarDemo";
 import * as tex from "./tex";
 import "./sonar.css";
 
-const meta = flagshipBySlug["sonar-inverse-rendering"];
-
 const PAPER = "https://arxiv.org/abs/2605.24195";
-const CODE = "https://github.com/SevanBrodjian/sonar-inverse-rendering";
 const BIBTEX = `@inproceedings{brodjian2026sonar,
   title     = {Single-View Seafloor Recovery from Imaging Sonar
                via Differentiable Rendering},
@@ -31,10 +28,10 @@ function TeX({ html, block = false }: { html: string; block?: boolean }) {
   );
 }
 
-export default function Page() {
+export default function Page({ project: p }: CustomPageProps) {
   return (
     <ProjectRoom className="sr">
-      <title>{meta.title}</title>
+      <title>{p.title}</title>
       <ProjectHead
         when="CVPR 2026 Workshops · PBVS · Poster"
         title="Single-View Seafloor Recovery from Imaging Sonar via Differentiable Rendering"
@@ -51,7 +48,7 @@ export default function Page() {
             <Action href={PAPER} primary>
               Paper
             </Action>
-            <Action href={CODE}>Code</Action>
+            {p.source && <Action href={p.source}>Code</Action>}
           </>
         }
       />
@@ -241,7 +238,7 @@ export default function Page() {
           </pre>
         </div>
       </section>
-      <ProjectPager slug="sonar-inverse-rendering" />
+      <ProjectPager slug={p.slug} />
     </ProjectRoom>
   );
 }

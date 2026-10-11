@@ -1,9 +1,30 @@
 // The essays, from content/writing/*.md (compiled at build time by ./build.ts).
 
 import { LOAD, POSTS, type PostMeta } from "virtual:writing";
+import { useMemo } from "react";
+import useApi from "../frame/useApi";
+import type { Post } from "../types";
+import { dekOf } from "./dek";
 
 export type { PostMeta };
-export { POSTS };
+
+/**
+ * The essays, newest first: as of the build, then as the control panel has them now, so
+ * one hidden since is gone at once and edits to a title, date or description show.
+ */
+export function usePosts(): PostMeta[] {
+  const { data } = useApi<Post[]>("posts/");
+  return useMemo(() => {
+    if (!data) return POSTS;
+    const now = new Map(data.map((e) => [e.slug, e]));
+    return POSTS.flatMap((p) => {
+      const e = now.get(p.slug);
+      if (!e) return p.draft ? [p] : [];
+      const description = e.description ?? "";
+      return [{ ...p, title: e.title, date: e.date, description, dek: dekOf(description) }];
+    }).sort((a, b) => b.date.localeCompare(a.date) || a.title.localeCompare(b.title));
+  }, [data]);
+}
 
 const bodies = new Map<string, string>();
 const pending = new Map<string, Promise<string>>();
@@ -41,8 +62,8 @@ export const prefetch = (slug: string) => {
   loadBody(slug).catch(() => {});
 };
 
-/** Oldest first: an essay's neighbours in time. */
-export function neighbours(slug: string) {
-  const i = POSTS.findIndex((p) => p.slug === slug);
-  return { earlier: POSTS[i + 1] ?? null, later: i > 0 ? POSTS[i - 1] : null };
+/** An essay's neighbours in time, in a list that is newest first. */
+export function neighbours(posts: PostMeta[], slug: string) {
+  const i = posts.findIndex((p) => p.slug === slug);
+  return { earlier: posts[i + 1] ?? null, later: i > 0 ? posts[i - 1] : null };
 }

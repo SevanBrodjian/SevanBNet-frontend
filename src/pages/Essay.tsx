@@ -8,19 +8,27 @@ import Time from "../frame/Time";
 import { SAVE_DATA } from "../frame/util";
 import { pageTitle } from "../site";
 import Ecosystem from "../writing/Ecosystem";
-import { loadBody, loadedBody, neighbours, POSTS, type PostMeta, prefetch } from "../writing/posts";
+import {
+  loadBody,
+  loadedBody,
+  neighbours,
+  type PostMeta,
+  prefetch,
+  usePosts,
+} from "../writing/posts";
 import { BIOME_NAMES, cycleBiome, useBiome } from "../writing/settings";
 import NotFound from "./NotFound";
 import "../styles/writing.css";
 
 export default function Essay() {
   const { slug = "" } = useParams();
-  const post = POSTS.find((p) => p.slug === slug);
+  const posts = usePosts();
+  const post = posts.find((p) => p.slug === slug);
   if (!post) return <NotFound />;
-  return <EssayPage key={slug} post={post} />;
+  return <EssayPage key={slug} post={post} posts={posts} />;
 }
 
-function EssayPage({ post }: { post: PostMeta }) {
+function EssayPage({ post, posts }: { post: PostMeta; posts: PostMeta[] }) {
   const room = useRef<HTMLDivElement>(null);
   const leaf = useRef<HTMLElement>(null);
   const navigate = useNavigate();
@@ -81,7 +89,7 @@ function EssayPage({ post }: { post: PostMeta }) {
     navigate(href);
   };
 
-  const { earlier, later } = neighbours(post.slug);
+  const { earlier, later } = neighbours(posts, post.slug);
   return (
     <div ref={room} className="room-w room-night">
       <title>{pageTitle(post.title)}</title>

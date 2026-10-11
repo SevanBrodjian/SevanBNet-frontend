@@ -1,24 +1,17 @@
-import { FLAGSHIPS } from "./projects/meta";
-import type { Publication } from "./types";
+// Small text rules shared by the app and the build-time pages (seo.ts).
 
-// API dates are calendar dates; pin to UTC so nobody sees them a day early.
-export const day = (iso: string) =>
-  new Date(iso).toLocaleDateString("en-US", {
-    timeZone: "UTC",
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+type Venued = { venue: string | null; status: string | null };
 
-export const monthYear = (iso: string | null) =>
-  iso
-    ? new Date(iso).toLocaleDateString("en-US", { timeZone: "UTC", year: "numeric", month: "long" })
-    : null;
+/**
+ * A paper's "Venue · Status", or just the status without a venue. An accepted paper with
+ * a venue shows its kind instead (Poster, Oral) when the status names one.
+ */
+export function venueLine({ venue, status }: Venued) {
+  const s = status ?? "";
+  if (!venue) return s;
+  const kind = /accept/i.test(s) ? (s.match(/\(([^)]+)\)/)?.[1] ?? "Accepted") : s;
+  return [venue, kind].filter(Boolean).join(" · ");
+}
 
-// Where a publication lives on this site, if anywhere. Old paths map to their new home.
-const LEGACY = Object.fromEntries(
-  FLAGSHIPS.filter((p) => p.legacyPath).map((p) => [p.legacyPath, `/projects/${p.slug}`]),
-);
-export const onSitePath = (p: Publication) =>
-  p.site_path ? (LEGACY[p.site_path] ?? p.site_path) : null;
-export const paperUrl = (p: Publication) => p.url ?? (p.doi ? `https://doi.org/${p.doi}` : null);
+/** Sevan's name in an author list, however it is written (Sevan Brodjian, S. Brodjian). */
+export const SEVAN = /(\b(?:Sevan|S\.?)\s*Brodjian\b)/;

@@ -3,11 +3,12 @@ import { Link } from "react-router";
 import Time from "../frame/Time";
 import { PAGES } from "../site";
 import Ecosystem from "../writing/Ecosystem";
-import { POSTS, prefetch } from "../writing/posts";
+import { prefetch, usePosts } from "../writing/posts";
 import "../styles/writing.css";
 
 export default function Writing() {
   const room = useRef<HTMLDivElement>(null);
+  const posts = usePosts();
   return (
     <div ref={room} className="room-w">
       <title>{PAGES.writing.title}</title>
@@ -18,7 +19,7 @@ export default function Writing() {
             <h1>Writing</h1>
           </div>
           <ul className="erows">
-            {POSTS.map((p) => (
+            {posts.map((p) => (
               <li key={p.slug} className="erow">
                 <Time iso={p.date} f="ym" className="dt" />
                 <div>

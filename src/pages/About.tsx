@@ -2,7 +2,8 @@ import { useRef, useState } from "react";
 import Action, { Actions } from "../frame/Action";
 import ExternalLink from "../frame/ExternalLink";
 import PageFrame from "../frame/PageFrame";
-import { ABOUT, DOCUMENTS, NAME, PAGES, ROLE } from "../site";
+import { DOCUMENTS, NAME, PAGES, ROLE } from "../site";
+import useSiteText from "../siteText";
 import "../styles/about.css";
 
 type Doc = (typeof DOCUMENTS)[number];
@@ -14,6 +15,7 @@ export default function About() {
   const dialog = useRef<HTMLDialogElement>(null);
   const [doc, setDoc] = useState<Doc | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const site = useSiteText();
   const open = (d: Doc) => {
     setDoc(d);
     setLoaded(false);
@@ -40,7 +42,7 @@ export default function About() {
           </Actions>
         </div>
         <div className="bio" data-slot="about.text">
-          {ABOUT.paragraphs.map((t) => (
+          {site.about.map((t) => (
             <p key={t}>{t}</p>
           ))}
         </div>
