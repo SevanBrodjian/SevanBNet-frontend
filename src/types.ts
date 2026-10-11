@@ -20,16 +20,6 @@ export type Media =
   | { kind: "youtube"; id: string | null }
   | { kind: "code"; text: string };
 
-/** A paper as listed under the project it links to. */
-export type ProjectPaper = {
-  key: string | null;
-  title: string;
-  venue: string | null;
-  status: string | null;
-  date: string | null;
-  paper_url: string | null;
-};
-
 /** Every visible project; the Projects page shows the `listed` ones. */
 export type Project = {
   slug: string;
@@ -45,7 +35,6 @@ export type Project = {
   source: string | null;
   description: string | null;
   description_html: string | null;
-  papers: ProjectPaper[];
 };
 
 export type Paper = {

@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import react from "@vitejs/plugin-react";
 import { defineConfig, type PluginOption, type ProxyOptions } from "vite";
-import { API_BASES, LOCAL_BACKEND, loadContent, siteText } from "./content.ts";
+import { API_BASES, builtContent, LOCAL_BACKEND, loadContent } from "./content.ts";
 import { sitePages } from "./seo.ts";
 import { writingPosts } from "./src/writing/build.ts";
 
@@ -37,11 +37,9 @@ export default defineConfig(async ({ command, isPreview }) => {
   const contentApi = apiBase.startsWith("/") ? `${apiTarget}${apiBase}` : apiBase;
   const plugins: PluginOption[] = [react()];
   if (!isPreview) {
-    const content = await loadContent(contentApi, {
-      save: contentApi === API_BASES.production,
-    });
+    const content = await loadContent(contentApi);
     plugins.push(
-      siteText(content.site),
+      builtContent(content),
       // Essays: content/writing/<slug>.md, compiled to HTML at build time, published when
       // the control panel lists them.
       writingPosts(content.posts),

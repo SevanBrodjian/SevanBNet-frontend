@@ -1,3 +1,4 @@
+import { PROJECTS } from "virtual:projects";
 import Loading from "../frame/Loading";
 import useApi from "../frame/useApi";
 import { Entry, thumbOf, When } from "../projects/kit";
@@ -11,7 +12,7 @@ const GLOW = "#9aa3ad";
 // Every listed project, in the control panel's order (ranked first, then newest), each in
 // its own box: a picture, when, its name, one line.
 export default function Projects() {
-  const { data, failed } = useApi<Project[]>("projects/");
+  const { data, failed } = useApi<Project[]>("projects/", PROJECTS);
   const listed = data ? data.filter((p) => p.listed) : [];
   return (
     <div className="wrap pjl">
@@ -26,8 +27,8 @@ export default function Projects() {
             to={`/projects/${p.slug}`}
             title={p.title}
             when={<When p={p} />}
-            // A hand-built page's project carries a lamp when it has a start: lit while ongoing.
-            lit={CUSTOM_PAGES[p.slug] && p.start ? !p.end : undefined}
+            // A hand-built page's project carries a lit lamp while it is ongoing.
+            lit={CUSTOM_PAGES[p.slug] && p.start && !p.end ? true : undefined}
             line={p.summary ?? undefined}
             thumb={thumbOf(p)}
             glow={p.glow ?? GLOW}

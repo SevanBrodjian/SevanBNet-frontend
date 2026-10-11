@@ -115,12 +115,11 @@ const monthYear = (iso: string | null) =>
     ? new Date(iso).toLocaleDateString("en-US", { timeZone: "UTC", year: "numeric", month: "long" })
     : null;
 
-// When a project ran, as the app writes it (2023.03 – 2023.06, 2026.05 – Ongoing); an
-// undated one shows where its paper appeared.
+// When a project ran, as the app writes it (2023.03 – 2023.06, 2026.05 – Ongoing).
 const ym = (iso: string) => iso.slice(0, 7).replace("-", ".");
 function when(p: Project) {
   const start = p.start ?? p.end;
-  if (!start) return p.papers[0]?.venue ?? "";
+  if (!start) return "";
   if (!p.end) return `${ym(start)} – Ongoing`;
   return ym(start) === ym(p.end) ? ym(start) : `${ym(start)} – ${ym(p.end)}`;
 }

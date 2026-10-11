@@ -1,3 +1,4 @@
+import { PROJECTS } from "virtual:projects";
 import DOMPurify from "dompurify";
 import { Suspense } from "react";
 import { useParams } from "react-router";
@@ -14,17 +15,19 @@ import "../styles/projects.css";
 
 // Any visible project has a page, listed or not; a hidden one is not in the API, so its
 // page is a 404. Projects with a hand-built page (see projects/pages.ts) render it;
-// the rest share the default page: media, then the description.
+// the rest share the default page: media, then the description. Pages render from the
+// projects as of the build, then follow the API's answer.
 export default function ProjectPage() {
   const { slug = "" } = useParams();
-  const { data, failed } = useApi<Project[]>("projects/");
+  const { data, failed, fresh } = useApi<Project[]>("projects/", PROJECTS);
   const p = data?.find((q) => q.slug === slug);
-  if (data && !p) return <NotFound />;
   if (!p) {
+    // Not in the build's list: a project added since then, or none at all. The API decides.
+    if (fresh || failed) return <NotFound />;
     return (
       <ProjectRoom>
         <title>{NAME}</title>
-        <Loading failed={failed} what="this project" />
+        <Loading what="this project" />
       </ProjectRoom>
     );
   }

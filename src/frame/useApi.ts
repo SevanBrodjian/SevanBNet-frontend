@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchApi } from "../api";
 
-type State<T> = { data: T | null; failed: boolean; missing: boolean };
+type State<T> = { data: T | null; failed: boolean; missing: boolean; fresh: boolean };
 
 // Answers already fetched in this visit, and requests on their way: coming back to a page
 // (or a second component asking for the same list) renders at once, without refetching.
@@ -27,27 +27,24 @@ function ask(path: string) {
   return p;
 }
 
-/**
- * Fetch an API path ahead of time (with the page that shows it), so the page has it when
- * it first renders. Waits at most `ms`: a slow answer still arrives, just not on time.
- */
-export function prefetchApi(path: string, ms = 1500): Promise<unknown> {
-  if (answers.has(path)) return Promise.resolve();
-  return Promise.race([
-    ask(path).catch(() => {}),
-    new Promise((resolve) => setTimeout(resolve, ms)),
-  ]);
+/** Start fetching an API path ahead of time (with the page that shows it). */
+export function prefetchApi(path: string) {
+  if (!answers.has(path)) ask(path).catch(() => {});
 }
 
-const known = <T>(path: string | null): State<T> => ({
-  data: path && answers.has(path) ? (answers.get(path) as T) : null,
-  failed: false,
-  missing: false,
-});
+const known = <T>(path: string | null, built?: T): State<T> => {
+  const fresh = path !== null && answers.has(path);
+  const data = fresh ? (answers.get(path) as T) : (built ?? null);
+  return { data, failed: false, missing: false, fresh };
+};
 
-// Fetch one API path. `missing` is a confirmed 404, distinct from a failed request.
-export default function useApi<T>(path: string | null): State<T> {
-  const [state, setState] = useState<State<T>>(() => known<T>(path));
+/**
+ * Fetch one API path. `built` is the same content as of the build (content.ts): shown at
+ * once, then replaced by the API's answer, and kept if the API can't be reached. `fresh`
+ * means the data is the API's answer; `missing` is a confirmed 404.
+ */
+export default function useApi<T>(path: string | null, built?: T): State<T> {
+  const [state, setState] = useState<State<T>>(() => known<T>(path, built));
   useEffect(() => {
     if (!path) return;
     if (answers.has(path)) {
@@ -55,16 +52,21 @@ export default function useApi<T>(path: string | null): State<T> {
       return;
     }
     let live = true;
-    setState({ data: null, failed: false, missing: false });
+    setState((s) => (s.data === (built ?? null) && !s.fresh ? s : known<T>(path, built)));
     ask(path)
-      .then((data) => live && setState({ data: data as T, failed: false, missing: false }))
+      .then(
+        (data) => live && setState({ data: data as T, failed: false, missing: false, fresh: true }),
+      )
       .catch((error: { status?: number }) => {
         console.error(`Couldn't fetch ${path}:`, error);
-        if (live) setState({ data: null, failed: true, missing: error.status === 404 });
+        if (live) {
+          const missing = error.status === 404;
+          setState({ data: built ?? null, failed: true, missing, fresh: false });
+        }
       });
     return () => {
       live = false;
     };
-  }, [path]);
+  }, [path, built]);
   return state;
 }

@@ -1,11 +1,11 @@
 // The site's content from the backend API, fetched once when the site is built (and when
-// `vite` starts). The essays' metadata, the site text baked into the app, and the
-// crawler pages, sitemap and llms.txt (seo.ts) all come from here.
+// `vite` starts). The essays' metadata, the content baked into the app, and the crawler
+// pages, sitemap and llms.txt (seo.ts) all come from here.
 //
 // If the API can't be reached, or answers with something that isn't content, each part
-// falls back to content/api-snapshot.json: the last answer from the production API,
-// rewritten by every build that reaches it. A backend outage never empties the site; it
-// holds the site at its last good state.
+// falls back to content/api-snapshot.json, a saved answer from the production API
+// (`npm run snapshot` refreshes it). A backend outage never empties the site; it holds the
+// site at its last good state.
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -57,7 +57,7 @@ const loads = new Map<string, Promise<Content>>();
 
 /**
  * Everything visible on the site, from `api` (a base URL ending in /api). With `save`, a
- * complete answer is written to the snapshot (only for the production API).
+ * complete answer is written to the snapshot (`npm run snapshot`, production API only).
  */
 export function loadContent(api: string, { save = false } = {}): Promise<Content> {
   let load = loads.get(api);
@@ -85,8 +85,8 @@ export function loadContent(api: string, { save = false } = {}): Promise<Content
         if (!existsSync(SNAPSHOT) || readFileSync(SNAPSHOT, "utf8") !== text) {
           writeFileSync(SNAPSHOT, text);
           console.info("[content] content/api-snapshot.json updated from the production API");
-        }
-      }
+        } else console.info("[content] content/api-snapshot.json is already up to date");
+      } else if (save) throw new Error("not every part of the API answered; snapshot unchanged");
       return content;
     })();
     loads.set(api, load);
@@ -94,16 +94,26 @@ export function loadContent(api: string, { save = false } = {}): Promise<Content
   return load;
 }
 
-/** `virtual:site`: the site text as of the build, so the first render already has it. */
-export function siteText(site: Site): Plugin {
-  const ID = "virtual:site";
+/**
+ * The content as of the build, as modules the app imports, so pages render at once
+ * without waiting for the API (or without it, in an outage). The app still asks the API
+ * when a page opens and shows any change since. Project descriptions in Markdown are left
+ * out; the app shows `description_html`.
+ */
+export function builtContent(content: Content): Plugin {
+  const projects = content.projects.map((p) => ({ ...p, description: null }));
+  const modules: Record<string, string> = {
+    "virtual:site": `export const SITE = ${JSON.stringify(content.site)};`,
+    "virtual:projects": `export const PROJECTS = ${JSON.stringify(projects)};`,
+    "virtual:papers": `export const PAPERS = ${JSON.stringify(content.papers)};`,
+  };
   return {
-    name: "site-text",
+    name: "built-content",
     resolveId(id) {
-      if (id === ID) return `\0${ID}`;
+      if (Object.hasOwn(modules, id)) return `\0${id}`;
     },
     load(id) {
-      if (id === `\0${ID}`) return `export const SITE = ${JSON.stringify(site)};`;
+      if (id.startsWith("\0") && Object.hasOwn(modules, id.slice(1))) return modules[id.slice(1)];
     },
   };
 }

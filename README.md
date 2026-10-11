@@ -26,7 +26,7 @@ The build reads `RAILWAY_ENVIRONMENT_NAME`, which Railway sets automatically:
 - **production**: indexable by search engines, uses the production API (https://admin.sevanb.net/api).
 - **anything else**: every response carries `X-Robots-Tag: noindex` plus a robots meta tag, and the build uses the development API (https://dev-admin.sevanb.net/api). Preview sites stay viewable but never appear in search results.
 
-Content edited in the control panel shows in the app at once; the crawler pages, sitemap, llms.txt, the essay list and the site text baked into the first render update on the next deploy ("Rebuild site" in the control panel).
+Each build bakes the content (projects, papers, essays, site text) into the app, so pages render at once; the app then asks the API and shows anything edited since. The crawler pages, sitemap, llms.txt and the baked-in content update on the next deploy ("Rebuild site" in the control panel).
 
 All pages declare `https://www.sevanb.net/...` as their canonical URL.
 
@@ -34,7 +34,7 @@ All pages declare `https://www.sevanb.net/...` as their canonical URL.
 
 Many crawlers (including the ones behind ChatGPT, Claude and Perplexity search) don't run JavaScript, so `seo.ts` writes a real HTML file for every page at build time: its own title, description, canonical URL, structured data, and a plain-HTML version of the content that React replaces on load. It also generates `sitemap.xml`, `llms.txt` and the `serve.json` routing (real 404s for unknown paths). Content is fetched from the API during the build (`content.ts`), so content published in the control panel appears in these files after the next deploy; until then the page still works for visitors.
 
-If the API can't be reached during a build, `content.ts` uses `content/api-snapshot.json`, the last good answer, so an outage never empties the site. Every build that reaches the production API rewrites the snapshot; commit it when it changes.
+If the API can't be reached during a build, `content.ts` uses `content/api-snapshot.json`, a saved answer from the production API, so an outage never empties the site. Builds only read it. To refresh it, run `npm run snapshot` now and then and commit the file.
 
 Facts about the site owner shown in titles, descriptions and structured data live in `src/site.js`. Keep them true and visible on the site.
 

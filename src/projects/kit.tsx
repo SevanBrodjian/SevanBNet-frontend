@@ -1,3 +1,4 @@
+import { PROJECTS } from "virtual:projects";
 import { type CSSProperties, type ReactNode, useEffect, useState } from "react";
 import { Link } from "react-router";
 import StarSky from "../frame/StarSky";
@@ -51,11 +52,10 @@ export function Thumb({ thumb }: { thumb: ThumbData }) {
   );
 }
 
-/** When a project ran; an undated one shows where its paper appeared. */
+/** When a project ran (nothing for an undated one). */
 export function When({ p }: { p: Project }) {
   const start = p.start ?? p.end;
-  if (start) return <Span start={start} end={p.end} />;
-  return <>{p.papers[0]?.venue ?? ""}</>;
+  return start ? <Span start={start} end={p.end} /> : null;
 }
 
 /** When a project ran: 2023.12 – 2024.01, a single month, or 2026.05 – Ongoing. */
@@ -183,7 +183,7 @@ export function Pager({ prev, next }: { prev: Near; next: Near }) {
 
 /** The pager for one project, walking the Projects list in its order. */
 export function ProjectPager({ slug }: { slug: string }) {
-  const { data } = useApi<Project[]>("projects/");
+  const { data } = useApi<Project[]>("projects/", PROJECTS);
   const order = (data ?? [])
     .filter((q) => q.listed)
     .map((q) => ({ to: `/projects/${q.slug}`, title: q.title }));

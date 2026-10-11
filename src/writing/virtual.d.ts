@@ -20,7 +20,17 @@ declare module "virtual:writing" {
   export const LOAD: Record<string, () => Promise<{ html: string }>>;
 }
 
+// The content as the API had it when the site was built (content.ts, builtContent).
 declare module "virtual:site" {
-  /** The site text (home line, role, About) as the API had it when the site was built. */
+  /** The site text: home line, role, About. */
   export const SITE: import("../types").Site;
+}
+
+declare module "virtual:projects" {
+  /** Every visible project, listed or not; `description` is null (use description_html). */
+  export const PROJECTS: import("../types").Project[];
+}
+
+declare module "virtual:papers" {
+  export const PAPERS: import("../types").Paper[];
 }

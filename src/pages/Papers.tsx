@@ -1,3 +1,4 @@
+import { PAPERS } from "virtual:papers";
 import { type FocusEvent, type MouseEvent, type PointerEvent, useRef, useState } from "react";
 import { Link } from "react-router";
 import { SEVAN, venueLine } from "../format";
@@ -112,7 +113,7 @@ const INTERACTIVE = "a, button, input, select, textarea, pre, [tabindex]";
 
 // The control panel's order: ranked papers first, then newest.
 export default function Papers() {
-  const { data: papers, failed } = useApi<Paper[]>("papers/");
+  const { data: papers, failed } = useApi<Paper[]>("papers/", PAPERS);
   // One paper is alive at a time: the one under the pointer, holding focus, or tapped.
   const [active, setActive] = useState<number | null>(null);
   const pointer = useRef("mouse");

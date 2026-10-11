@@ -10,7 +10,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "start": "serve dist --no-clipboard --listen tcp://0.0.0.0:${PORT:-3000}",
-    "check": "biome check && tsc --noEmit"
+    "check": "biome check && tsc --noEmit",
+    "snapshot": "node -e \"import('./content.ts').then((c) => c.loadContent(c.API_BASES.production, { save: true }))\""
   },
   "dependencies": {
     "@fontsource-variable/archivo": "^5.3.0",

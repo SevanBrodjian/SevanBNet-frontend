@@ -8,5 +8,5 @@ import type { Site } from "./types";
  * renders the same, so nothing moves.
  */
 export default function useSiteText(): Site {
-  return useApi<Site>("site/").data ?? SITE;
+  return useApi<Site>("site/", SITE).data ?? SITE;
 }
