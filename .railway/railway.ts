@@ -27,6 +27,9 @@ export default defineRailway((ctx) => {
     start: "npm start",
     healthcheck: "/",
     env: {
+      // The build fetches content from the API, so "Rebuild site" in the control panel
+      // must never reuse a cached build.
+      NO_CACHE: "1",
       CI: preserve(),
       NODE_ENV: preserve(),
       // Unused since the Vite migration (the API URL now follows the environment);
