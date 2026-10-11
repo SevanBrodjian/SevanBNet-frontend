@@ -8,7 +8,7 @@
 ## Branches and deploys
 - Railway deploys `dev` to the development site and `main` to www.sevanb.net, each only after CI passes.
 - Work on `redesign` (or a feature branch), then move `dev` to it to preview. Never push `main` without Sevan's explicit go-ahead.
-- Railway service settings live in `.railway/railway.ts`. Change them only with `railway config plan` first (it must say "0 to destroy"), then apply that pinned plan. Never pass `--confirm-destructive`.
+- Railway service settings live in `.railway/railway.ts`. Change them only with `railway config plan` first (it must say "0 to destroy"), then apply that pinned plan. Never pass `--confirm-destructive`. Applying settings triggers a deploy: wait for any running deploy to finish before pushing or applying again, so two deploys never run database migrations at the same time.
 
 ## Before committing
 - Run `npm run check` and `RAILWAY_ENVIRONMENT_NAME=production npm run build`, and judge them by exit code, not by the last lines of output.
