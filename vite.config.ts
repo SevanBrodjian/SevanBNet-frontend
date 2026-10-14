@@ -54,7 +54,9 @@ export default defineConfig(async ({ command, isPreview }) => {
     },
     // Fixed local addresses (never drift to another port): the site is always
     // http://localhost:5173 and a local production preview http://localhost:4173.
-    server: { port: 5173, strictPort: true, proxy },
-    preview: { port: 4173, strictPort: true, proxy },
+    // Both stay on localhost; to open them from a phone, Tailscale forwards to them
+    // (`tailscale serve`), so they also answer to this Mac's tailnet name (*.ts.net).
+    server: { port: 5173, strictPort: true, proxy, allowedHosts: [".ts.net"] },
+    preview: { port: 4173, strictPort: true, proxy, allowedHosts: [".ts.net"] },
   };
 });

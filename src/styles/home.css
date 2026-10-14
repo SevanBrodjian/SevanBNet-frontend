@@ -34,7 +34,9 @@ html[data-room="home"] .fx-web {
 }
 
 .home-copy {
-  grid-column: 1 / span 7;
+  position: relative;
+  z-index: 1;
+  grid-column: 1 / span 5;
 }
 
 .home .role {
@@ -48,41 +50,84 @@ html[data-room="home"] .fx-web {
   margin: 0;
   color: var(--tx);
   font-weight: var(--w35);
-  font-size: clamp(38px, 4.4vw, 68px);
+  font-size: clamp(36px, 3.75vw, 62px);
   line-height: calc(1.04 * var(--k-lead));
   letter-spacing: -0.026em;
   text-wrap: balance;
 }
 
-/* SLOT home.center: reserved for Sevan's own element. */
+/* The hero: glimpses of worlds beside the line, as large as the page allows. Its canvas runs
+   to the frame on the right; the drawing gives out at a ragged edge rather than a box. */
 .slot {
   position: relative;
-  grid-column: 9 / span 4;
-  justify-self: end;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  max-width: 420px;
-  aspect-ratio: 1;
-  padding: 0 6%;
+  grid-column: 6 / span 7;
+  height: min(78vh, 820px);
+  min-height: 480px;
+  margin-right: calc(12px - var(--m));
 }
 
-.slot svg {
-  width: 13%;
-  height: 62%;
-  overflow: visible;
-}
-
-.slot path {
-  fill: none;
-  stroke: var(--tx3);
-  stroke-width: 1.2px;
-  vector-effect: non-scaling-stroke;
-}
-
-.slot .crop {
+.hero {
+  position: absolute;
   inset: 0;
+  pointer-events: none;
+}
+
+.hero canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* On screens wide and tall enough, the home page is exactly the window: nothing scrolls, the
+   footer sits inside the frame at the bottom, and the hero fills the height between header and
+   footer beside the line. Phones and short windows keep the stacked, scrolling layout. */
+@media (min-width: 901px) and (min-height: 560px) {
+  html[data-room="home"] body {
+    height: 100svh;
+    min-height: 0;
+    overflow: clip; /* the frame's glow reaches past the window's edge */
+  }
+
+  html[data-room="home"] main {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+
+  /* the footer's row lies along the bottom of the frame, over the page rather than under it,
+     so the line and the hero are centred in the whole frame */
+  html[data-room="home"] .ftr {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 2;
+    margin-top: 0;
+  }
+
+  .home {
+    align-items: stretch;
+  }
+
+  /* centred in the frame, then lifted a little: dead centre reads low */
+  .home-in {
+    --lift: clamp(12px, 2.5vh, 28px);
+    grid-template-rows: minmax(0, 1fr);
+    padding-top: calc(18px + clamp(20px, 4vh, 48px) - var(--lift));
+    padding-bottom: calc(18px + clamp(20px, 4vh, 48px) + var(--lift));
+  }
+
+  /* The full width of its columns, and as tall as the room allows, but never much taller than
+     it is wide (60cqw is about the slot's own width). */
+  .home-in {
+    container-type: size;
+  }
+
+  .slot {
+    align-self: center;
+    height: min(100%, 60cqw);
+    min-height: 0;
+    pointer-events: none;
+  }
 }
 
 @media (max-width: 900px) {
@@ -101,9 +146,10 @@ html[data-room="home"] .fx-web {
   }
 
   .slot {
-    justify-self: center;
-    width: min(100%, 300px);
-    margin-top: 48px;
+    width: auto;
+    height: min(72vh, 118vw);
+    min-height: 0;
+    margin: 28px calc(-1 * var(--m)) 0;
   }
 }
 
@@ -118,7 +164,6 @@ html[data-room="home"] .fx-web {
   }
 
   .slot {
-    width: min(64%, 240px);
-    margin-top: 36px;
+    margin-top: 20px;
   }
 }
