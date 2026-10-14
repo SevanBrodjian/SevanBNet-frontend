@@ -1,0 +1,169 @@
+/* Home: one line, an open slot, and a frame that holds still. Owned by the frame. */
+
+html[data-room="home"] {
+  --r-g0: #0a0b0d;
+}
+
+.home {
+  display: flex;
+  align-items: center;
+  min-height: 100%;
+}
+
+html[data-room="home"] main {
+  display: flex;
+}
+
+html[data-room="home"] main > .home {
+  flex: 1;
+}
+
+/* The old site's cosmic web: behind the home page only, and only when turned up in the controls. */
+html[data-room="home"] .fx-web {
+  display: block;
+  opacity: calc(var(--k-web) * 0.85);
+}
+
+.home-in {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: center;
+  column-gap: var(--gap);
+  padding-top: 48px;
+  padding-bottom: 48px;
+}
+
+.home-copy {
+  position: relative;
+  z-index: 1;
+  grid-column: 1 / span 5;
+}
+
+.home .role {
+  margin: 0 0 30px;
+  color: var(--tx2);
+  font-size: 12.5px;
+}
+
+.home h1 {
+  max-width: 11.5em;
+  margin: 0;
+  color: var(--tx);
+  font-weight: var(--w35);
+  font-size: clamp(36px, 3.75vw, 62px);
+  line-height: calc(1.04 * var(--k-lead));
+  letter-spacing: -0.026em;
+  text-wrap: balance;
+}
+
+/* The hero: glimpses of worlds beside the line, as large as the page allows. Its canvas runs
+   to the frame on the right; the drawing gives out at a ragged edge rather than a box. */
+.slot {
+  position: relative;
+  grid-column: 6 / span 7;
+  height: min(78vh, 820px);
+  min-height: 480px;
+  margin-right: calc(12px - var(--m));
+}
+
+.hero {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.hero canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* On screens wide and tall enough, the home page is exactly the window: nothing scrolls, the
+   footer sits inside the frame at the bottom, and the hero fills the height between header and
+   footer beside the line. Phones and short windows keep the stacked, scrolling layout. */
+@media (min-width: 901px) and (min-height: 560px) {
+  html[data-room="home"] body {
+    height: 100svh;
+    min-height: 0;
+    overflow: clip; /* the frame's glow reaches past the window's edge */
+  }
+
+  html[data-room="home"] main {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+
+  /* the footer's row lies along the bottom of the frame, over the page rather than under it,
+     so the line and the hero are centred in the whole frame */
+  html[data-room="home"] .ftr {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 2;
+    margin-top: 0;
+  }
+
+  .home {
+    align-items: stretch;
+  }
+
+  /* centred in the frame, then lifted a little: dead centre reads low */
+  .home-in {
+    --lift: clamp(12px, 2.5vh, 28px);
+    grid-template-rows: minmax(0, 1fr);
+    padding-top: calc(18px + clamp(20px, 4vh, 48px) - var(--lift));
+    padding-bottom: calc(18px + clamp(20px, 4vh, 48px) + var(--lift));
+  }
+
+  /* The full width of its columns, and as tall as the room allows, but never much taller than
+     it is wide (60cqw is about the slot's own width). */
+  .home-in {
+    container-type: size;
+  }
+
+  .slot {
+    align-self: center;
+    height: min(100%, 60cqw);
+    min-height: 0;
+    pointer-events: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .home {
+    align-items: flex-start;
+  }
+
+  .home-in {
+    grid-template-columns: 1fr;
+    padding-top: 44px;
+  }
+
+  .home-copy,
+  .slot {
+    grid-column: 1;
+  }
+
+  .slot {
+    width: auto;
+    height: min(72vh, 118vw);
+    min-height: 0;
+    margin: 28px calc(-1 * var(--m)) 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .home-in {
+    padding-top: 36px;
+    padding-bottom: 24px;
+  }
+
+  .home .role {
+    margin-bottom: 22px;
+  }
+
+  .slot {
+    margin-top: 20px;
+  }
+}

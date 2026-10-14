@@ -3,3 +3,6 @@
 .DS_Store
 .env*.local
 *.log
+
+# The Learning Taichi lab export (53 MB) is not committed: hosting decision pending.
+/public/lab/

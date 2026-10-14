@@ -30,17 +30,7 @@
   },
   "overrides": [
     {
-      "includes": [
-        "src/components/About.jsx",
-        "src/components/Blog.jsx",
-        "src/components/Home.jsx",
-        "src/components/ProjectDetail.jsx",
-        "src/components/Projects.jsx",
-        "src/components/Research.jsx",
-        "src/components/*.css",
-        "src/assets/*.svg",
-        "src/components/papers/*"
-      ],
+      "includes": ["src/assets/*.svg"],
       "linter": {
         "rules": {
           "a11y": "warn",
