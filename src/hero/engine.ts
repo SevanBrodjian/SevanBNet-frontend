@@ -3,7 +3,7 @@
 // transition. Owns the canvas, the ink and the clock; the Hero component owns when it runs.
 
 import { FLOW_IN, flow, lidsAt } from "./flow";
-import { CanvasInk, GLInk, type InkTarget, Pen } from "./ink";
+import { CanvasInk, GLInk, type InkTarget, Pen, releaseGL } from "./ink";
 import { lids } from "./lids";
 import { ERASE, FILL, Frame, hash, INKFILL, Sketch, smooth } from "./sketch";
 
@@ -62,16 +62,24 @@ export class HeroEngine {
   private cssH = 1;
   private dpr = 1;
 
-  static create(canvas: HTMLCanvasElement, makers: SceneMaker[]): HeroEngine | null {
-    const gl = canvas.getContext("webgl2", {
-      alpha: true,
-      antialias: false,
-      premultipliedAlpha: true,
-      preserveDrawingBuffer: false,
-      powerPreference: "low-power",
-    });
-    const ink = gl ? GLInk.create(gl) : null;
-    if (ink) return new HeroEngine(canvas, ink, makers);
+  /** WebGL ink, or the 2D canvas when `flat` (or WebGL is missing). Null when WebGL took the
+   *  canvas but failed, e.g. a context lost as it was made: try again flat, on a new canvas. */
+  static create(canvas: HTMLCanvasElement, makers: SceneMaker[], flat = false): HeroEngine | null {
+    if (!flat) {
+      const gl = canvas.getContext("webgl2", {
+        alpha: true,
+        antialias: false,
+        premultipliedAlpha: true,
+        preserveDrawingBuffer: false,
+        powerPreference: "low-power",
+      });
+      if (gl) {
+        const ink = gl.isContextLost() ? null : GLInk.create(gl);
+        if (ink) return new HeroEngine(canvas, ink, makers);
+        releaseGL(gl);
+        return null;
+      }
+    }
     const g = canvas.getContext("2d");
     return g ? new HeroEngine(canvas, new CanvasInk(g), makers) : null;
   }
@@ -85,6 +93,23 @@ export class HeroEngine {
     this.pen = new Pen(ink);
     this.scenes = makers.map((make) => make());
     this.scenes[0].reset();
+  }
+
+  /** The GPU gave a lost context back: its buffers went with it, so build the ink again on
+   *  the same context rather than taking a new one. False when that isn't possible. */
+  restore(): boolean {
+    if (!(this.ink instanceof GLInk)) return false;
+    const ink = GLInk.create(this.ink.gl);
+    if (!ink) return false;
+    ink.color = this.ink.color;
+    this.ink = ink;
+    this.pen = new Pen(ink);
+    return true;
+  }
+
+  /** Done with this canvas: give its GPU context back at once. */
+  release(): void {
+    this.ink.release?.();
   }
 
   setColor(rgb: [number, number, number]): void {

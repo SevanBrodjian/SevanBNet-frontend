@@ -24,17 +24,26 @@ function inkColor(): [number, number, number] {
   }
 }
 
-type Make = (canvas: HTMLCanvasElement) => HeroEngine | null;
+type Make = (canvas: HTMLCanvasElement, flat: boolean) => HeroEngine | null;
+
+/** How long the GPU has to give back a lost context before the ink carries on in 2D. */
+const RESTORE_MS = 1500;
+/** Draw with the 2D canvas for the rest of the visit: WebGL failed, or was lost and not given
+ *  back, so asking it again would most likely only fail again. */
+let flat = false;
 
 /** Start the hero in box; `again` restarts it (after the GPU drops the context). */
 function run(box: HTMLElement, make: Make, again: () => void): () => void {
   const canvas = document.createElement("canvas");
   canvas.setAttribute("aria-hidden", "true");
   box.append(canvas);
-  const engine = make(canvas);
+  const engine = make(canvas, flat);
   if (!engine) {
     canvas.remove();
-    return () => {};
+    if (flat) return () => {};
+    // WebGL took the canvas and failed with it: start again in 2D on a new one
+    flat = true;
+    return run(box, make, again);
   }
   // ?hero=scene:seconds (or scene:h:u for the hand-over after it) holds one moment, for checks
   const hold = import.meta.env.DEV ? new URLSearchParams(location.search).get("hero") : null;
@@ -83,12 +92,27 @@ function run(box: HTMLElement, make: Make, again: () => void): () => void {
     engine.setColor(inkColor());
     if (live.paused) paint();
   });
+  // a lost context takes the ink's buffers with it: when the GPU gives it back soon, build the
+  // ink again on it; when it does not, carry on in 2D on a new canvas
+  let waiting = 0;
   const lost = (e: Event) => {
     e.preventDefault();
     live.setPaused(true);
+    clearTimeout(waiting);
+    waiting = window.setTimeout(() => {
+      flat = true;
+      again();
+    }, RESTORE_MS);
   };
-  // a lost context takes the ink's buffers with it: start over on a new canvas
-  const restored = () => setTimeout(again);
+  const restored = () => {
+    clearTimeout(waiting);
+    if (!engine.restore()) {
+      setTimeout(again);
+      return;
+    }
+    paint();
+    live.setPaused(still);
+  };
   canvas.addEventListener("webglcontextlost", lost);
   canvas.addEventListener("webglcontextrestored", restored);
 
@@ -129,11 +153,13 @@ function run(box: HTMLElement, make: Make, again: () => void): () => void {
   }
 
   return () => {
+    clearTimeout(waiting);
     live.dispose();
     ro.disconnect();
     unsub();
     canvas.removeEventListener("webglcontextlost", lost);
     canvas.removeEventListener("webglcontextrestored", restored);
+    engine.release();
     canvas.remove();
   };
 }
@@ -150,7 +176,7 @@ export default function Hero() {
         const scenes = ORDER.map((name) => SCENES[name]);
         const start = () => {
           stop();
-          if (!gone) stop = run(el, (c) => HeroEngine.create(c, scenes), start);
+          if (!gone) stop = run(el, (c, f) => HeroEngine.create(c, scenes, f), start);
         };
         start();
       })

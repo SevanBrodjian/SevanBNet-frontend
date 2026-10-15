@@ -60,6 +60,15 @@ export interface InkTarget {
   flush(w: number, h: number): void;
   /** Ink colour, 0..1 sRGB. */
   color: [number, number, number];
+  /** Give the GPU back now (WebGL), rather than whenever the context is collected. */
+  release?(): void;
+}
+
+/** Hand a WebGL context back to the browser at once. Browsers allow a page only a few live
+ *  contexts (Safari counts every one not yet collected, even from before a reload) and take
+ *  the oldest away when there are too many, so a context we are done with must not linger. */
+export function releaseGL(gl: WebGL2RenderingContext): void {
+  if (!gl.isContextLost()) gl.getExtension("WEBGL_lose_context")?.loseContext();
 }
 
 function program(gl: WebGL2RenderingContext, vs: string, fs: string): WebGLProgram | null {
@@ -201,6 +210,10 @@ export class GLInk implements InkTarget {
   private bind(p: WebGLProgram): void {
     // biome-ignore lint/correctness/useHookAtTopLevel: WebGL's useProgram, not a React hook
     this.gl.useProgram(p);
+  }
+
+  release(): void {
+    releaseGL(this.gl);
   }
 
   flush(w: number, h: number): void {
