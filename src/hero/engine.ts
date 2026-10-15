@@ -62,16 +62,22 @@ export class HeroEngine {
   private cssH = 1;
   private dpr = 1;
 
-  static create(canvas: HTMLCanvasElement, makers: SceneMaker[]): HeroEngine | null {
-    const gl = canvas.getContext("webgl2", {
-      alpha: true,
-      antialias: false,
-      premultipliedAlpha: true,
-      preserveDrawingBuffer: false,
-      powerPreference: "low-power",
-    });
-    const ink = gl ? GLInk.create(gl) : null;
-    if (ink) return new HeroEngine(canvas, ink, makers);
+  /** WebGL ink, or the 2D canvas when `flat` (or WebGL is missing). Null when WebGL took the
+   *  canvas but failed, e.g. a context lost as it was made: try again flat, on a new canvas. */
+  static create(canvas: HTMLCanvasElement, makers: SceneMaker[], flat = false): HeroEngine | null {
+    if (!flat) {
+      const gl = canvas.getContext("webgl2", {
+        alpha: true,
+        antialias: false,
+        premultipliedAlpha: true,
+        preserveDrawingBuffer: false,
+        powerPreference: "low-power",
+      });
+      if (gl) {
+        const ink = gl.isContextLost() ? null : GLInk.create(gl);
+        return ink ? new HeroEngine(canvas, ink, makers) : null;
+      }
+    }
     const g = canvas.getContext("2d");
     return g ? new HeroEngine(canvas, new CanvasInk(g), makers) : null;
   }
