@@ -30,6 +30,8 @@ export default defineRailway((ctx) => {
       // The build fetches content from the API, so "Rebuild site" in the control panel
       // must never reuse a cached build.
       NO_CACHE: "1",
+      // The Learning Taichi lab, embedded on its project page (the taichi_lab service below).
+      VITE_LAB_URL: "https://taichi-lab.sevanb.net/",
       CI: preserve(),
       NODE_ENV: preserve(),
       // Unused since the Vite migration (the API URL now follows the environment);
@@ -38,5 +40,19 @@ export default defineRailway((ctx) => {
     },
   });
 
-  return project("SevanBNet", { resources: [web] });
+  // The Learning Taichi lab: a static, already privacy-scanned export committed to the
+  // public-export branch of learning-taichi (public-lab/), served as plain files. It is
+  // exported on Sevan's Mac, never built here (see that repo's harness/dashboard/README.md).
+  // Production only; the development site embeds the same lab.
+  const lab = service("taichi_lab", {
+    source: github("SevanBrodjian/learning-taichi", {
+      branch: "public-export",
+      rootDirectory: "public-lab",
+    }),
+    build: { builder: "RAILPACK" },
+    // Its address, taichi-lab.sevanb.net, is a custom domain added with `railway domain`
+    // (configuration files can't register custom domains).
+  });
+
+  return project("SevanBNet", { resources: prod ? [web, lab] : [web] });
 });

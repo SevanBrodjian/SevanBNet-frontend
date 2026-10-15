@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Loading from "../../frame/Loading";
 import still from "../assets/lt-lab.webp";
 
-// The Learning Taichi dashboard, exported read-only (public/lab/learning-taichi), in a
+// The Learning Taichi dashboard, exported read-only (served at taichi-lab.sevanb.net), in a
 // framed viewport at the top of the page. Fullscreen uses the Fullscreen API where it
 // exists; otherwise (iPhone) the frame fills the window from the top layer (a manual
 // popover, so no view's transforms can move it and the iframe never reloads), and as a
@@ -14,15 +14,18 @@ import still from "../assets/lt-lab.webp";
 
 const LAB: string = import.meta.env.VITE_LAB_URL ?? "";
 const SAME_SITE = LAB.startsWith("/");
-const PLACE = "lt_place";
 
 type State = "wait" | "ok" | "missing";
 
-/** Is the export really there? A missing file may come back as the app's own page. */
+/** Is the export really there? A missing file may come back as the app's own page. On
+ *  its own domain the lab can only be asked whether it answers at all. */
 async function present() {
   if (!LAB) return false;
-  if (!SAME_SITE) return true;
   try {
+    if (!SAME_SITE) {
+      await fetch(LAB, { mode: "no-cors", cache: "no-cache" });
+      return true;
+    }
     const r = await fetch(LAB, { cache: "no-cache" });
     if (!r.ok) return false;
     return /learning-taichi/i.test(await r.text());
@@ -51,18 +54,9 @@ export default function Lab() {
       return;
     }
     idle(() => {
+      // The lab opens on its task map the first time, and keeps its own place after that.
       present().then((ok) => {
-        if (!live) return;
-        // A first visit opens the lab on its task map; after that it keeps its own place.
-        if (ok) {
-          try {
-            if (!localStorage.getItem(PLACE))
-              localStorage.setItem(PLACE, JSON.stringify({ section: "map" }));
-          } catch {
-            // Storage is optional.
-          }
-        }
-        setState(ok ? "ok" : "missing");
+        if (live) setState(ok ? "ok" : "missing");
       });
     });
     return () => {
