@@ -30,6 +30,8 @@ export default defineRailway((ctx) => {
       // The build fetches content from the API, so "Rebuild site" in the control panel
       // must never reuse a cached build.
       NO_CACHE: "1",
+      // The Learning Taichi lab, embedded on its project page (the taichi_lab service below).
+      VITE_LAB_URL: "https://taichi-lab.sevanb.net/",
       CI: preserve(),
       NODE_ENV: preserve(),
       // Unused since the Vite migration (the API URL now follows the environment);
