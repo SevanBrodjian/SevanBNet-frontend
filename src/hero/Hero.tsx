@@ -28,8 +28,8 @@ type Make = (canvas: HTMLCanvasElement, flat: boolean) => HeroEngine | null;
 
 /** How long the GPU has to give back a lost context before the ink carries on in 2D. */
 const RESTORE_MS = 1500;
-/** Draw with the 2D canvas from now on: WebGL failed or was lost and not given back. Safari can
- *  keep a page's WebGL broken for a while, so this holds for the rest of the visit. */
+/** Draw with the 2D canvas for the rest of the visit: WebGL failed, or was lost and not given
+ *  back, so asking it again would most likely only fail again. */
 let flat = false;
 
 /** Start the hero in box; `again` restarts it (after the GPU drops the context). */
@@ -92,12 +92,13 @@ function run(box: HTMLElement, make: Make, again: () => void): () => void {
     engine.setColor(inkColor());
     if (live.paused) paint();
   });
-  // a lost context takes the ink's buffers with it: start over on a new canvas, with WebGL if
-  // the GPU gives the context back soon, and in 2D if it does not
+  // a lost context takes the ink's buffers with it: when the GPU gives it back soon, build the
+  // ink again on it; when it does not, carry on in 2D on a new canvas
   let waiting = 0;
   const lost = (e: Event) => {
     e.preventDefault();
     live.setPaused(true);
+    clearTimeout(waiting);
     waiting = window.setTimeout(() => {
       flat = true;
       again();
@@ -105,7 +106,12 @@ function run(box: HTMLElement, make: Make, again: () => void): () => void {
   };
   const restored = () => {
     clearTimeout(waiting);
-    setTimeout(again);
+    if (!engine.restore()) {
+      setTimeout(again);
+      return;
+    }
+    paint();
+    live.setPaused(still);
   };
   canvas.addEventListener("webglcontextlost", lost);
   canvas.addEventListener("webglcontextrestored", restored);
@@ -153,6 +159,7 @@ function run(box: HTMLElement, make: Make, again: () => void): () => void {
     unsub();
     canvas.removeEventListener("webglcontextlost", lost);
     canvas.removeEventListener("webglcontextrestored", restored);
+    engine.release();
     canvas.remove();
   };
 }
