@@ -21,7 +21,7 @@
   --r-tx3: #9c9992; /* 6.9:1, the smallest text colour for words */
   --r-tx4: #5e5c57; /* decoration only: braces, ticks, crop marks */
 
-  /* Controls inputs (Comfort values; src/controls writes the live ones on <html>). */
+  /* Controls inputs (Standard values; src/controls writes the live ones on <html>). */
   --k-ground: 0;
   --k-temp: 0;
   --k-ink: 0;
@@ -434,13 +434,16 @@ h3 {
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.05),
     0 1px 0 rgb(0 0 0 / 0.5);
-  --cx: var(--tx3);
+  /* the corner marks only while it is pointed at */
+  --cx: transparent;
   --cx-o: 3px;
   --cx-s: 4px;
 }
 
-.vw-btn:hover {
+.vw-btn:hover,
+.vw-btn:focus-visible {
   border-color: var(--tx3);
+  --cx: var(--tx3);
 }
 
 .vw-btn:active {
@@ -1117,6 +1120,11 @@ html:has(.doc[open]) {
 @media (max-width: 760px) {
   .pframe {
     --g: 11px;
+  }
+
+  /* Phones: the home and About pages go without their frames. */
+  html:is([data-room="home"], [data-room="about"]) .pframe {
+    display: none;
   }
 }
 

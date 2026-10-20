@@ -1,7 +1,7 @@
 # sevanb.net frontend: working rules
 
 ## Fixed local addresses (do not change)
-- Frontend: http://localhost:5173 (`npm run dev`; the port is strict, it never moves)
+- Frontend: http://localhost:1000 (`npm run dev`; the port is strict, it never moves)
 - Production preview of a build: http://localhost:4173 (`npm run preview`)
 - Backend: http://localhost:8000 (see the backend repo); admin at http://localhost:8000/admin/
 

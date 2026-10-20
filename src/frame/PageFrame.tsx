@@ -259,6 +259,8 @@ export default function PageFrame({ glow = false }: { glow?: boolean }) {
       const hdr = document.querySelector(".hdr")?.getBoundingClientRect();
       if (hdr && y < hdr.bottom) return null;
       const r = box.getBoundingClientRect();
+      // no frame drawn (the home page on phones): nothing to warm
+      if (!r.width) return null;
       let px = clamp(x, r.left, r.right) - r.left;
       let py = clamp(y, r.top, r.bottom) - r.top;
       const lx = x - r.left;
