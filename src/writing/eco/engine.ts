@@ -21,7 +21,7 @@
 //   light goes and the fireflies come out.
 // One garden for every writing page: attach() moves it into the page being shown, so the
 // list and the essays share it, and it keeps growing between visits. It starts as a few
-// sprouts and fills in over minutes; plants grow at a quarter of the rate things move.
+// sprouts and fills in over minutes; plants grow at a fifth of the rate things move.
 // Bounded: cell, plant, creature and particle caps; it only lives near the part of the
 // page being read; one step costs well under a millisecond. Still (reduced motion,
 // Save-Data): grown in idle slices, then drawn once.
@@ -252,7 +252,7 @@ const COLUMN = 880;
 /** Growth steps a new garden starts with: a few sprouts. */
 const YOUNG = 16;
 /** Plants grow on one step in this many; everything that moves, on every step. */
-const GROW_EVERY = 4;
+const GROW_EVERY = 5;
 /** Milliseconds for night to fall, or lift. */
 const DUSK = 2400;
 const WHITE: RGB = [1, 1, 1];
@@ -830,7 +830,7 @@ export function createEco(o: EcoOptions): Eco {
       if (s.T[q] === PET) {
         const c = colorOf(s, q);
         clear(s, q);
-        if (fall && c && rnd() < 0.7) spawn(s, q % s.cols, (q / s.cols) | 0, "petal", c);
+        if (fall && c && rnd() < 0.5) spawn(s, q % s.cols, (q / s.cols) | 0, "petal", c);
       }
     f.pet = [];
   }
@@ -964,7 +964,7 @@ export function createEco(o: EcoOptions): Eco {
         continue;
       }
       m.t++;
-      if (bio.shrooms && m.t > 60 && rnd() < 0.03 && s.parts.length < 90) {
+      if (bio.shrooms && m.t > 60 && rnd() < 0.02 && s.parts.length < 90) {
         spawn(s, m.x + (rnd() < 0.5 ? -1 : 1), m.y - 1, "spore", C.spore);
         const p = s.parts[s.parts.length - 1];
         if (p && p.kind === "spore") p.glow = m.glow;
@@ -1054,7 +1054,7 @@ export function createEco(o: EcoOptions): Eco {
         if (s.P[i] !== pl.id || !s.T[i]) continue;
         const c = colorOf(s, i);
         clear(s, i);
-        if (c && rnd() < 0.3) spawn(s, i % s.cols, (i / s.cols) | 0, "litter", c);
+        if (c && rnd() < 0.2) spawn(s, i % s.cols, (i / s.cols) | 0, "litter", c);
       }
       if (pl.cr >= pl.order.length) plants.delete(pl.id);
     }
@@ -1105,7 +1105,7 @@ export function createEco(o: EcoOptions): Eco {
       }
       const y = (i / s.cols) | 0;
       if (!inB(y, b)) continue;
-      if (rnd() < fall * 3 * (inGust(y) ? 4 : 1)) {
+      if (rnd() < fall * 2.1 * (inGust(y) ? 4 : 1)) {
         const c = colorOf(s, i);
         clear(s, i);
         s.leaves[j] = s.leaves[s.leaves.length - 1];
@@ -1127,7 +1127,7 @@ export function createEco(o: EcoOptions): Eco {
   /** Snow falls at the pace things move, not the pace plants grow. */
   function snowfall(s: Side, b: [number, number]) {
     const sn = seas("snow");
-    if (sn <= 0.05 || rnd() > sn * 0.35) return;
+    if (sn <= 0.05 || rnd() > sn * 0.25) return;
     let flakes = 0;
     for (const p of s.parts) if (p.kind === "snow") flakes++;
     if (flakes >= (slim(s) ? 8 : 34)) return;
