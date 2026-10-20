@@ -1,7 +1,6 @@
 import { PROJECTS } from "virtual:projects";
 import { type CSSProperties, type ReactNode, useEffect, useState } from "react";
 import { Link } from "react-router";
-import StarSky from "../frame/StarSky";
 import Time from "../frame/Time";
 import useApi from "../frame/useApi";
 import type { Project } from "../types";
@@ -113,14 +112,9 @@ export function Entry({
   );
 }
 
-/** The room a project page sits in: near-black, with the shooting stars behind. */
+/** The room a project page sits in: space, with the sky behind (StarSky, from Layout). */
 export function ProjectRoom({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <article className={className ? `wrap pj ${className}` : "wrap pj"}>
-      <StarSky density={0.7} />
-      {children}
-    </article>
-  );
+  return <article className={className ? `wrap pj ${className}` : "wrap pj"}>{children}</article>;
 }
 
 /** A project page's header: where it sits, its name, one line, and its main actions. */
