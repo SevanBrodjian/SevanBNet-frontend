@@ -93,11 +93,14 @@ function EssayPage({ post, posts }: { post: PostMeta; posts: PostMeta[] }) {
   return (
     <div ref={room} className="room-w room-night">
       <title>{pageTitle(post.title)}</title>
-      {html !== null && <Ecosystem host={room} column=".leaf" night />}
+      <Ecosystem column=".leaf" night />
       {html !== null && <ReadingProgress target={leaf} />}
       <div className="wrap">
         <article ref={leaf} className="leaf essay">
           <header>
+            <Link to="/writing" className="w-back">
+              <span aria-hidden="true">←</span> Writing
+            </Link>
             <p className="kick">
               <Time iso={post.date} f="long" />
             </p>
