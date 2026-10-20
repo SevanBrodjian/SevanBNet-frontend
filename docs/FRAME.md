@@ -76,10 +76,10 @@ file; ask the frame instead.
 ## Views and the controls (`src/controls`)
 
 - 55 settings (`schema.ts`); a view is a preset of them. The navbar toggle cycles
-  Comfort, Wireframe, Broken, Reactive. The panel's "Reset all" returns everything to
-  Comfort (the navbar has no Reset).
+  Standard, Wireframe, Broken, Hyper. The panel's "Reset all" returns everything to
+  Standard (the navbar has no Reset).
 - The panel (`Panel.tsx`) has no entry point: pressing the toggle rapidly (7 presses
-  within 1.4 s) or arriving at Comfort for the third time opens it; `?controls` too.
+  within 1.4 s) or arriving at Standard for the third time opens it; `?controls` too.
   Esc closes it. `?view=wireframe` etc. and `?reset` work in URLs.
 - The store writes `--k-*` properties and `k-*` classes on `<html>`; `fx.ts` marks
   boxes with `data-bx`, `data-bk`, `data-ff`, `data-st`, `data-ovf`, `data-zf` and

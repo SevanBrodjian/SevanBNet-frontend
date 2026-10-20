@@ -54,17 +54,17 @@ export default function Panel() {
 }
 
 const STOPS = [
-  { key: "c", name: "Comfort" },
+  { key: "s", name: "Standard" },
   { key: "w", name: "Wireframe" },
   { key: "b", name: "Broken" },
-  { key: "r", name: "Reactive" },
-  { key: "c2", name: "Comfort" },
+  { key: "h", name: "Hyper" },
+  { key: "s2", name: "Standard" },
 ];
 const INITIAL: Record<string, string> = {
-  comfort: "C",
+  standard: "S",
   wireframe: "W",
   broken: "B",
-  reactive: "R",
+  hyper: "H",
 };
 
 function PanelBody() {
@@ -198,7 +198,7 @@ function Group({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-/** The track: Comfort, Wireframe, Broken, Reactive and back to Comfort; between two
+/** The track: Standard, Wireframe, Broken, Hyper and back to Standard; between two
  *  views everything blends. */
 function Master({ input, pos }: { input: RefObject<HTMLInputElement | null>; pos: number | null }) {
   const want = useRef<number | null>(null);

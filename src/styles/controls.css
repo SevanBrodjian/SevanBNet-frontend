@@ -2,7 +2,7 @@
 
 /* What the controls do, in CSS. The store (src/controls/store.ts) writes --k-* properties
    and k-* classes on <html>; the runtime (src/controls/fx.ts) marks boxes with data-*
-   attributes. Every rule is gated by one of those, so Comfort costs nothing.
+   attributes. Every rule is gated by one of those, so Standard costs nothing.
    1. the panel  2. consequences  3. effect layers
    Optics, faults and dynamics reach only <main> and the footer: the header and the panel
    always work. Owned by the frame. */
@@ -817,8 +817,23 @@ html.k-steps :is(a, button, .chip, .btn, .act, .nav a) {
 
 /* optics: the page body only */
 html.k-filter :is(main, .ftr) {
-  filter: hue-rotate(var(--k-hue)) saturate(var(--k-sat)) contrast(var(--k-contrast))
-    invert(var(--k-invert)) blur(var(--k-defocus));
+  filter: hue-rotate(calc(var(--k-hue) + var(--k-hd, 0deg))) saturate(var(--k-sat))
+    contrast(var(--k-contrast)) invert(var(--k-invert)) blur(var(--k-defocus));
+}
+
+/* Intrusions (fx.ts): for a moment a line shows something else, in its own type. */
+.fx-intr {
+  position: fixed;
+  inset: 0;
+  z-index: 58;
+  pointer-events: none;
+}
+
+.fx-intr span {
+  position: absolute;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 html.k-hor main {
@@ -932,6 +947,29 @@ html.k-faults [data-zf] {
   z-index: 6;
   margin: 0;
   pointer-events: none;
+}
+
+/* Missing textures: the renderer's magenta checker where an image should be... */
+html.k-faults [data-mt="1"] {
+  object-position: -300vw 0 !important;
+  background: repeating-conic-gradient(#f0f 0 25%, #000 0 50%) 0 0 / 24px 24px !important;
+}
+
+/* ...or an image that stopped downloading partway: grey below the last rows that came. */
+html.k-faults [data-mt="2"] {
+  clip-path: inset(0 0 calc(100% - var(--cut, 50%)) 0);
+}
+
+html.k-faults .mx:has(> [data-mt="2"]) {
+  background-color: #808080 !important;
+}
+
+/* The hero's ink out of register, like everything else. */
+@media (pointer: fine) {
+  html.k-mis .hero canvas {
+    filter: drop-shadow(calc(var(--k-misreg) * -4px) 0 0 rgb(255 40 90 / 0.6))
+      drop-shadow(calc(var(--k-misreg) * 4px) 0 0 rgb(30 220 255 / 0.5));
+  }
 }
 
 /* ---------- 3. effect layers ---------- */
@@ -1172,8 +1210,8 @@ html.k-inspect .fx-ins.on {
 
 .fx-ins .ib {
   position: fixed;
-  outline: 1px solid var(--wire);
-  background: rgb(from var(--wire) r g b / 0.08);
+  outline: 1px solid rgb(from var(--wire) r g b / 0.45);
+  background: rgb(from var(--wire) r g b / 0.03);
 }
 
 .fx-ins .it {
@@ -1237,5 +1275,15 @@ html.k-hud body {
 .fx-trail {
   position: fixed;
   inset: 0;
+  z-index: 57;
+}
+
+/* Drawn at device pixels by fx.ts: the cursor smear (faults) and shockwave rings. */
+.fx-smear,
+.fx-ring {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   z-index: 57;
 }

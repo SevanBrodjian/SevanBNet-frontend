@@ -160,12 +160,14 @@ function apply() {
       Math.abs(num("sat") - 1) > 0.005 ||
       Math.abs(num("contrast") - 1) > 0.005 ||
       values.invert ||
-      num("defocus") > 0.01,
+      num("defocus") > 0.01 ||
+      num("huedrift") > 0.001,
   );
   on("k-hor", Math.abs(num("horizon")) > 0.01);
   on("k-parity", values.parity);
   on("k-react", reactive());
   on("k-faults", faulty());
+  on("k-over", num("overgrowth") > 0.001);
   on("k-ink", num("ink") > 0.001);
   for (const k of Object.keys(extra)) {
     const v = values[k];
@@ -175,12 +177,34 @@ function apply() {
   html.dataset.view = match() ?? "custom";
 }
 
-export const faulty = () =>
-  ["misreg", "zfight", "drift", "fallback", "stuck", "overflow", "tear"].some(
-    (k) => num(k) > 0.001,
-  );
-export const reactive = () =>
-  ["field", "magnet", "inertia", "gravity", "tilt", "shock"].some((k) => num(k) > 0.001);
+const FAULTS = [
+  "misreg",
+  "zfight",
+  "drift",
+  "fallback",
+  "stuck",
+  "overflow",
+  "tear",
+  "missing",
+  "mojibake",
+  "smear",
+  "overgrowth",
+  "intrude",
+];
+const DYNAMICS = [
+  "field",
+  "magnet",
+  "inertia",
+  "gravity",
+  "tilt",
+  "shock",
+  "wake",
+  "recoil",
+  "frenzy",
+  "groove",
+];
+export const faulty = () => FAULTS.some((k) => num(k) > 0.001);
+export const reactive = () => DYNAMICS.some((k) => num(k) > 0.001);
 
 // ---------------------------------------------------------------------------------
 // Persistence and change events
@@ -262,12 +286,12 @@ export function preset(view: View) {
   if (i >= 0) setPos(i, "preset");
 }
 
-/** The view after the current one around the loop (Comfort after a custom state). */
+/** The view after the current one around the loop (Standard after a custom state). */
 export function nextView(): View {
   const m = match();
   if (m) return ORDER[(ORDER.indexOf(m) + 1) % 4];
   if (pos !== null) return ORDER[(Math.floor(pos) + 1) % 4];
-  return "comfort";
+  return "standard";
 }
 
 const resetHooks = new Set<() => void>();
