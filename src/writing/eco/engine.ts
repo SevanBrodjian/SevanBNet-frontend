@@ -13,16 +13,20 @@
 // - Seasons follow the date (see ../settings): growth, bloom, leaf colour, leaf fall, snow.
 // - Three biomes: Meadow (flowering vines, bees, butterflies, beetles), Understory (ferns,
 //   moss, fungi on dead wood, springtails), Mycelium (hyphae, mushrooms, spores).
-// - Night (the essays): the grids are lit only by the moon, a little lamp at the pointer,
-//   and what glows: fireflies that fall into step with each other and glow-worms in the
-//   meadow; foxfire on dead wood and glow-worm threads under the fronds in the understory;
-//   pulses that run along the hyphae and glowing caps in the mycelium. Moths come to the
-//   lamp.
+// - Night (the essays): the same garden after dark, lit by a blue moon, a little lamp at
+//   the pointer, and what glows: a few fireflies drifting slowly and lighting the plants
+//   around them, glow-worms in the meadow; foxfire on dead wood and glow-worm threads under
+//   the fronds in the understory; pulses along the hyphae and glowing caps in the mycelium.
+//   Night falls (and lifts) over a couple of seconds: the bees head for the wall as the
+//   light goes and the fireflies come out.
+// One garden for every writing page: attach() moves it into the page being shown, so the
+// list and the essays share it, and it keeps growing between visits. It starts as a few
+// sprouts and fills in over minutes; plants grow at a fifth of the rate things move.
 // Bounded: cell, plant, creature and particle caps; it only lives near the part of the
 // page being read; one step costs well under a millisecond. Still (reduced motion,
 // Save-Data): grown in idle slices, then drawn once.
 
-import { living, STILL } from "../../frame/live";
+import { type Living, living, STILL } from "../../frame/live";
 import { clamp } from "../../frame/util";
 import {
   BIOME_DEFS,
@@ -37,11 +41,6 @@ import {
 } from "./species";
 
 export type EcoOptions = {
-  /** The room: the margins are positioned inside it. */
-  host: HTMLElement;
-  /** The text column; the margins are what is left on either side. */
-  column: () => Element | null;
-  night: boolean;
   biome: string;
   /** Where in the year (0 start of spring .. 4). */
   phase: () => number;
@@ -49,9 +48,23 @@ export type EcoOptions = {
   cycle: () => boolean;
   /** Growth speed (1 = natural). */
   tempo: () => number;
+  /** Growth steps a garden already had (after a reload): it grows back to about that. */
+  resume?: number;
+  /** Overgrowth (the Broken view): some plants grow out over the text, 0..1. */
+  overgrowth?: () => number;
+  /** Frenzy (the Hyper view): growth, sudden death, plants bursting apart, 0..1. */
+  frenzy?: () => number;
 };
 
 export type Eco = {
+  /** Show the garden in `host`, in the margins either side of `column`. */
+  attach: (host: HTMLElement, column: () => Element | null, night: boolean) => void;
+  /** The page holding it is going: rest until the next attach. */
+  detach: (host: HTMLElement) => void;
+  /** Start again from sprouts. */
+  reset: () => void;
+  /** Growth steps so far. */
+  grown: () => number;
   setBiome: (b: string) => void;
   setNight: (n: boolean) => void;
   seasonChanged: () => void;
@@ -64,6 +77,8 @@ export type Eco = {
     steps: number;
     /** Fireflies lit now, and all of them. */
     fireflies: [number, number];
+    /** How far night has fallen, 0..1. */
+    dark: number;
   };
 };
 
@@ -123,6 +138,8 @@ type Plant = {
   base: number;
   order: number[];
   fung: boolean;
+  /** May grow out over the text when overgrowth is on. */
+  over: boolean;
 };
 type Flower = {
   i: number;
@@ -136,7 +153,7 @@ type Flower = {
   pol: boolean;
 };
 type SeedT = { i: number; x: number; y: number; sp: string; t: number };
-type PartKind = "spore" | "fruit" | "snow" | "leaf" | "petal" | "litter";
+type PartKind = "spore" | "fruit" | "snow" | "leaf" | "petal" | "litter" | "bit";
 type Part = {
   x: number;
   y: number;
@@ -169,6 +186,9 @@ type Crit = {
   on: number;
   /** Butterflies: which kind. */
   kind: number;
+  /** Fireflies: where it is drifting to. */
+  wx: number;
+  wy: number;
 };
 /** Only some caps glow at night, as only some fungi do. */
 type Shroom = { x: number; y: number; cells: number[]; t: number; life: number; glow: boolean };
@@ -191,6 +211,12 @@ type Side = {
   lx: CanvasRenderingContext2D | null;
   cols: number;
   rows: number;
+  /** The margin's columns [mlo, mhi); the rest of the grid reaches out over the text. */
+  mlo: number;
+  mhi: number;
+  /** The columns things may occupy now: the margin, or all of it under overgrowth. */
+  lo: number;
+  hi: number;
   T: Uint8Array;
   P: Uint16Array;
   A: Uint8Array;
@@ -221,12 +247,33 @@ const ctx2d = (c: HTMLCanvasElement) => {
   return x;
 };
 
+/** The widest text column on the writing pages: the margins are the same on every page. */
+const COLUMN = 880;
+/** Growth steps a new garden starts with: a few sprouts. */
+const YOUNG = 16;
+/** Plants grow on one step in this many; everything that moves, on every step. */
+const GROW_EVERY = 5;
+/** Milliseconds for night to fall, or lift. */
+const DUSK = 2400;
+const WHITE: RGB = [1, 1, 1];
+/** How far past the gutter, over the text, a grid reaches (px): room for overgrowth. */
+const REACH = 165;
+
 export function createEco(o: EcoOptions): Eco {
-  const host = o.host;
+  let host: HTMLElement | null = null;
+  let column: () => Element | null = () => null;
   const NARROW = matchMedia("(max-width: 760px)").matches;
   const CS = NARROW ? 2 : 3;
   const GUT = NARROW ? 3 : 34;
-  let night = o.night;
+  /** Night is wanted; dark is how far it has fallen (0 day .. 1 night). */
+  let night = false;
+  let dark = 0;
+  const isNight = () => dark > 0.5;
+  let resume = o.resume ?? 0;
+  const overgrowth = () => o.overgrowth?.() ?? 0;
+  const frenzy = () => o.frenzy?.() ?? 0;
+  let overOn = false;
+  let wild = 0;
   let bio: BiomeDef = BIOME_DEFS[o.biome] ?? BIOME_DEFS.meadow;
   let seed = (Date.now() ^ (Math.random() * 0x7fffffff)) >>> 0 || 1;
   const rnd = () => {
@@ -269,7 +316,7 @@ export function createEco(o: EcoOptions): Eco {
     const view = document.createElement("canvas");
     view.className = "eco-cv";
     box.append(view);
-    host.prepend(box);
+    host?.prepend(box);
     const base = document.createElement("canvas");
     return {
       name,
@@ -282,6 +329,10 @@ export function createEco(o: EcoOptions): Eco {
       lx: null,
       cols: 0,
       rows: 0,
+      mlo: 0,
+      mhi: 0,
+      lo: 0,
+      hi: 0,
       T: new Uint8Array(1),
       P: new Uint16Array(1),
       A: new Uint8Array(1),
@@ -327,27 +378,50 @@ export function createEco(o: EcoOptions): Eco {
 
   /** Fit the grids to the margins. True when they changed (and were emptied). */
   function layout(force: boolean) {
-    const c = o.column();
-    if (!c) return false;
+    const c = column();
+    if (!c || !host) return false;
     const hr = host.getBoundingClientRect();
     const cr = c.getBoundingClientRect();
+    // The column is taken as wide as the widest one on the writing pages (as wide as its
+    // container allows), so the list and the essays have the same margins.
+    const wrap = c.parentElement;
+    const pad = wrap
+      ? Number.parseFloat(getComputedStyle(wrap).paddingLeft) +
+        Number.parseFloat(getComputedStyle(wrap).paddingRight)
+      : 0;
+    const cw = Math.min(COLUMN, (wrap?.clientWidth ?? cr.width) - pad);
+    const mid = (cr.left + cr.right) / 2;
+    const left = Math.min(cr.left, mid - cw / 2);
+    const right = Math.max(cr.right, mid + cw / 2);
     const hgt = Math.max(0, Math.round(hr.height));
-    const L = { x0: 4, w: Math.floor(cr.left - hr.left - GUT - 4) };
-    const rx = Math.ceil(cr.right - hr.left + GUT);
+    const L = { x0: 4, w: Math.floor(left - hr.left - GUT - 4) };
+    const rx = Math.ceil(right - hr.left + GUT);
     const R = { x0: rx, w: Math.floor(hr.width - 4 - rx) };
+    // Each grid reaches on past the gutter, over the edge of the text: out of bounds, and
+    // empty, unless overgrowth lets plants in.
+    const rc = Math.round((GUT + Math.max(0, Math.min(REACH, cw / 2 - GUT - 40))) / CS);
     if (!sides.length) sides = [makeSide("l"), makeSide("r")];
     let changed = false;
     let grown = false;
     [L, R].forEach((g, k) => {
       const s = sides[k];
-      const cols = Math.max(0, Math.floor(g.w / CS));
-      const rows = Math.max(0, Math.floor(hgt / CS));
-      s.box.style.cssText = `left:${g.x0}px;width:${cols * CS}px;height:${rows * CS}px;display:${cols >= 3 ? "block" : "none"}`;
-      s.x0 = g.x0;
-      if (!force && s.cols === cols && s.rows === rows) return;
+      const m = Math.max(0, Math.floor(g.w / CS));
+      const cols = m + rc;
+      const x0 = k === 0 ? g.x0 : g.x0 - rc * CS;
+      const shown = Math.max(0, Math.floor(hgt / CS));
+      s.box.style.cssText = `left:${x0}px;width:${cols * CS}px;height:${shown * CS}px;display:${m >= 3 ? "block" : "none"}`;
+      s.x0 = x0;
+      s.mlo = k === 0 ? 0 : rc;
+      s.mhi = k === 0 ? m : cols;
+      s.lo = overOn ? 0 : s.mlo;
+      s.hi = overOn ? cols : s.mhi;
+      // The grid never shrinks with a shorter page: what grew further down is kept, out of
+      // sight, for a longer one.
+      if (!force && s.cols === cols && s.rows >= shown) return;
+      const rows = !force && s.cols === cols ? Math.max(shown, s.rows) : shown;
       const n = Math.max(1, cols * rows);
       if (!force && s.cols === cols && s.T.length > 1) {
-        // Only the height changed (an image loaded, a line wrapped): keep the garden.
+        // Only the height grew (a longer page, an image loaded): keep the garden.
         const keep = Math.min(s.T.length, n);
         const T = new Uint8Array(n);
         const P = new Uint16Array(n);
@@ -362,10 +436,16 @@ export function createEco(o: EcoOptions): Eco {
         old.width = s.base.width;
         old.height = s.base.height;
         ctx2d(old).drawImage(s.base, 0, 0);
+        const shownView = document.createElement("canvas");
+        shownView.width = s.view.width;
+        shownView.height = s.view.height;
+        ctx2d(shownView).drawImage(s.view, 0, 0);
         s.rows = rows;
-        s.ok = cols >= 3 && rows > 10;
+        s.ok = m >= 3 && rows > 10;
         for (const cv of [s.view, s.base]) cv.height = Math.max(1, rows);
+        s.view.style.height = `${rows * CS}px`;
         s.bx.drawImage(old, 0, 0);
+        s.vx.drawImage(shownView, 0, 0);
         let cells = 0;
         for (let i = 0; i < n; i++) if (T[i]) cells++;
         s.cells = cells;
@@ -375,7 +455,7 @@ export function createEco(o: EcoOptions): Eco {
       changed = true;
       s.cols = cols;
       s.rows = rows;
-      s.ok = cols >= 3 && rows > 10;
+      s.ok = m >= 3 && rows > 10;
       s.T = new Uint8Array(n);
       s.P = new Uint16Array(n);
       s.A = new Uint8Array(n);
@@ -385,6 +465,7 @@ export function createEco(o: EcoOptions): Eco {
         cv.width = Math.max(1, cols);
         cv.height = Math.max(1, rows);
       }
+      s.view.style.height = `${rows * CS}px`;
       s.vx.clearRect(0, 0, s.view.width, s.view.height);
       s.bx.clearRect(0, 0, s.base.width, s.base.height);
     });
@@ -395,15 +476,36 @@ export function createEco(o: EcoOptions): Eco {
 
   /** The rows near what is on screen: everything outside rests. */
   function band(): [number, number] {
+    if (!host) return [0, 0];
     const hr = host.getBoundingClientRect();
     const top = Math.max(0, -hr.top);
     const bot = Math.min(hr.height, innerHeight - hr.top);
     return [Math.floor((top - 140) / CS), Math.ceil((bot + 140) / CS)];
   }
   const inB = (y: number, b: [number, number]) => y >= b[0] && y <= b[1];
-  const cap = (s: Side) => s.cols * s.rows * (NARROW ? 0.22 : 0.205);
+  // the room plants may fill: the margin, and under overgrowth the reach over the text too
+  const cap = (s: Side) => (s.hi - s.lo) * s.rows * (NARROW ? 0.22 : 0.205);
   const at = (s: Side, x: number, y: number) =>
-    x < 0 || y < 0 || x >= s.cols || y >= s.rows ? -1 : y * s.cols + x;
+    x < s.lo || y < 0 || x >= s.hi || y >= s.rows ? -1 : y * s.cols + x;
+  /** A margin too narrow for much. */
+  const slim = (s: Side) => s.mhi - s.mlo < 14;
+  const inMargin = (s: Side, x: number) => x >= s.mlo && x < s.mhi;
+
+  /** Overgrowth on or off: off, whatever had grown out over the text withers at once. */
+  function setOver(on: boolean) {
+    overOn = on;
+    for (const s of sides) {
+      s.lo = on ? 0 : s.mlo;
+      s.hi = on ? s.cols : s.mhi;
+      if (on) continue;
+      for (let y = 0; y < s.rows; y++)
+        for (let x = 0; x < s.cols; x++) {
+          if (inMargin(s, x)) continue;
+          const i = y * s.cols + x;
+          if (s.T[i]) clear(s, i);
+        }
+    }
+  }
 
   // ---------- colour of a cell ----------
   function leafCol(sp: Species, i: number): RGB {
@@ -508,6 +610,7 @@ export function createEco(o: EcoOptions): Eco {
       base: y,
       order: [],
       fung: false,
+      over: hh(id * 7 + 3) < 0.45,
     };
     const a = (rnd() - 0.5) * 0.9;
     pl.tips.push({
@@ -560,7 +663,7 @@ export function createEco(o: EcoOptions): Eco {
       const x = Math.round(t.x + nx * a + t.dx * b);
       const y = Math.round(t.y + ny * a + t.dy * b - (sp.frond ? 0 : a * 0.18));
       const i = at(s, x, y);
-      if (i < 0 || s.T[i]) {
+      if (i < 0 || s.T[i] || (!pl.over && !inMargin(s, x))) {
         if (first) return;
         continue;
       }
@@ -576,7 +679,7 @@ export function createEco(o: EcoOptions): Eco {
     const sp = SP[pl.sp];
     const dirIn = s.dirIn;
     const near = t.age > t.life * 0.75 && !!sp.curlEnd;
-    const ang = (rnd() - 0.5) * 2 * sp.wander;
+    const ang = (rnd() - 0.5) * 2 * sp.wander * (1 + wild * 1.5);
     let dx = t.dx * Math.cos(ang) - t.dy * Math.sin(ang);
     let dy = t.dx * Math.sin(ang) + t.dy * Math.cos(ang);
     const cu = (sp.curl + (near ? (sp.curlEnd ?? 0) : 0)) * dirIn;
@@ -589,7 +692,7 @@ export function createEco(o: EcoOptions): Eco {
       dx += sp.trop[0] * dirIn * 0.5;
       dy += sp.trop[1] * 0.5;
     }
-    if (s.cols < 14) {
+    if (slim(s)) {
       dx *= 0.25;
       dy += sp.thin ? 0.3 : -0.5;
     }
@@ -614,7 +717,7 @@ export function createEco(o: EcoOptions): Eco {
       return true;
     }
     const i = at(s, nx, ny);
-    if (i < 0 || s.T[i]) return false;
+    if (i < 0 || s.T[i] || (!pl.over && !inMargin(s, nx))) return false;
     if (sp.avoid !== false) {
       let crowd = 0;
       for (let j = -1; j <= 1; j++)
@@ -674,12 +777,14 @@ export function createEco(o: EcoOptions): Eco {
     else if (sp.thin && rnd() < 0.3) shroom(s, Math.round(t.x), Math.round(t.y), pl.id);
   }
   function grow(s: Side, b: [number, number], pre: boolean) {
-    const g = pre ? Math.max(0.75, seas("grow")) : seas("grow") * (night ? 0.55 : 1);
+    const g = pre ? Math.max(0.75, seas("grow")) : seas("grow") * (isNight() ? 0.55 : 1);
     for (const pl of plants.values()) {
       if (pl.s !== s || pl.dying || !pl.tips.length) continue;
+      // overgrowth is a fault, not nature: it keeps on through any season
+      const gp = overOn && pl.over ? Math.max(g, 0.7) : g;
       const next: Tip[] = [];
       for (const t of pl.tips) {
-        if (!inB(t.y, b) || rnd() > g * 0.9 || s.cells >= cap(s)) {
+        if (!inB(t.y, b) || rnd() > gp * 0.9 || s.cells >= cap(s)) {
           next.push(t);
           continue;
         }
@@ -725,7 +830,7 @@ export function createEco(o: EcoOptions): Eco {
       if (s.T[q] === PET) {
         const c = colorOf(s, q);
         clear(s, q);
-        if (fall && c && rnd() < 0.7) spawn(s, q % s.cols, (q / s.cols) | 0, "petal", c);
+        if (fall && c && rnd() < 0.5) spawn(s, q % s.cols, (q / s.cols) | 0, "petal", c);
       }
     f.pet = [];
   }
@@ -745,7 +850,7 @@ export function createEco(o: EcoOptions): Eco {
       }
       f.t++;
       if (f.st === "bud") {
-        if (!night && rnd() < bl * (pre ? 0.03 : 0.014)) {
+        if (!isNight() && rnd() < bl * (pre ? 0.03 : 0.014)) {
           f.st = "open";
           f.t = 0;
           s.A[f.i] = 255;
@@ -859,7 +964,7 @@ export function createEco(o: EcoOptions): Eco {
         continue;
       }
       m.t++;
-      if (bio.shrooms && m.t > 60 && rnd() < 0.03 && s.parts.length < 90) {
+      if (bio.shrooms && m.t > 60 && rnd() < 0.02 && s.parts.length < 90) {
         spawn(s, m.x + (rnd() < 0.5 ? -1 : 1), m.y - 1, "spore", C.spore);
         const p = s.parts[s.parts.length - 1];
         if (p && p.kind === "spore") p.glow = m.glow;
@@ -949,7 +1054,7 @@ export function createEco(o: EcoOptions): Eco {
         if (s.P[i] !== pl.id || !s.T[i]) continue;
         const c = colorOf(s, i);
         clear(s, i);
-        if (c && rnd() < 0.3) spawn(s, i % s.cols, (i / s.cols) | 0, "litter", c);
+        if (c && rnd() < 0.2) spawn(s, i % s.cols, (i / s.cols) | 0, "litter", c);
       }
       if (pl.cr >= pl.order.length) plants.delete(pl.id);
     }
@@ -989,7 +1094,6 @@ export function createEco(o: EcoOptions): Eco {
   // ---------- the season acting on leaves and snow ----------
   function seasonal(s: Side, b: [number, number]) {
     const fall = seas("fall");
-    const sn = seas("snow");
     const melt = seas("melt");
     for (let k = 0; k < 14 && s.leaves.length; k++) {
       const j = Math.floor(rnd() * s.leaves.length);
@@ -1001,25 +1105,13 @@ export function createEco(o: EcoOptions): Eco {
       }
       const y = (i / s.cols) | 0;
       if (!inB(y, b)) continue;
-      if (rnd() < fall * 3 * (inGust(y) ? 4 : 1)) {
+      if (rnd() < fall * 2.1 * (inGust(y) ? 4 : 1)) {
         const c = colorOf(s, i);
         clear(s, i);
         s.leaves[j] = s.leaves[s.leaves.length - 1];
         s.leaves.pop();
         if (c) spawn(s, i % s.cols, y, "leaf", c);
       } else paint(s, i);
-    }
-    let flakes = 0;
-    for (const p of s.parts) if (p.kind === "snow") flakes++;
-    if (sn > 0.05 && rnd() < sn * 0.35 && flakes < (s.cols < 14 ? 8 : 34)) {
-      const top = Math.max(0, b[0] + 46);
-      spawn(
-        s,
-        Math.floor(rnd() * s.cols),
-        top + Math.floor(rnd() * Math.max(10, b[1] - top - 60)),
-        "snow",
-        C.snow,
-      );
     }
     for (let k = 0; k < 3 && s.snow.length; k++) {
       const j = Math.floor(rnd() * s.snow.length);
@@ -1032,10 +1124,27 @@ export function createEco(o: EcoOptions): Eco {
     }
   }
 
+  /** Snow falls at the pace things move, not the pace plants grow. */
+  function snowfall(s: Side, b: [number, number]) {
+    const sn = seas("snow");
+    if (sn <= 0.05 || rnd() > sn * 0.25) return;
+    let flakes = 0;
+    for (const p of s.parts) if (p.kind === "snow") flakes++;
+    if (flakes >= (slim(s) ? 8 : 34)) return;
+    const top = Math.max(0, b[0] + 46);
+    spawn(
+      s,
+      s.mlo + Math.floor(rnd() * (s.mhi - s.mlo)),
+      top + Math.floor(rnd() * Math.max(10, b[1] - top - 60)),
+      "snow",
+      C.snow,
+    );
+  }
+
   // ---------- falling things ----------
   function spawn(s: Side, x: number, y: number, kind: PartKind, c: RGB, sp?: string) {
-    if (s.parts.length > 110) return;
-    s.parts.push({
+    if (s.parts.length > (kind === "bit" ? 170 : 110)) return null;
+    const p: Part = {
       x,
       y,
       vx: (rnd() - 0.5) * 0.2,
@@ -1045,7 +1154,9 @@ export function createEco(o: EcoOptions): Eco {
       sp,
       t: 0,
       ph: rnd() * 6,
-    });
+    };
+    s.parts.push(p);
+    return p;
   }
   function settle(s: Side, p: Part, x: number, y: number) {
     const i = at(s, x, y);
@@ -1069,6 +1180,10 @@ export function createEco(o: EcoOptions): Eco {
         p.vx += (rnd() - 0.5) * 0.06 + s.dirIn * 0.004;
         p.vy += (rnd() - 0.5) * 0.03 - 0.002;
         if (p.t > 160) continue;
+      } else if (p.kind === "bit") {
+        // a piece of a plant that burst: thrown out, then falling
+        p.vx *= 0.96;
+        p.vy = Math.min(1.4, p.vy + 0.06);
       } else {
         const g = p.kind === "fruit" ? 0.045 : p.kind === "snow" ? 0.006 : 0.012;
         const top = p.kind === "fruit" ? 1.2 : p.kind === "snow" ? 0.22 : 0.35;
@@ -1121,15 +1236,14 @@ export function createEco(o: EcoOptions): Eco {
       w: 1 / (34 + rnd() * 8),
       on: 0,
       kind: Math.floor(rnd() * C.fly.length),
+      wx: x,
+      wy: y,
     };
   }
   function wanted(s: Side, openF: Flower[]): Partial<Record<CritKind, number>> {
-    const small = s.cols < 14;
-    if (night)
-      return {
-        firefly: bio.sp[0] === "vetch" ? (small ? 1 : 2) : 0,
-        moth: 0,
-      };
+    const small = slim(s);
+    if (isNight()) return { firefly: small ? 1 : 2 };
+    if (dark > 0.25) return {};
     const poll = seas("poll");
     return {
       bee: bio.bees ? Math.min(5, Math.ceil(openF.length * poll * 0.6)) : 0,
@@ -1151,28 +1265,33 @@ export function createEco(o: EcoOptions): Eco {
         const i = pick(s.leaves) ?? -1;
         if (i < 0 || !inB((i / s.cols) | 0, b)) continue;
         s.crit.push(newCrit(k, i % s.cols, (i / s.cols) | 0));
-      } else if (k === "firefly") s.crit.push(newCrit(k, Math.floor(rnd() * s.cols), y));
-      else s.crit.push(newCrit(k, s.dirIn > 0 ? 0 : s.cols - 1, y));
+      } else if (k === "firefly") {
+        // out from among the plants
+        const i = pick(s.leaves) ?? -1;
+        const ly = (i / s.cols) | 0;
+        if (i >= 0 && inB(ly, b)) s.crit.push(newCrit(k, flyX(s, i % s.cols), ly));
+        else s.crit.push(newCrit(k, flyX(s, s.mlo + Math.floor(rnd() * (s.mhi - s.mlo))), y));
+      } else s.crit.push(newCrit(k, s.dirIn > 0 ? 0 : s.cols - 1, y));
     }
     const out: Crit[] = [];
     for (const c of s.crit) {
       c.t++;
       if (c.y < b[0] - 20 || c.y > b[1] + 20 || c.x < -2 || c.x > s.cols + 1) continue;
-      // Nothing that belongs to the other half of the day stays.
-      if (night !== (c.k === "firefly" || c.k === "moth")) continue;
+      // As the light goes, the day's creatures leave (bees and butterflies fly off to the
+      // wall, the small walkers tuck in); fireflies go out once it is day again.
+      const nightly = c.k === "firefly" || c.k === "moth";
+      if (nightly && dark < 0.02) continue;
+      if (!nightly && dark > 0.25) {
+        if (c.k !== "bee" && c.k !== "butterfly") continue;
+        c.n = 99;
+        c.tgt = null;
+      }
       const near = ptr && ptr.s === s ? Math.hypot(ptr.x - c.x, ptr.y - c.y) : 1e9;
       if (c.k === "bee" || c.k === "butterfly") {
         if (!pollinator(s, c, near, openF)) continue;
       } else if (c.k === "moth") moth(s, c, near);
-      else if (c.k === "firefly") {
-        c.vx = c.vx * 0.96 + (rnd() - 0.5) * 0.012;
-        c.vy = c.vy * 0.96 + (rnd() - 0.5) * 0.012 - 0.0005;
-        c.x += c.vx;
-        c.y += c.vy;
-        if (c.x < 1) c.vx += 0.05;
-        if (c.x > s.cols - 2) c.vx -= 0.05;
-        if (c.on > 0) c.on--;
-      } else {
+      else if (c.k === "firefly") firefly(s, c, b);
+      else {
         // beetles walk along plants; springtails hop
         const beetle = c.k === "beetle";
         if (beetle ? c.t % 3 === 0 : c.t % (18 + (c.d % 20)) === 0) {
@@ -1264,7 +1383,7 @@ export function createEco(o: EcoOptions): Eco {
   }
   /** Moths go to the lamp, or to the brightest thing that glows nearby. */
   function moth(s: Side, c: Crit, near: number) {
-    let tx = s.dirIn > 0 ? s.cols - 3 : 2;
+    let tx = s.dirIn > 0 ? s.mhi - 3 : s.mlo + 2;
     let ty = c.y + Math.sin(c.t * 0.03) * 6;
     if (ptr && ptr.s === s && near < 60) {
       tx = ptr.x;
@@ -1288,13 +1407,63 @@ export function createEco(o: EcoOptions): Eco {
     c.x += c.vx;
     c.y += c.vy;
   }
-  /** A firefly's light: a slow, steady breath (about 25 s), never a flash. */
+  /** Where a firefly may go across a margin: never so near the text that its glow would be
+   *  cut off by the margin's edge. */
+  function flyX(s: Side, x: number) {
+    const m = Math.min(10, Math.floor((s.mhi - s.mlo) * 0.3));
+    return s.dirIn > 0 ? clamp(x, s.mlo + 1, s.mhi - 1 - m) : clamp(x, s.mlo + m, s.mhi - 2);
+  }
+  /** A firefly drifts slowly from place to place among the plants, and now and then
+   *  settles on a leaf for a while; its light comes up over a few seconds. */
+  function firefly(s: Side, c: Crit, b: [number, number]) {
+    c.on = Math.min(1, c.on + 1 / 45);
+    if (c.vis > 0) {
+      c.vis--;
+      return;
+    }
+    let dx = c.wx - c.x;
+    let dy = c.wy - c.y;
+    let d = Math.hypot(dx, dy);
+    if (d < 0.7 || c.t > c.d) {
+      if (d < 0.7 && c.pol) c.vis = 150 + Math.floor(rnd() * 260);
+      c.pol = null;
+      c.d = c.t + 140 + rnd() * 220;
+      c.wx = flyX(s, c.x + (rnd() - 0.5) * 18);
+      c.wy = clamp(c.y + (rnd() - 0.5) * 16, b[0] + 8, b[1] - 8);
+      // sometimes, a leaf nearby to rest on
+      if (rnd() < 0.35)
+        for (let k = 0; k < 12; k++) {
+          const i = pick(s.leaves) ?? -1;
+          if (i < 0 || s.T[i] !== LEAF) continue;
+          const lx = i % s.cols;
+          const ly = (i / s.cols) | 0;
+          if (Math.hypot(lx - c.x, ly - c.y) > 16 || !inB(ly, b) || flyX(s, lx) !== lx) continue;
+          c.wx = lx;
+          c.wy = ly - 1;
+          c.pol = { sp: "", i };
+          break;
+        }
+      dx = c.wx - c.x;
+      dy = c.wy - c.y;
+      d = Math.hypot(dx, dy) || 1;
+    }
+    c.vx = c.vx * 0.94 + (dx / d) * 0.006;
+    c.vy = c.vy * 0.94 + (dy / d) * 0.006 + Math.sin(c.t * 0.05 + c.th * 6.28) * 0.002;
+    const sp = Math.hypot(c.vx, c.vy);
+    if (sp > 0.08) {
+      c.vx *= 0.08 / sp;
+      c.vy *= 0.08 / sp;
+    }
+    c.x = flyX(s, c.x + c.vx);
+    c.y += c.vy;
+  }
+  /** A firefly's light: steady, with a breath so slow it is barely seen; never a flash. */
   function fireflyGlow(c: Crit, tt: number) {
-    return 0.3 + 0.15 * Math.sin(tt * 0.25 + c.th * 6.28);
+    return (0.85 + 0.15 * Math.sin(tt * 0.08 + c.th * 6.28)) * c.on;
   }
   // ---------- what glows at night ----------
   function glowing(s: Side, b: [number, number]) {
-    const small = s.cols < 14;
+    const small = slim(s);
     // glow-worms on stems (meadow), foxfire on dead wood and moss (understory)
     s.glows = s.glows.filter((g) => {
       const t = s.T[g.i];
@@ -1369,7 +1538,7 @@ export function createEco(o: EcoOptions): Eco {
     if (ptr && ptr.s === s) L.push({ x: ptr.x, y: ptr.y, r: 12, c: LIGHT.lamp, k: 0.35 });
     for (const c of s.crit)
       if (c.k === "firefly")
-        L.push({ x: c.x, y: c.y, r: 6, c: LIGHT.firefly, k: fireflyGlow(c, tt) });
+        L.push({ x: c.x, y: c.y, r: 11, c: LIGHT.firefly, k: 0.65 * fireflyGlow(c, tt) });
     for (const g of s.glows) {
       const y = (g.i / s.cols) | 0;
       if (!inB(y, b)) continue;
@@ -1396,42 +1565,121 @@ export function createEco(o: EcoOptions): Eco {
     for (const p of s.pulses)
       for (const i of p.front.slice(0, 6))
         L.push({ x: i % s.cols, y: (i / s.cols) | 0, r: 3, c: LIGHT.pulse, k: 0.3 });
+    // everything that gives light comes up as night falls
+    for (const l of L) l.k *= dark;
     s.lights = L;
   }
 
   /** Keep a few plants alive near the reader. */
   function ensure(s: Side, b: [number, number], pre: boolean) {
     const g = pre ? 1 : seas("grow");
-    if (g < 0.15 || s.cells >= cap(s)) return;
+    if (s.cells >= cap(s)) return;
     const b0 = Math.max(0, b[0]);
     const b1 = Math.min(s.rows, b[1]);
+    // overgrowth: now and then a vine starts at the edge of the text and climbs out over it,
+    // whatever the season
+    if (overOn && !pre && rnd() < 0.06 * overgrowth()) {
+      const y = clamp(Math.floor(b0 + 30 + rnd() * Math.max(8, b1 - b0 - 60)), 3, s.rows - 3);
+      const pl = newPlant(s, s.dirIn > 0 ? s.mhi - 1 : s.mlo, y);
+      if (pl) {
+        pl.over = true;
+        pl.tips[0].dx = s.dirIn * 0.85;
+        pl.tips[0].dy = -0.45;
+      }
+    }
+    if (g < 0.15) return;
     let n = 0;
     for (const pl of plants.values())
       if (pl.s === s && !pl.dying && pl.base >= b0 && pl.base <= b1) n++;
-    const want = Math.max(2, Math.round((b1 - b0) / (s.cols < 14 ? 120 : 34)));
-    if (n < want && rnd() < (pre ? 0.6 : 0.13 * g)) {
+    const want = Math.max(2, Math.round((b1 - b0) / (slim(s) ? 120 : 34)));
+    if (n < want && rnd() < (pre ? 0.6 : 0.13 * g * (1 + 4 * wild))) {
       const y = clamp(Math.floor(b0 + 20 + rnd() * Math.max(8, b1 - b0 - 30)), 3, s.rows - 3);
       newPlant(s, s.dirIn > 0 ? 0 : s.cols - 1, y);
     }
   }
 
+  // ---------- frenzy ----------
+  const livingIn = (s: Side, b: [number, number], min: number) =>
+    [...plants.values()].filter(
+      (p) => p.s === s && !p.dying && p.cells.length >= min && inB(p.base, b),
+    );
+  /** A plant in its prime, suddenly dying. */
+  function strike(s: Side, b: [number, number]) {
+    const pl = pick(livingIn(s, b, 6));
+    if (!pl) return;
+    pl.dying = true;
+    pl.tips = [];
+    pl.order = pl.cells.slice().sort(() => rnd() - 0.5);
+  }
+  /** A plant bursting apart: its pieces are thrown out, fall, and lie as litter. */
+  function burst(s: Side, pl: Plant) {
+    let cx = 0;
+    let cy = 0;
+    let n = 0;
+    for (const i of pl.cells)
+      if (s.P[i] === pl.id && s.T[i]) {
+        cx += i % s.cols;
+        cy += (i / s.cols) | 0;
+        n++;
+      }
+    plants.delete(pl.id);
+    if (!n) return;
+    cx /= n;
+    cy /= n;
+    for (const i of pl.cells) {
+      if (s.P[i] !== pl.id || !s.T[i]) continue;
+      const c = colorOf(s, i);
+      const x = i % s.cols;
+      const y = (i / s.cols) | 0;
+      clear(s, i);
+      if (!c || rnd() > 0.6) continue;
+      const p = spawn(s, x, y, "bit", c);
+      if (!p) continue;
+      const dx = x - cx;
+      const dy = y - cy;
+      const d = Math.hypot(dx, dy) || 1;
+      const v = 0.5 + rnd() * 1.1;
+      p.vx = (dx / d) * v + (rnd() - 0.5) * 0.4;
+      p.vy = (dy / d) * v - 0.5 - rnd() * 0.5;
+    }
+  }
+
   // ---------- one step ----------
   let steps = 0;
+  let grownSteps = 0;
   function stepAll(b: [number, number], pre: boolean) {
     frame++;
     steps++;
-    if (o.cycle()) phase = (phase + 0.00045) % 4;
+    wild = pre ? 0 : frenzy();
+    const over = overgrowth() > 0.001;
+    if (over !== overOn) setOver(over);
+    const growing = pre || wild > 0.3 || steps % GROW_EVERY === 0;
+    if (growing) {
+      grownSteps++;
+      if (o.cycle()) phase = (phase + 0.0018) % 4;
+    }
     if (!pre) wind(b);
     for (const s of sides) {
       if (!s.ok) continue;
-      grow(s, b, pre);
-      flowers(s, b, pre);
-      seeds(s, b);
-      ageing(s, b);
-      fungi(s, b);
-      mossGrow(s, b);
-      seasonal(s, b);
+      if (growing) {
+        grow(s, b, pre);
+        flowers(s, b, pre);
+        seeds(s, b);
+        ageing(s, b);
+        fungi(s, b);
+        mossGrow(s, b);
+        seasonal(s, b);
+        ensure(s, b, pre);
+      }
       if (!pre) {
+        if (wild > 0) {
+          if (growing && rnd() < wild * 0.03) strike(s, b);
+          if (rnd() < wild * 0.009) {
+            const pl = pick(livingIn(s, b, 12));
+            if (pl) burst(s, pl);
+          }
+        }
+        snowfall(s, b);
         particles(s);
         creatures(s, b);
         mature(s);
@@ -1439,8 +1687,7 @@ export function createEco(o: EcoOptions): Eco {
         for (const p of s.parts) settle(s, p, Math.round(p.x), Math.round(p.y));
         s.parts.length = 0;
       }
-      ensure(s, b, pre);
-      if (night) glowing(s, b);
+      if (isNight()) glowing(s, b);
     }
   }
 
@@ -1462,10 +1709,11 @@ export function createEco(o: EcoOptions): Eco {
     return Math.min(1, k);
   }
   function drawCritters(s: Side, y0: number, y1: number) {
-    const lit = (c: RGB, x: number, y: number) => (night ? shade(c, lightAt(s, x, y)) : c);
+    const lit = (c: RGB, x: number, y: number) =>
+      dark > 0 ? shade(c, 1 + (lightAt(s, x, y) - 1) * dark) : c;
     for (const p of s.parts) {
       if (p.y < y0 || p.y > y1) continue;
-      if (night && p.glow) dot(s, p.x, p.y, shade(LIGHT.cap, 120));
+      if (isNight() && p.glow) dot(s, p.x, p.y, shade(LIGHT.cap, 120));
       else dot(s, p.x, p.y, lit(p.c, p.x, p.y));
     }
     for (const c of s.crit) {
@@ -1492,9 +1740,9 @@ export function createEco(o: EcoOptions): Eco {
           dot(s, c.x + 1, c.y, shade(m, 0.8));
         } else dot(s, c.x, c.y - 1, shade(m, 0.7));
       } else if (c.k === "firefly") {
-        const k = fireflyGlow(c, frame * 0.06);
-        dot(s, c.x, c.y, rgb(shade(LIGHT.firefly, Math.round(150 + 90 * k))));
-        const g = rgb(shade(LIGHT.firefly, Math.round(70 * k)));
+        const k = fireflyGlow(c, frame * 0.06) * dark;
+        dot(s, c.x, c.y, rgb(shade(LIGHT.firefly, Math.round(40 + 215 * k))));
+        const g = rgb(shade(LIGHT.firefly, Math.round(90 * k)));
         dot(s, c.x - 1, c.y, g);
         dot(s, c.x + 1, c.y, g);
       } else if (c.k === "beetle") dot(s, c.x, c.y, C.beetle);
@@ -1514,6 +1762,7 @@ export function createEco(o: EcoOptions): Eco {
       v.fillRect(l.x - l.r, l.y - l.r, l.r * 2 + 1, l.r * 2 + 1);
     }
     v.globalCompositeOperation = "source-over";
+    if (!isNight()) return;
     const tt = frame * 0.06;
     for (const g of s.glows) {
       const y = (g.i / s.cols) | 0;
@@ -1541,8 +1790,9 @@ export function createEco(o: EcoOptions): Eco {
     for (const i of pulseHead(s)) dot(s, i % s.cols, (i / s.cols) | 0, "#E8FFFF");
   }
   const pulseHead = (s: Side) => s.pulses.flatMap((p) => p.front);
-  const MOON = rgb(shade(LIGHT.moon, 255));
   function render(b: [number, number]) {
+    // the light falling on the garden: daylight, going over to the moon as night falls
+    const AMBIENT = rgb(shade(mix(WHITE, LIGHT.moon, dark), 255));
     for (const s of sides) {
       if (!s.ok) continue;
       const y0 = clamp(b[0], 0, s.rows);
@@ -1550,7 +1800,7 @@ export function createEco(o: EcoOptions): Eco {
       const h = y1 - y0;
       if (h <= 0) continue;
       const v = s.vx;
-      if (!night) {
+      if (dark <= 0) {
         v.clearRect(0, y0, s.cols, h);
         v.drawImage(s.base, 0, y0, s.cols, h, 0, y0, s.cols, h);
         if (gust) {
@@ -1585,7 +1835,7 @@ export function createEco(o: EcoOptions): Eco {
       }
       const L = s.lx;
       L.globalCompositeOperation = "source-over";
-      L.fillStyle = MOON;
+      L.fillStyle = AMBIENT;
       L.fillRect(0, 0, s.cols, h);
       L.globalCompositeOperation = "lighter";
       for (const l of s.lights) {
@@ -1615,39 +1865,55 @@ export function createEco(o: EcoOptions): Eco {
   // ---------- running ----------
   let acc = 0;
   let lastCost = 0;
-  let bornAt = performance.now();
   let ready = false;
   const STEP = 66;
-  const live = living({
-    el: host,
-    fps: 15,
-    budget: 6,
-    paused: true,
-    slow() {
-      live.fps = Math.max(6, live.fps - 3);
-    },
-    tick(dt) {
-      if (!ready || disposed) return;
-      const t0 = performance.now();
-      const b = band();
-      // after three minutes without a touch, slow to a crawl
-      live.fps = performance.now() - lastInput > 180000 ? 5 : 15;
-      // a day garden grows in quickly as you arrive, then settles to its own pace
-      const since = performance.now() - bornAt;
-      const boost = night ? 1 : 1 + 2 * Math.exp(-since / 9000);
-      acc += dt * clamp(o.tempo(), 0.1, 8) * boost;
-      let n = 0;
-      while (acc >= STEP && n < 4) {
-        stepAll(b, false);
-        acc -= STEP;
-        n++;
-      }
-      if (acc > STEP * 4) acc = 0;
-      if (night && n) for (const s of sides) if (s.ok) collectLights(s, b);
-      render(b);
-      lastCost = performance.now() - t0;
-    },
-  });
+  let live: Living | null = null;
+  function tick(dt: number) {
+    if (!ready || disposed || !host || !live) return;
+    const t0 = performance.now();
+    const b = band();
+    // after three minutes without a touch, slow to a crawl
+    live.fps = performance.now() - lastInput > 180000 ? 5 : 15;
+    // night falling, or lifting
+    const want = night ? 1 : 0;
+    const dusk = dark !== want;
+    if (dusk) {
+      const was = isNight();
+      dark = want > dark ? Math.min(1, dark + dt / DUSK) : Math.max(0, dark - dt / DUSK);
+      if (!was && isNight()) seedNight();
+      if (was && !isNight()) for (const s of sides) clearNight(s);
+    }
+    acc += dt * clamp(o.tempo(), 0.1, 8);
+    let n = 0;
+    while (acc >= STEP && n < 4) {
+      stepAll(b, false);
+      acc -= STEP;
+      n++;
+    }
+    if (acc > STEP * 4) acc = 0;
+    if (dark > 0 && (n || dusk)) for (const s of sides) if (s.ok) collectLights(s, b);
+    render(b);
+    lastCost = performance.now() - t0;
+  }
+  function startLiving(el: HTMLElement) {
+    live?.dispose();
+    const l = living({
+      el,
+      fps: 15,
+      budget: 6,
+      paused: true,
+      slow() {
+        l.fps = Math.max(6, l.fps - 3);
+      },
+      tick,
+    });
+    live = l;
+  }
+  function clearNight(s: Side) {
+    s.glows = [];
+    s.threads = [];
+    s.pulses = [];
+  }
 
   /** Run a generator in small slices so a long job never blocks the page. */
   function chunk(gen: Generator<void>, budget: number) {
@@ -1677,6 +1943,7 @@ export function createEco(o: EcoOptions): Eco {
   // pointer: pollinators flee it, moths come to it, it is a lamp at night; a press plants
   // a seed (or, in the mycelium at night, sends a pulse along the hyphae)
   function regionHit(e: PointerEvent) {
+    if (!host) return null;
     const hr = host.getBoundingClientRect();
     const x = e.clientX - hr.left;
     const y = e.clientY - hr.top;
@@ -1701,14 +1968,14 @@ export function createEco(o: EcoOptions): Eco {
   const onMove = (e: PointerEvent) => {
     ptr = regionHit(e);
     lastInput = performance.now();
-    if (night && ptr && bio.shrooms && performance.now() - nudge > 400) {
+    if (isNight() && ptr && bio.shrooms && performance.now() - nudge > 400) {
       const q = nearHypha(ptr.s, ptr.x, ptr.y, 2);
       if (q >= 0) {
         nudge = performance.now();
         pulse(ptr.s, q);
       }
     }
-    if (STILL && night && ready) redraw();
+    if (STILL && dark > 0 && ready) redraw();
   };
   const onOut = (e: MouseEvent) => {
     if (!e.relatedTarget) ptr = null;
@@ -1725,7 +1992,20 @@ export function createEco(o: EcoOptions): Eco {
     if (now - lastSeed < 300) return;
     lastSeed = now;
     const i = at(h.s, h.x, h.y);
-    if (night && bio.shrooms && i >= 0) {
+    if (frenzy() > 0 && i >= 0) {
+      // the plant under the pointer (or nearly) bursts
+      for (let d = 0; d <= 3; d++)
+        for (let j = -d; j <= d; j++)
+          for (let k = -d; k <= d; k++) {
+            const q = at(h.s, h.x + k, h.y + j);
+            const pl = q >= 0 && h.s.P[q] ? plants.get(h.s.P[q]) : undefined;
+            if (pl && pl.s === h.s) {
+              burst(h.s, pl);
+              return;
+            }
+          }
+    }
+    if (isNight() && bio.shrooms && i >= 0) {
       const q = nearHypha(h.s, h.x, h.y, 4);
       if (q >= 0) {
         pulse(h.s, q);
@@ -1752,8 +2032,9 @@ export function createEco(o: EcoOptions): Eco {
 
   let rq = 0;
   function redraw() {
+    if (!host) return;
     const b = band();
-    if (night) for (const s of sides) if (s.ok) collectLights(s, b);
+    if (dark > 0) for (const s of sides) if (s.ok) collectLights(s, b);
     render(b);
   }
   function queueRedraw() {
@@ -1769,6 +2050,7 @@ export function createEco(o: EcoOptions): Eco {
   let lastH = 0;
   let growing = 0;
   function relayout(force: boolean) {
+    if (!host) return;
     const r = host.getBoundingClientRect();
     if (!force && Math.abs(r.width - lastW) < 1 && Math.abs(r.height - lastH) < 1) return;
     lastW = r.width;
@@ -1779,28 +2061,37 @@ export function createEco(o: EcoOptions): Eco {
     }
     const my = ++growing;
     ready = false;
-    live.setPaused(true);
-    // nights start grown; days start young and grow in (still: grown, then drawn once)
-    const n = night || STILL ? (NARROW ? 300 : 420) : NARROW ? 260 : 360;
+    live?.setPaused(true);
+    // A new garden starts as a few sprouts and fills in as the page is read; one that was
+    // growing before a reload grows back to about where it was. Held still: grown, then
+    // drawn once.
+    const n = STILL ? (NARROW ? 300 : 420) : YOUNG;
     chunk(pregrow(n, my), 4).then(() => {
       if (growing !== my || disposed) return;
       ready = true;
-      bornAt = performance.now();
-      if (night) seedNight();
+      // grown back after a reload: a few seconds of time-lapse, in slices between frames
+      if (resume > 0 && !STILL) chunk(pregrow(Math.min(resume, 500), my), 3);
+      resume = 0;
+      if (isNight()) seedNight();
       redraw();
-      if (!STILL) live.setPaused(false);
+      if (!STILL && host) live?.setPaused(false);
     });
   }
-  /** A night begins with what already glows (and, held still, a few fireflies mid-flash). */
+  /** A night begins with what already glows, and a firefly or two already out. */
   function seedNight() {
     const b: [number, number] = [0, Math.max(...sides.map((s) => s.rows))];
     for (let k = 0; k < 40; k++) for (const s of sides) if (s.ok) glowing(s, b);
-    if (!STILL || bio.sp[0] !== "vetch") return;
+    const view = band();
     for (const s of sides) {
-      if (!s.ok || s.cols < 14) continue;
-      for (let y = 40 + rnd() * 120; y < s.rows - 10; y += 90 + rnd() * 160) {
-        const c = newCrit("firefly", 2 + rnd() * (s.cols - 4), y);
-        c.on = rnd() < 0.6 ? 1 : 0;
+      if (!s.ok || slim(s) || s.crit.some((c) => c.k === "firefly")) continue;
+      for (let k = 0; k < 1; k++) {
+        const y = clamp(
+          view[0] + 160 + rnd() * Math.max(20, view[1] - view[0] - 320),
+          4,
+          s.rows - 4,
+        );
+        const c = newCrit("firefly", flyX(s, s.mlo + 2 + rnd() * (s.mhi - s.mlo - 4)), y);
+        if (STILL) c.on = 1;
         s.crit.push(c);
       }
     }
@@ -1810,8 +2101,6 @@ export function createEco(o: EcoOptions): Eco {
     clearTimeout(rt);
     rt = window.setTimeout(() => relayout(false), 220);
   });
-  ro.observe(host);
-  relayout(true);
 
   function reseed() {
     plants.clear();
@@ -1820,6 +2109,42 @@ export function createEco(o: EcoOptions): Eco {
   }
 
   return {
+    attach(el: HTMLElement, col: () => Element | null, n: boolean) {
+      const first = !sides.length;
+      host = el;
+      column = col;
+      night = n;
+      // arriving straight at a page: its light already; moving between pages: dusk or dawn
+      if (first) dark = n ? 1 : 0;
+      for (const s of sides) el.prepend(s.box);
+      startLiving(el);
+      ro.disconnect();
+      ro.observe(el);
+      lastW = lastH = 0;
+      relayout(first);
+      if (ready) {
+        redraw();
+        if (!STILL) live?.setPaused(false);
+      }
+    },
+    detach(el: HTMLElement) {
+      if (host !== el) return;
+      live?.dispose();
+      live = null;
+      ro.disconnect();
+      clearTimeout(rt);
+      cancelAnimationFrame(rq);
+      rq = 0;
+      host = null;
+      ptr = null;
+    },
+    reset() {
+      resume = 0;
+      grownSteps = 0;
+      for (const s of sides) clearNight(s);
+      reseed();
+    },
+    grown: () => grownSteps,
     setBiome(b: string) {
       const next = BIOME_DEFS[b] ?? BIOME_DEFS.meadow;
       if (next === bio) return;
@@ -1829,15 +2154,17 @@ export function createEco(o: EcoOptions): Eco {
     setNight(n: boolean) {
       if (n === night) return;
       night = n;
-      for (const s of sides) {
-        s.crit = [];
-        s.glows = [];
-        s.threads = [];
-        s.pulses = [];
-        s.lights = [];
+      // the light changes over DUSK in tick(); held still, at once
+      if (STILL) {
+        dark = n ? 1 : 0;
+        for (const s of sides) {
+          s.crit = [];
+          clearNight(s);
+          s.lights = [];
+        }
+        if (n && ready) seedNight();
+        if (ready) redraw();
       }
-      if (n && ready) seedNight();
-      if (ready) redraw();
     },
     seasonChanged() {
       for (const s of sides) for (const i of s.leaves) if (s.T[i] === LEAF) paint(s, i);
@@ -1845,7 +2172,7 @@ export function createEco(o: EcoOptions): Eco {
     },
     dispose() {
       disposed = true;
-      live.dispose();
+      live?.dispose();
       ro.disconnect();
       clearTimeout(rt);
       cancelAnimationFrame(rq);
@@ -1881,6 +2208,7 @@ export function createEco(o: EcoOptions): Eco {
         cost: lastCost,
         steps,
         fireflies: [lit, ff],
+        dark,
       };
     },
   };

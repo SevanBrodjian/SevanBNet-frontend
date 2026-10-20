@@ -231,7 +231,8 @@ export const C = {
 
 /** Light, as multipliers: moonlight, and what glows at night in each biome. */
 export const LIGHT = {
-  moon: [0.13, 0.145, 0.19] as RGB,
+  /** Moonlight: dim and blue, enough to make out the plants by. */
+  moon: [0.22, 0.26, 0.4] as RGB,
   lamp: [1, 0.84, 0.6] as RGB,
   firefly: [1, 0.92, 0.38] as RGB,
   glowworm: [0.55, 1, 0.42] as RGB,

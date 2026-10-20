@@ -24,6 +24,30 @@ const proxy: Record<string, ProxyOptions> = {
 const LOCAL_LAB = "/lab/learning-taichi/index.html";
 const labUrl = process.env.VITE_LAB_URL ?? (existsSync(`public${LOCAL_LAB}`) ? LOCAL_LAB : "");
 
+// The dev server's port, 1000, is below 1024, which macOS lets an ordinary user open only on
+// every network interface at once. So it listens everywhere but answers only this Mac and
+// Sevan's own devices over Tailscale (http://<this Mac's tailnet name>:1000, for testing on
+// a phone); anyone else on the network gets a 403.
+const LOOPBACK = new Set(["::1", "127.0.0.1", "::ffff:127.0.0.1"]);
+/** Tailscale's addresses: 100.64.0.0/10, and its IPv6 prefix. */
+const tailnet = (a: string) => {
+  const v4 = a.replace(/^::ffff:/, "").match(/^100\.(\d+)\./);
+  return (!!v4 && Number(v4[1]) >= 64 && Number(v4[1]) <= 127) || a.startsWith("fd7a:115c:a1e0:");
+};
+const ownDevicesOnly: PluginOption = {
+  name: "own-devices-only",
+  configureServer(server) {
+    server.middlewares.use((req, res, next) => {
+      const from = req.socket.remoteAddress ?? "";
+      const to = req.socket.localAddress ?? "";
+      // from a device on the tailnet, arriving on this Mac's tailnet address
+      if (LOOPBACK.has(from) || (tailnet(from) && tailnet(to))) return next();
+      res.statusCode = 403;
+      res.end();
+    });
+  },
+};
+
 export default defineConfig(async ({ command, isPreview }) => {
   // Where the app calls the API. An explicit VITE_API_URL wins (empty means relative
   // /api, which suits a local `vite preview`); otherwise `vite` uses the proxy and builds
@@ -35,7 +59,7 @@ export default defineConfig(async ({ command, isPreview }) => {
   const apiBase = apiUrl || "/api";
   // The build reads content from the same API, through the proxy's target when relative.
   const contentApi = apiBase.startsWith("/") ? `${apiTarget}${apiBase}` : apiBase;
-  const plugins: PluginOption[] = [react()];
+  const plugins: PluginOption[] = [react(), ownDevicesOnly];
   if (!isPreview) {
     const content = await loadContent(contentApi);
     plugins.push(
@@ -53,10 +77,16 @@ export default defineConfig(async ({ command, isPreview }) => {
       "import.meta.env.VITE_LAB_URL": JSON.stringify(labUrl),
     },
     // Fixed local addresses (never drift to another port): the site is always
-    // http://localhost:5173 and a local production preview http://localhost:4173.
-    // Both stay on localhost; to open them from a phone, Tailscale forwards to them
-    // (`tailscale serve`), so they also answer to this Mac's tailnet name (*.ts.net).
-    server: { port: 5173, strictPort: true, proxy, allowedHosts: [".ts.net"] },
+    // http://localhost:1000 and a local production preview http://localhost:4173.
+    // Answered for this Mac and, over Tailscale, Sevan's own devices, by this Mac's tailnet
+    // name (short or full); the preview is for this Mac.
+    server: {
+      port: 1000,
+      strictPort: true,
+      host: "::",
+      proxy,
+      allowedHosts: [".ts.net", "sevan-macbook-air"],
+    },
     preview: { port: 4173, strictPort: true, proxy, allowedHosts: [".ts.net"] },
   };
 });

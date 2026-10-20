@@ -8,7 +8,7 @@ Requires Node 24 (see `.nvmrc`).
 
 ```sh
 npm install
-npm run dev      # http://localhost:5173; /api is proxied to the local backend (port 8000)
+npm run dev      # http://localhost:1000; /api is proxied to the local backend (port 8000)
 npm run check    # Biome lint/format + TypeScript
 npm run build    # production bundle in dist/
 ```

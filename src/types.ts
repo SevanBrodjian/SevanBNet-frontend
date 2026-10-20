@@ -68,6 +68,12 @@ export type Post = {
 export type Site = {
   home_line: string;
   role: string;
-  /** The About page, one string per paragraph. */
+  /** The About page, one string per paragraph (plain, for crawlers and fallbacks). */
   about: string[];
+  /** The About page from its Markdown, sanitized by the backend. Missing from older APIs. */
+  about_html?: string;
+  /** The note at the top of the Writing page; empty for none. Missing from older APIs. */
+  writing_note?: string;
+  /** The note from its Markdown, sanitized by the backend. */
+  writing_note_html?: string;
 };

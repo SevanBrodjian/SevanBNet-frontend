@@ -1,5 +1,6 @@
 /* Papers (/papers). Owned by the Papers area.
-   Each paper is a panel: date, the paper, and its widget in a dark well on the right.
+   Each paper is a compact panel: the date with its links under it, the paper, and its
+   widget in a dark well on the right; BibTeX opens across the bottom.
    Room: html[data-room="papers"] keeps the frame's ground. */
 
 .papers-page {
@@ -7,10 +8,31 @@
   --pw-well: color-mix(in oklab, var(--g0), #000 26%);
 }
 
+/* "Selected Publications", and the full list under it. */
+.pa-head {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 9px;
+}
+
+.pa-full {
+  color: var(--tx3);
+  font: 13px / 1 var(--sans);
+  letter-spacing: 0.01em;
+}
+
+.pa-full:hover,
+.pa-full:focus-visible {
+  color: var(--tx);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
 .pas {
   display: grid;
-  gap: 24px;
-  margin: 40px 0 0;
+  gap: 20px;
+  margin: 32px 0 0;
   padding: 0;
   list-style: none;
 }
@@ -18,23 +40,31 @@
 .pa {
   position: relative;
   display: grid;
-  grid-template-columns: 92px minmax(0, 1fr) minmax(300px, 440px);
-  gap: 0 44px;
-  padding: 34px 34px 36px 30px;
+  grid-template-columns: 116px minmax(0, 1fr) minmax(220px, 300px);
+  gap: 0 34px;
+  padding: 22px 24px 22px 22px;
   border: var(--hair) solid var(--rule);
   background: var(--g1);
 }
 
 .pa.pa-plain {
-  grid-template-columns: 92px minmax(0, 1fr);
+  grid-template-columns: 116px minmax(0, 1fr);
 }
 
 .pa[data-active] {
   border-color: var(--rule2);
 }
 
+.pa-side {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+  min-width: 0;
+}
+
 .pa-dt {
-  padding-top: 7px;
+  padding-top: 5px;
   color: var(--tx3);
   font: 13px / 1 var(--mono);
   font-variant-numeric: tabular-nums;
@@ -47,9 +77,9 @@
 
 .pa-ti {
   margin: 0;
-  max-width: 34ch;
+  max-width: 44ch;
   color: var(--tx);
-  font: var(--w5) 26px / 1.22 var(--sans);
+  font: var(--w5) 21px / 1.25 var(--sans);
   letter-spacing: -0.004em;
   text-wrap: balance;
 }
@@ -70,9 +100,9 @@
 }
 
 .pa-au {
-  margin: 12px 0 0;
+  margin: 7px 0 0;
   color: var(--tx3);
-  font-size: 16px;
+  font-size: 14.5px;
 }
 
 .pa-au b {
@@ -84,27 +114,74 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 10px 0 0;
+  margin: 4px 0 0;
   color: var(--tx2);
-  font-size: 14.5px;
+  font-size: 13.5px;
 }
 
 .pa-ds {
-  max-width: 64ch;
-  margin: 20px 0 0;
+  max-width: 72ch;
+  margin: 11px 0 0;
   color: var(--tx2);
-  font-size: 16.5px;
-  line-height: calc(1.6 * var(--k-lead));
+  font-size: 15px;
+  line-height: calc(1.55 * var(--k-lead));
 }
 
+/* The links: slim, one under another, the arrow kept to the right edge. */
 .pa-acts {
-  margin-top: 28px;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 6px;
 }
 
-/* BibTeX, while its block is open: held down. */
+.pa-acts .act {
+  min-height: 28px;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 10px;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  --cx: transparent;
+}
+
+.pa-acts .act:hover {
+  --cx: transparent;
+}
+
+/* BibTeX: smaller than the links, plainly a switch for the block it opens. */
+.pa-bibt {
+  align-self: flex-start;
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 0 2px;
+  border: 0;
+  border-bottom: 1px dotted var(--rule2);
+  background: none;
+  color: var(--tx3);
+  font: 11.5px / 1.3 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.pa-bibt:hover,
+.pa-bibt[aria-expanded="true"] {
+  border-bottom-color: var(--tx3);
+  color: var(--tx);
+}
+
+.pa-bibt i {
+  font-style: normal;
+  font-size: 10px;
+}
+
+/* BibTeX, while open: across the bottom of the panel. */
 .pa-bib {
+  grid-column: 1 / -1;
   max-width: 100%;
-  margin-top: 20px;
+  margin-top: 18px;
   padding-right: 76px;
 }
 
@@ -139,6 +216,12 @@
   overflow: hidden;
   border: var(--hair) solid var(--rule);
   background: var(--pw-well);
+}
+
+/* Kuramoto's well is wider than tall, so with its bar it stands as high as the others. */
+.pw[data-w="kuramoto"] .pw-well,
+.pw[data-w="kuramoto"]:empty::before {
+  aspect-ratio: 2 / 1;
 }
 
 .pw-well canvas {
@@ -247,8 +330,8 @@
 
 @media (max-width: 1100px) {
   .pa {
-    grid-template-columns: 80px minmax(0, 1fr) minmax(260px, 340px);
-    gap: 0 32px;
+    grid-template-columns: 108px minmax(0, 1fr) minmax(200px, 260px);
+    gap: 0 26px;
   }
 }
 
@@ -262,26 +345,36 @@
   .pa.pa-plain {
     grid-template-columns: minmax(0, 1fr);
     gap: 0;
-    padding: 22px 20px 24px;
+    padding: 18px 18px 20px;
+  }
+
+  /* the date and the links in a row above the paper */
+  .pa-side {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 10px;
+    padding-bottom: 14px;
   }
 
   .pa-dt {
-    padding: 0 0 12px;
-  }
-
-  .pa-ti {
-    font-size: 22px;
-  }
-
-  .pa-ds {
-    font-size: 16px;
+    padding: 0 6px 0 0;
   }
 
   .pa-acts {
-    gap: 12px;
+    flex-direction: row;
+    gap: 6px;
+  }
+
+  .pa-ti {
+    font-size: 19px;
+  }
+
+  .pa-ds {
+    font-size: 15px;
   }
 
   .pa-w {
-    margin-top: 24px;
+    margin-top: 16px;
   }
 }

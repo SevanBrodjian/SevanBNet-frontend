@@ -2,11 +2,16 @@
 // a video is a long strip of frames; the method finds where the content changes and
 // keeps a few events. While active, a playhead runs through a new synthetic video, marks
 // each change it passes, and drops every finished event into its own tile.
-// The "video" is procedural: each event is a little scene that pans slowly.
+// The "video" is procedural: one place in one light, each event a little scene with
+// something else in it (a house, a tree, someone walking by), panning slowly.
 
 import { living, STILL } from "../frame/live";
 import { clamp, rng } from "../frame/util";
 import { type MountWidget, onControls, type Palette, type RGB, readPalette, Surface } from "./kit";
+
+/** What an event is about: the change between events is in what is there, not the light. */
+type Subject = "sun" | "house" | "tree" | "figure" | "car";
+const SUBJECTS: Subject[] = ["sun", "house", "tree", "figure", "car"];
 
 type Scene = {
   a: number; // first frame
@@ -15,34 +20,42 @@ type Scene = {
   ground: number;
   horizon: number;
   slope: number;
-  disc: [x: number, y: number, r: number, tone: number];
-  block: [x: number, w: number, h: number, tone: number];
+  subject: Subject;
+  sx: number; // where it stands, 0..1 across
+  size: number;
+  tone: number;
   pan: number;
 };
 
 const FRAME_MS = 115; // the playhead's pace
 const HOLD_MS = 1900; // the finished picture, before the next video
 
+/** A video: one place, one light, and a run of events that each show something else. */
 function video(seed: number, n: number): Scene[] {
   const r = rng(seed);
+  const sky = 0.22 + r() * 0.16;
+  const ground = 0.32 + r() * 0.14;
+  const horizon = 0.5 + r() * 0.16;
+  const slope = (r() - 0.5) * 0.16;
   const out: Scene[] = [];
   let a = 0;
   while (a < n) {
     let len = 2 + Math.floor(r() * 6);
     if (n - a - len < 2) len = n - a;
     const prev = out[out.length - 1];
-    // Neighbouring events differ: flip the light, move the horizon.
-    const dark = prev ? prev.sky > 0.3 : r() < 0.5;
+    const others = SUBJECTS.filter((k) => k !== prev?.subject);
     out.push({
       a,
       b: a + len,
-      sky: dark ? 0.08 + r() * 0.08 : 0.42 + r() * 0.2,
-      ground: 0.2 + r() * 0.3,
-      horizon: prev ? clamp(1 - prev.horizon + (r() - 0.5) * 0.2, 0.3, 0.78) : 0.4 + r() * 0.3,
-      slope: (r() - 0.5) * 0.4,
-      disc: [0.15 + r() * 0.7, 0.18 + r() * 0.3, 0.1 + r() * 0.12, 0.6 + r() * 0.35],
-      block: [r(), 0.12 + r() * 0.22, 0.2 + r() * 0.35, r() < 0.5 ? 0.06 : 0.75],
-      pan: (r() - 0.5) * 0.5,
+      sky: clamp(sky + (r() - 0.5) * 0.06, 0, 1),
+      ground: clamp(ground + (r() - 0.5) * 0.06, 0, 1),
+      horizon: clamp(horizon + (r() - 0.5) * 0.08, 0.4, 0.75),
+      slope,
+      subject: others[Math.floor(r() * others.length)],
+      sx: prev ? clamp(1 - prev.sx + (r() - 0.5) * 0.3, 0.18, 0.82) : 0.25 + r() * 0.5,
+      size: 0.85 + r() * 0.3,
+      tone: 0.62 + r() * 0.22,
+      pan: (r() - 0.5) * 0.3,
     });
     a += len;
   }
@@ -70,22 +83,62 @@ function drawScene(
   ctx.clip();
   ctx.fillStyle = mix(pal.well, pal.tx2, s.sky);
   ctx.fillRect(x, y, w, h);
-  const [dx, dy, dr, dt] = s.disc;
-  ctx.fillStyle = mix(pal.well, pal.tx, dt);
-  ctx.beginPath();
-  ctx.arc(x + (dx - pan) * w, y + dy * h, Math.max(1, dr * h), 0, Math.PI * 2);
-  ctx.fill();
+  const hy = (px: number) => y + h * (s.horizon + s.slope * (px - 0.5));
   ctx.fillStyle = mix(pal.well, pal.tx2, s.ground);
   ctx.beginPath();
-  ctx.moveTo(x, y + h * (s.horizon - s.slope * 0.5));
-  ctx.lineTo(x + w, y + h * (s.horizon + s.slope * 0.5));
+  ctx.moveTo(x, hy(0));
+  ctx.lineTo(x + w, hy(1));
   ctx.lineTo(x + w, y + h);
   ctx.lineTo(x, y + h);
   ctx.fill();
-  const [bx, bw, bh, bt] = s.block;
-  ctx.fillStyle = mix(pal.well, pal.tx2, bt);
-  const gx = x + (bx - pan * 1.6) * w;
-  ctx.fillRect(gx, y + h * (s.horizon - bh), bw * w, h * bh + 1);
+  // the subject, standing on the horizon where it is, drifting a little with the camera
+  const cx = s.sx - pan;
+  const X = x + cx * w;
+  const base = hy(cx);
+  const k = s.size * h;
+  ctx.fillStyle = mix(pal.well, pal.tx, s.tone);
+  switch (s.subject) {
+    case "sun":
+      ctx.beginPath();
+      ctx.arc(X, y + h * s.horizon * 0.42, Math.max(1, k * 0.14), 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    case "house": {
+      const bw = k * 0.34;
+      const bh = k * 0.24;
+      ctx.fillRect(X - bw / 2, base - bh, bw, bh + 1);
+      ctx.beginPath();
+      ctx.moveTo(X - bw * 0.6, base - bh);
+      ctx.lineTo(X, base - bh - k * 0.16);
+      ctx.lineTo(X + bw * 0.6, base - bh);
+      ctx.fill();
+      break;
+    }
+    case "tree":
+      ctx.fillRect(X - k * 0.025, base - k * 0.14, k * 0.05, k * 0.14 + 1);
+      ctx.beginPath();
+      ctx.moveTo(X - k * 0.13, base - k * 0.12);
+      ctx.lineTo(X, base - k * 0.46);
+      ctx.lineTo(X + k * 0.13, base - k * 0.12);
+      ctx.fill();
+      break;
+    case "figure":
+      ctx.fillRect(X - k * 0.035, base - k * 0.24, k * 0.07, k * 0.24 + 1);
+      ctx.beginPath();
+      ctx.arc(X, base - k * 0.3, Math.max(1, k * 0.055), 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    case "car":
+      ctx.fillRect(X - k * 0.2, base - k * 0.11, k * 0.4, k * 0.08);
+      ctx.fillRect(X - k * 0.1, base - k * 0.17, k * 0.2, k * 0.07);
+      ctx.fillStyle = mix(pal.well, pal.tx2, 0.12);
+      for (const o of [-0.12, 0.12]) {
+        ctx.beginPath();
+        ctx.arc(X + o * k, base - k * 0.03, Math.max(1, k * 0.04), 0, Math.PI * 2);
+        ctx.fill();
+      }
+      break;
+  }
   ctx.restore();
 }
 

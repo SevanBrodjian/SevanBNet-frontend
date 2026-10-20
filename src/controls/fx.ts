@@ -5,10 +5,12 @@
 // - skeleton: tag, class, size and target labels for those boxes; rulers, grid, HUD,
 //   inspector
 // - faults: misregistration and drift are CSS; fallback fonts, stuck states, overflow,
-//   z-fighting, tearing and stray Loading... boxes are assigned here from a seeded hash,
-//   so Re-roll moves them
+//   z-fighting, tearing, missing textures, mojibake and stray Loading... boxes are
+//   assigned here from a seeded hash, so Re-roll moves them; the cursor smear is drawn
+//   wherever the pointer goes
 // - dynamics: a spring per block (stiff, slightly underdamped), driven by pointer,
-//   scroll, gravity and taps
+//   its wake, scroll, gravity and taps; links and buttons never flee the pointer, they
+//   lean toward it and recoil when touched
 // - mechanics: audible clicks, row-by-row printing, phosphor persistence of the pointer,
 //   grain motion
 // The header and the panel are never broken or moved, so they always work. Elements are
@@ -33,7 +35,7 @@ const SEL =
 
 let started = false;
 let L: Record<
-  "web" | "grain" | "scan" | "vign" | "grid" | "skel" | "rul" | "ins" | "hud",
+  "web" | "grain" | "scan" | "vign" | "grid" | "skel" | "rul" | "ins" | "hud" | "intr",
   HTMLElement
 >;
 
@@ -93,11 +95,12 @@ function collect() {
 }
 
 function unmark(n: HTMLElement) {
-  for (const a of ["data-bx", "data-bk", "data-ff", "data-st", "data-ovf", "data-zf"])
+  for (const a of ["data-bx", "data-bk", "data-ff", "data-st", "data-ovf", "data-zf", "data-mt"])
     n.removeAttribute(a);
   n.style.removeProperty("--h1");
   n.style.removeProperty("--h2");
   n.style.removeProperty("--tear");
+  n.style.removeProperty("--cut");
 }
 
 function boxes() {
@@ -208,16 +211,102 @@ function skel() {
 const strays: HTMLElement[] = [];
 const TEXT = /^(H1|H2|H3|P|LI|A|SPAN|TIME|BUTTON|FIGCAPTION)$/;
 
+/** Bytes 0x80-0x9F as Windows-1252 reads them; the rest of the high half is Latin-1. */
+const CP1252: Record<number, string> = {
+  128: "€",
+  130: "‚",
+  131: "ƒ",
+  132: "„",
+  133: "…",
+  134: "†",
+  135: "‡",
+  136: "ˆ",
+  137: "‰",
+  138: "Š",
+  139: "‹",
+  140: "Œ",
+  142: "Ž",
+  145: "‘",
+  146: "’",
+  147: "“",
+  148: "”",
+  149: "•",
+  150: "–",
+  151: "—",
+  152: "˜",
+  153: "™",
+  154: "š",
+  155: "›",
+  156: "œ",
+  158: "ž",
+  159: "Ÿ",
+};
+const UTF8 = new TextEncoder();
+
+/** Text as a page sent in UTF-8 but read as Windows-1252 shows it: it’s → itâ€™s. */
+function misread(text: string) {
+  let out = "";
+  for (const ch of text) {
+    if (ch.charCodeAt(0) < 128) out += ch;
+    else
+      for (const byte of UTF8.encode(ch))
+        out += byte < 160 ? (CP1252[byte] ?? "\ufffd") : String.fromCharCode(byte);
+  }
+  return out;
+}
+
+/** Text nodes shown misread, with what they said and what they show now. */
+const MISREAD = new Map<Text, [string, string]>();
+
+/** Misread (or restore) the text a block owns: its text nodes not inside a nearer block. */
+function encoding(b: HTMLElement, wrong: boolean) {
+  const walk = D.createTreeWalker(b, NodeFilter.SHOW_TEXT);
+  for (let t = walk.nextNode() as Text | null; t; t = walk.nextNode() as Text | null) {
+    if (t.parentElement?.closest("[data-bk]") !== b || t.parentElement.closest(".zg")) continue;
+    const had = MISREAD.get(t);
+    if (wrong && !had) {
+      const shown = misread(t.data);
+      if (shown === t.data) continue;
+      MISREAD.set(t, [t.data, shown]);
+      t.data = shown;
+    } else if (!wrong && had) restore(t, had);
+  }
+}
+
+function restore(t: Text, [said, shown]: [string, string]) {
+  // React may have written new text since; then leave it.
+  if (t.data === shown) t.data = said;
+  MISREAD.delete(t);
+}
+
 function faults() {
   const seed = currentSeed();
   const fallback = num("fallback");
   const stuck = num("stuck");
   const overflow = num("overflow");
   const zfight = num("zfight");
+  const missing = num("missing");
+  const mojibake = num("mojibake");
+  for (const t of [...MISREAD.keys()]) if (!t.isConnected) MISREAD.delete(t);
   for (const b of BOX) {
     if (!b.hasAttribute("data-bk")) continue;
     const k = keyOf(b);
     const t = b.tagName;
+    // Missing textures: the renderer's magenta checker, or (in a media frame) an image
+    // that stopped downloading partway, grey below the last row that arrived.
+    if (t === "IMG" || t === "VIDEO") {
+      const r = hash(k, seed * 19 + 8);
+      const framed = !!b.parentElement?.matches(".mx");
+      const mt = r < missing * (framed ? 0.4 : 0.75) ? "1" : framed && r < missing * 0.8 ? "2" : "";
+      if (mt) {
+        b.dataset.mt = mt;
+        b.style.setProperty("--cut", `${Math.round(22 + hash(k, seed + 41) * 50)}%`);
+      } else {
+        b.removeAttribute("data-mt");
+        b.style.removeProperty("--cut");
+      }
+    }
+    encoding(b, hash(k, seed * 17 + 7) < mojibake * 0.85);
     b.style.setProperty("--h1", hash(k, seed * 3 + 1).toFixed(3));
     b.style.setProperty("--h2", hash(k, seed * 3 + 2).toFixed(3));
     const ff = TEXT.test(t) && hash(k, seed * 5 + 3) < fallback * 0.55;
@@ -273,8 +362,10 @@ function faults() {
 
 function clearFaults() {
   for (const b of BOX) {
-    for (const a of ["data-ff", "data-st", "data-ovf", "data-zf"]) b.removeAttribute(a);
+    for (const a of ["data-ff", "data-st", "data-ovf", "data-zf", "data-mt"]) b.removeAttribute(a);
   }
+  for (const [t, was] of MISREAD) restore(t, was);
+  smearClear();
   for (const g of $$(".zg")) g.remove();
   while (strays.length) strays.pop()?.remove();
   zfLive.setPaused(true);
@@ -334,6 +425,182 @@ function setTear(b: HTMLElement, tx: number) {
   else b.style.removeProperty("--tear");
 }
 
+/** Cursor smear: the pointer is drawn into the page and never painted over, the way a
+ *  machine that has stopped repainting leaves a trail of cursors. A click or a scroll
+ *  repaints. A white arrow outlined in black, at whole device pixels. */
+const ARROW = [
+  "1",
+  "11",
+  "121",
+  "1221",
+  "12221",
+  "122221",
+  "1222221",
+  "12222221",
+  "122222221",
+  "1222222221",
+  "12222211111",
+  "1221221",
+  "121 1221",
+  "11  1221",
+  "1    1221",
+  "     1221",
+  "      1221",
+  "      1221",
+  "       11",
+];
+let scv: HTMLCanvasElement | null = null;
+let sctx: CanvasRenderingContext2D | null = null;
+let sprite: HTMLCanvasElement | null = null;
+let smeared = false;
+
+function arrow(px: number) {
+  const c = D.createElement("canvas");
+  c.width = 11 * px;
+  c.height = ARROW.length * px;
+  const g = c.getContext("2d");
+  if (!g) return c;
+  ARROW.forEach((row, y) => {
+    [...row].forEach((v, x) => {
+      if (v === " ") return;
+      g.fillStyle = v === "1" ? "#000" : "#fff";
+      g.fillRect(x * px, y * px, px, px);
+    });
+  });
+  return c;
+}
+
+function smearSize() {
+  if (!scv) return;
+  const d = devicePixelRatio || 1;
+  scv.width = Math.round(innerWidth * d);
+  scv.height = Math.round(innerHeight * d);
+  sprite = arrow(Math.max(1, Math.round(d)));
+  smeared = false;
+}
+
+function smearAt(x: number, y: number) {
+  if (!scv) {
+    scv = D.createElement("canvas");
+    scv.className = "fxl fx-smear";
+    scv.setAttribute("aria-hidden", "true");
+    D.body.append(scv);
+    sctx = scv.getContext("2d");
+    smearSize();
+  }
+  if (!sctx || !sprite) return;
+  const d = devicePixelRatio || 1;
+  sctx.drawImage(sprite, Math.round(x * d), Math.round(y * d));
+  smeared = true;
+}
+
+function smearClear() {
+  if (!smeared || !sctx || !scv) return;
+  sctx.clearRect(0, 0, scv.width, scv.height);
+  smeared = false;
+}
+
+/** Intrusions: now and then, for a moment, a heading or a line on screen shows something
+ *  else, in its own type, and then is itself again. Never twice the same way running. */
+const INTRUSIONS = [
+  "segment 4 out of order",
+  "this heading has not been written yet",
+  "TEXTURE MISSING",
+  "(placeholder)",
+  "undefined",
+  "NaN",
+  "lorem ipsum dolor sit amet",
+  "[citation needed]",
+  "something else was here",
+  "TODO: rewrite",
+  "saving…",
+  "the same sentence, a moment later",
+  "checksum mismatch",
+  "out of memory",
+  "draft 2 of 7",
+  "frame dropped",
+  "still loading the rest of the world",
+  "this line belongs to another page",
+  "copy of a copy",
+  "see earlier version",
+  "deprecated",
+  "ERR_CONNECTION_RESET",
+  "404",
+  "[redacted]",
+  "▒▒▒▒▒▒▒▒▒▒▒▒",
+  "{{ title }}",
+  "{{ dek }}",
+  "null",
+  "here before the page loaded",
+  "written at 3:12 a.m.",
+  "awaiting review",
+  "overwritten",
+  "the light was different then",
+  "mirror of a mirror",
+];
+let intrT = 0;
+let lastIntr = "";
+
+function intrusionSoon() {
+  clearTimeout(intrT);
+  intrT = 0;
+  const k = num("intrude");
+  if (!(k > 0) || REDUCED_MOTION) return;
+  intrT = window.setTimeout(intrude, (4500 + Math.random() * 8000) / (0.35 + k));
+}
+
+function intrude() {
+  intrT = 0;
+  const vh = innerHeight;
+  const shown = BOX.filter((b) => {
+    if (!b.hasAttribute("data-bk") || !/^(H1|H2|H3|P|LI|FIGCAPTION)$/.test(b.tagName)) return false;
+    const t = (b.textContent ?? "").trim();
+    if (t.length < 3 || b.querySelector("[data-bx]:not(a, span, time)")) return false;
+    const r = b.getBoundingClientRect();
+    return r.top > 70 && r.bottom < vh - 10 && r.width > 40 && r.height < 160;
+  });
+  const el = shown[Math.floor(Math.random() * shown.length)];
+  if (el && !document.hidden) {
+    let msg = INTRUSIONS[Math.floor(Math.random() * INTRUSIONS.length)];
+    if (msg === lastIntr || Math.random() < 0.2) {
+      // or its own words, the other way round
+      msg = (el.textContent ?? "").trim().split(/\s+/).reverse().join(" ");
+    }
+    lastIntr = msg;
+    const r = el.getBoundingClientRect();
+    const cs = getComputedStyle(el);
+    const o = D.createElement("span");
+    o.textContent = msg;
+    Object.assign(o.style, {
+      left: `${r.left}px`,
+      top: `${r.top}px`,
+      width: `${r.width}px`,
+      height: `${r.height}px`,
+      padding: cs.padding,
+      color: cs.color,
+      fontFamily: cs.fontFamily,
+      fontSize: cs.fontSize,
+      fontWeight: cs.fontWeight,
+      fontStyle: cs.fontStyle,
+      fontStretch: cs.fontStretch,
+      letterSpacing: cs.letterSpacing,
+      lineHeight: cs.lineHeight,
+      textTransform: cs.textTransform,
+      textAlign: cs.textAlign,
+    });
+    L.intr.append(o);
+    el.style.visibility = "hidden";
+    window.setTimeout(
+      () => {
+        o.remove();
+        el.style.visibility = "";
+      },
+      240 + Math.random() * 420,
+    );
+  }
+  intrusionSoon();
+}
+
 // ---------------------------------------------------------------------------------
 // Dynamics
 
@@ -356,7 +623,13 @@ type Body = {
   w: number;
   h: number;
   m: number;
+  /** Scale offset and its velocity (recoil). */
+  s: number;
+  vs: number;
+  /** A link or button, which leans toward the pointer instead of fleeing it. */
   ia: boolean;
+  /** The pointer is over it (for recoil on entry). */
+  over: boolean;
   big: boolean;
   h0: number;
   last: string;
@@ -366,6 +639,9 @@ let bodies: Body[] = [];
 let bodiesDirty = true;
 let ptr: { x: number; y: number } | null = null;
 let ptrT = 0;
+/** Pointer velocity, px/s, for the wake; it dies away once the pointer stops. */
+let pvx = 0;
+let pvy = 0;
 
 function collectBodies() {
   bodiesDirty = false;
@@ -388,7 +664,10 @@ function collectBodies() {
     w: 0,
     h: 0,
     m: 1,
+    s: 0,
+    vs: 0,
     ia: n.matches(INTERACTIVE),
+    over: false,
     big: false,
     h0: hash(`${n.className}${n.tagName}${(n.textContent ?? "").slice(0, 20)}`, 5),
     last: "",
@@ -415,6 +694,9 @@ function measureBodies() {
 }
 
 let lastSY = 0;
+/** A click's shake of the whole page (px), dying away; groove's clock. */
+let shake = 0;
+let grooveT = 0;
 const K = 420;
 const C = 2 * Math.sqrt(K) * 0.62;
 const reactLive = living({
@@ -443,30 +725,59 @@ const reactLive = living({
     const tilt = num("tilt");
     const inertia = num("inertia");
     const gravity = num("gravity");
+    const wake = num("wake");
+    const recoil = num("recoil");
+    const groove = num("groove");
+    grooveT += dt;
+    // the shake: one jolt for the whole page each frame, smaller each time
+    const jx = shake > 0.3 ? (Math.random() - 0.5) * shake : 0;
+    const jy = shake > 0.3 ? (Math.random() - 0.5) * shake : 0;
+    shake *= 0.82 ** (dt * 60);
+    // the wake: the pointer's own motion, which dies away within a few frames of it stopping
+    const fade = 0.8 ** (dt * 60);
+    pvx *= fade;
+    pvy *= fade;
+    if (Math.abs(pvx) + Math.abs(pvy) < 30) pvx = pvy = 0;
     let energy = 0;
     for (const b of bodies) {
       if (b.cy + b.h / 2 < top || b.cy - b.h / 2 > bot) {
         if (b.last) {
           b.n.style.transform = "";
           b.last = "";
-          b.x = b.y = b.vx = b.vy = b.rx = b.ry = 0;
+          b.x = b.y = b.vx = b.vy = b.rx = b.ry = b.s = b.vs = 0;
         }
         continue;
       }
       // The rest offset this block is pulled toward.
       let tx = 0;
       let ty = gravity * 14 * b.m;
+      // the groove: a wave running across the page, links riding it lightly
+      if (groove > 0) {
+        const ph = grooveT * 5.5 - b.cx * 0.011 - b.cy * 0.004 + b.h0 * 1.5;
+        const amp = groove * (b.ia ? 3 : 10);
+        ty += Math.sin(ph) * amp;
+        tx += Math.cos(ph * 0.5) * amp * 0.35;
+      }
       let trx = 0;
       let try_ = 0;
       if (act) {
         const dx = px - b.cx;
         const dy = py - b.cy;
         const d = Math.hypot(dx, dy) || 1;
-        if (field > 0) {
+        // Everything but links and buttons is pushed away and carried along by the
+        // pointer's wake; links and buttons stay put to be clicked.
+        if (field > 0 && !b.ia) {
           const R = 150 + b.w * 0.15;
           const f = clamp(1 - (d - Math.min(b.w, b.h) * 0.3) / R, 0, 1);
           tx -= (dx / d) * field * 46 * f * f;
           ty -= (dy / d) * field * 46 * f * f;
+        }
+        if (wake > 0 && !b.ia && (pvx || pvy)) {
+          const R = 120 + b.w * 0.2;
+          const f = clamp(1 - (d - Math.min(b.w, b.h) * 0.3) / R, 0, 1);
+          const k = (wake * 0.07 * f * dt * 60) / b.m;
+          b.vx += clamp(pvx, -5000, 5000) * k;
+          b.vy += clamp(pvy, -5000, 5000) * k;
         }
         if (magnet > 0 && b.ia) {
           const f = clamp(1 - d / (130 + b.w * 0.5), 0, 1);
@@ -480,6 +791,12 @@ const reactLive = living({
           trx = -clamp(dy / (b.h * 0.5 + 60), -1, 1) * tilt * 9 * f;
         }
       }
+      if (b.ia) {
+        // recoil: a link or button springs as the pointer arrives on it
+        const over = act && Math.abs(px - b.cx) < b.w / 2 && Math.abs(py - b.cy) < b.h / 2;
+        if (over && !b.over && recoil > 0) b.vs += recoil * 2.6;
+        b.over = over;
+      }
       if (inertia > 0 && dY) b.vy += (-clamp(dY, -60, 60) * inertia * (6 + b.h0 * 4)) / b.m;
       for (let s = 0; s < sub; s++) {
         b.vx += (-K * (b.x - tx) - C * b.vx) * h;
@@ -490,7 +807,10 @@ const reactLive = living({
         b.vry += (-K * (b.ry - try_) - C * b.vry) * h;
         b.rx += b.vrx * h;
         b.ry += b.vry * h;
+        b.vs += (-K * b.s - C * 0.7 * b.vs) * h;
+        b.s += b.vs * h;
       }
+      b.s = clamp(b.s, -0.3, 0.4);
       b.x = clamp(b.x, -120, 120);
       b.y = clamp(b.y, -120, 160);
       energy +=
@@ -499,23 +819,27 @@ const reactLive = living({
         Math.abs(b.vx) * 0.02 +
         Math.abs(b.vy) * 0.02 +
         Math.abs(b.rx - trx) +
-        Math.abs(b.ry - try_);
-      const X = Math.round(b.x * 4) / 4;
-      const Y = Math.round(b.y * 4) / 4;
+        Math.abs(b.ry - try_) +
+        Math.abs(b.s) * 60 +
+        Math.abs(b.vs);
+      const X = Math.round((b.x + jx) * 4) / 4;
+      const Y = Math.round((b.y + jy) * 4) / 4;
       const RX = Math.round(b.rx * 10) / 10;
       const RY = Math.round(b.ry * 10) / 10;
-      const s =
-        X || Y || RX || RY
-          ? RX || RY
-            ? `perspective(900px) translate3d(${X}px,${Y}px,0) rotateX(${RX}deg) rotateY(${RY}deg)`
-            : `translate3d(${X}px,${Y}px,0)`
-          : "";
+      const S = Math.round(b.s * 500) / 500;
+      let s =
+        RX || RY
+          ? `perspective(900px) translate3d(${X}px,${Y}px,0) rotateX(${RX}deg) rotateY(${RY}deg)`
+          : X || Y
+            ? `translate3d(${X}px,${Y}px,0)`
+            : "";
+      if (S) s += `${s ? " " : ""}scale(${(1 + S).toFixed(3)})`;
       if (s !== b.last) {
         b.n.style.transform = s;
         b.last = s;
       }
     }
-    if (energy < 0.4 && !act && !dY) reactLive.setPaused(true);
+    if (energy < 0.4 && !act && !dY && !(groove > 0) && shake < 0.3) reactLive.setPaused(true);
   },
 });
 
@@ -531,9 +855,95 @@ function dynamicsOff() {
   for (const b of bodies) {
     b.n.style.transform = "";
     b.last = "";
-    b.x = b.y = b.vx = b.vy = b.rx = b.ry = b.vrx = b.vry = 0;
+    b.x = b.y = b.vx = b.vy = b.rx = b.ry = b.vrx = b.vry = b.s = b.vs = 0;
+    b.over = false;
   }
+  pvx = pvy = 0;
 }
+
+/** Shockwave rings: a tap's push, drawn as a 1px ring that runs out and is gone. */
+const RING_S = 0.34;
+let rcv: HTMLCanvasElement | null = null;
+let rctx: CanvasRenderingContext2D | null = null;
+let rings: { x: number; y: number; age: number }[] = [];
+/** Sparks thrown from a tap, falling (px, px/s). */
+let sparks: { x: number; y: number; vx: number; vy: number; age: number; c: string }[] = [];
+
+function ring(x: number, y: number) {
+  if (!rcv) {
+    rcv = D.createElement("canvas");
+    rcv.className = "fxl fx-ring";
+    rcv.setAttribute("aria-hidden", "true");
+    D.body.append(rcv);
+    rctx = rcv.getContext("2d");
+  }
+  const d = devicePixelRatio || 1;
+  const w = Math.round(innerWidth * d);
+  const hgt = Math.round(innerHeight * d);
+  if (rcv.width !== w || rcv.height !== hgt) {
+    rcv.width = w;
+    rcv.height = hgt;
+  }
+  rings.push({ x, y, age: 0 });
+  const n = Math.round(14 + num("shock") * 26);
+  for (let k = 0; k < n; k++) {
+    const a = Math.random() * Math.PI * 2;
+    const v = 260 + Math.random() * 520;
+    sparks.push({
+      x,
+      y,
+      vx: Math.cos(a) * v,
+      vy: Math.sin(a) * v - 180,
+      age: 0,
+      c: `rgb(${oklch(0.82, 0.17, num("phos") + (Math.random() - 0.5) * 160).join(" ")})`,
+    });
+  }
+  if (sparks.length > 240) sparks = sparks.slice(-240);
+  ringLive.setPaused(false);
+}
+
+const ringLive = living({
+  always: true,
+  fps: 60,
+  paused: true,
+  notempo: true,
+  tick(dtms) {
+    if (!rctx || !rcv) return;
+    const g = rctx;
+    const d = devicePixelRatio || 1;
+    g.clearRect(0, 0, rcv.width, rcv.height);
+    const dt = dtms / 1000;
+    for (const r of rings) r.age += dt;
+    rings = rings.filter((r) => r.age < RING_S);
+    for (const p of sparks) {
+      p.age += dt;
+      p.vy += 1400 * dt;
+      p.vx *= 0.985;
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+    }
+    sparks = sparks.filter((p) => p.age < 0.9 && p.y < innerHeight + 10);
+    const px = Math.max(3, Math.round(3.5 * d));
+    for (const p of sparks) {
+      g.fillStyle = p.c;
+      g.fillRect(Math.round(p.x * d), Math.round(p.y * d), px, px);
+    }
+    if (!rings.length) {
+      if (!sparks.length) ringLive.setPaused(true);
+      return;
+    }
+    const speed = 900 + num("shock") * 900;
+    g.strokeStyle = `rgb(${oklch(0.86, 0.14, num("phos")).join(" ")})`;
+    g.lineWidth = Math.max(1, Math.round(d));
+    g.beginPath();
+    for (const r of rings) {
+      const R = (14 + r.age * speed) * d;
+      g.moveTo(r.x * d + R, r.y * d);
+      g.arc(r.x * d, r.y * d, R, 0, Math.PI * 2);
+    }
+    g.stroke();
+  },
+});
 
 // ---------------------------------------------------------------------------------
 // Mechanics: sound
@@ -727,6 +1137,18 @@ function grainTile() {
   L.grain.style.backgroundImage = `url(${grainURL})`;
 }
 
+/** Hue drift: the page's colours turn round the wheel, slowly. */
+let hd = 0;
+const hueLive = living({
+  always: true,
+  fps: 30,
+  paused: true,
+  tick(dt) {
+    hd = (hd + (dt / 1000) * 30 * num("huedrift")) % 360;
+    H.style.setProperty("--k-hd", `${hd.toFixed(1)}deg`);
+  },
+});
+
 const grainLive = living({
   always: true,
   fps: 12,
@@ -851,6 +1273,7 @@ const SKEL_KEYS = new Set([
   "rulers",
 ]);
 const FAULT_KEYS = new Set([
+  "intrude",
   "misreg",
   "zfight",
   "drift",
@@ -858,6 +1281,9 @@ const FAULT_KEYS = new Set([
   "stuck",
   "overflow",
   "tear",
+  "missing",
+  "mojibake",
+  "smear",
   "seed",
 ]);
 
@@ -901,6 +1327,17 @@ function flush() {
     kick();
   } else dynamicsOff();
   if (num("grain") > 0) grainTile();
+  if (num("huedrift") > 0 && !REDUCED_MOTION) hueLive.setPaused(false);
+  else {
+    hueLive.setPaused(true);
+    hd = 0;
+    H.style.removeProperty("--k-hd");
+  }
+  if (all || keys.has("intrude")) {
+    if (num("intrude") > 0) {
+      if (!intrT) intrusionSoon();
+    } else clearTimeout(intrT), (intrT = 0);
+  }
   grainLive.fps = Number(get("grainhz")) || 12;
   grainLive.setPaused(!(Number(get("grainhz")) > 0) || !(num("grain") > 0) || REDUCED_MOTION);
   if (on("rulers")) rulers();
@@ -915,6 +1352,7 @@ function flush() {
     wakeAudio();
     click("clack");
   }
+  if (!on("smear")) smearClear();
   if (!(num("trail") > 0) && tctx && tcv) {
     tctx.clearRect(0, 0, tcv.width, tcv.height);
     trailLive.setPaused(true);
@@ -939,6 +1377,7 @@ export function relayout(ms = 160) {
     if (num("tags") > 0) skel();
     if (on("rulers")) rulers();
     trailSize();
+    smearSize();
     if (reactive()) measureBodies();
   }, ms);
 }
@@ -965,6 +1404,7 @@ export function startFx() {
     ),
     ins: layer("fx-ins", '<i class="ib"></i><div class="it"></div>'),
     hud: layer("fx-hud"),
+    intr: layer("fx-intr"),
   };
 
   subscribe((keys, how) => queue(keys, how));
@@ -972,9 +1412,16 @@ export function startFx() {
   addEventListener(
     "pointermove",
     (e) => {
+      const now = performance.now();
+      if (ptr && now - ptrT < 100 && now > ptrT) {
+        const k = 1000 / (now - ptrT);
+        pvx = pvx * 0.4 + (e.clientX - ptr.x) * k * 0.6;
+        pvy = pvy * 0.4 + (e.clientY - ptr.y) * k * 0.6;
+      }
       ptr = { x: e.clientX, y: e.clientY };
-      ptrT = performance.now();
+      ptrT = now;
       kick();
+      if (on("smear") && e.pointerType === "mouse") smearAt(e.clientX, e.clientY);
       if (num("trail") > 0 && !REDUCED_MOTION) {
         trailInit();
         if (tq.length < 40) tq.push([e.clientX, e.clientY]);
@@ -994,6 +1441,10 @@ export function startFx() {
     "scroll",
     () => {
       kick();
+      smearClear();
+      // what is under the pointer changes as the page scrolls under it
+      if (insE && (on("inspect") || on("rulers")) && !insRaf)
+        insRaf = requestAnimationFrame(inspect);
       if (num("tear") > 0 && !REDUCED_MOTION && tearLive.paused) {
         boxes();
         lastY = scrollY;
@@ -1010,12 +1461,25 @@ export function startFx() {
         wakeAudio();
         if (target?.closest("a,button,input,[role=slider]")) click("clack");
       }
-      if (!(num("shock") > 0) || REDUCED_MOTION || target?.closest(".cp,.hdr,dialog")) return;
+      smearClear();
+      if (REDUCED_MOTION || target?.closest(".cp,.hdr,dialog")) return;
+      if (!(num("shock") > 0) && !(num("recoil") > 0)) return;
       if (bodiesDirty) collectBodies();
       const px = e.clientX + scrollX;
       const py = e.clientY + scrollY;
       const shock = num("shock");
+      if (shock > 0) {
+        ring(e.clientX, e.clientY);
+        shake = Math.min(26, shake + shock * 12);
+      }
       for (const b of bodies) {
+        // a link or button being pressed squashes; the shock never throws it from under
+        // the pointer, or the click would miss
+        if (b.ia) {
+          if (target && b.n.contains(target)) b.vs -= num("recoil") * 3.2;
+          continue;
+        }
+        if (!(shock > 0)) continue;
         const dx = b.cx - px;
         const dy = b.cy - py;
         const d = Math.hypot(dx, dy) || 1;

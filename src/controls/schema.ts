@@ -1,6 +1,6 @@
 // Every setting a visitor can change, and the four views built from them.
 //
-// A view (Comfort, Wireframe, Broken, Reactive) is only a preset of these values: Comfort
+// A view (Standard, Wireframe, Broken, Hyper) is only a preset of these values: Standard
 // is every default, the others set a handful. Anything a view does can be reached one
 // control at a time in the controls panel. Page areas can add their own settings with
 // registerGroup() in ./store; those live alongside these but are never part of a view.
@@ -60,6 +60,11 @@ export const SPEC: Record<string, Spec> = {
   stuck: n(0, 0, 1),
   overflow: n(0, 0, 1),
   tear: n(0, 0, 1),
+  missing: n(0, 0, 1),
+  mojibake: n(0, 0, 1),
+  smear: b(),
+  overgrowth: n(0, 0, 1),
+  intrude: n(0, 0, 1),
   // dynamics
   field: n(0, 0, 1),
   magnet: n(0, 0, 1),
@@ -67,6 +72,10 @@ export const SPEC: Record<string, Spec> = {
   gravity: n(0, 0, 1),
   tilt: n(0, 0, 1),
   shock: n(0, 0, 1),
+  wake: n(0, 0, 1),
+  recoil: n(0, 0, 1),
+  frenzy: n(0, 0, 1),
+  groove: n(0, 0, 1),
   // mechanics
   clack: n(0, 0, 1),
   steps: n(0, 0, 8, 1),
@@ -83,46 +92,50 @@ export const SPEC: Record<string, Spec> = {
   defocus: n(0, 0, 2, 0.05),
   horizon: n(0, -3, 3, 0.05),
   parity: b(),
+  huedrift: n(0, 0, 1),
 };
 
 export const DEFAULTS: Values = Object.fromEntries(Object.entries(SPEC).map(([k, v]) => [k, v.d]));
 
-export const ORDER = ["comfort", "wireframe", "broken", "reactive"] as const;
+export const ORDER = ["standard", "wireframe", "broken", "hyper"] as const;
 export type View = (typeof ORDER)[number];
 export const NAMES: Record<View, string> = {
-  comfort: "Comfort",
+  standard: "Standard",
   wireframe: "Wireframe",
   broken: "Broken",
-  reactive: "Reactive",
+  hyper: "Hyper",
 };
 
 const PRESET_CHANGES: Record<View, Values> = {
-  comfort: {},
+  standard: {},
   wireframe: {
-    wire: 1,
-    tags: 1,
-    grid: 0.5,
-    xray: 0.3,
+    wire: 0.45,
+    tags: 0.5,
+    xray: 0.12,
     phos: 148,
-    ink: 0.92,
-    media: 0.3,
-    rulers: 1,
+    ink: 0.85,
+    media: 0.75,
     hud: 1,
     inspect: 1,
     ground: -0.3,
     grain: 0.12,
-    braces: "all",
+    braces: "heads",
     epoch: "iso",
     cursor: "cross",
   },
   broken: {
-    misreg: 0.55,
-    zfight: 0.7,
-    drift: 0.45,
-    fallback: 0.4,
-    stuck: 0.45,
-    overflow: 0.3,
-    tear: 0.8,
+    misreg: 0.3,
+    zfight: 0.25,
+    drift: 0.55,
+    fallback: 0.45,
+    stuck: 0.6,
+    overflow: 0.4,
+    tear: 0.9,
+    missing: 0.7,
+    mojibake: 0.75,
+    smear: 1,
+    overgrowth: 0.8,
+    intrude: 0.7,
     wire: 0.16,
     tags: 0.22,
     phos: 8,
@@ -133,19 +146,26 @@ const PRESET_CHANGES: Record<View, Values> = {
     wdth: 90,
     epoch: "unix",
     braces: "heads",
-    horizon: 0.4,
+    horizon: 0.6,
     contrast: 1.08,
   },
-  reactive: {
-    field: 0.6,
-    magnet: 0.55,
-    inertia: 0.65,
-    gravity: 0.16,
-    tilt: 0.5,
-    shock: 0.8,
+  hyper: {
+    field: 0.9,
+    magnet: 0.8,
+    inertia: 1,
+    gravity: 0.25,
+    tilt: 0.9,
+    shock: 1,
+    wake: 1,
+    recoil: 1,
+    frenzy: 1,
+    groove: 0.8,
     steps: 4,
     cursor: "reticle",
-    trail: 0.3,
+    trail: 0.8,
+    tempo: 2.2,
+    sat: 1.3,
+    huedrift: 0.5,
   },
 };
 
@@ -166,7 +186,7 @@ export function valid(spec: Spec | undefined, v: unknown): Value | undefined {
 
 export const wrapPos = (p: number) => ((p % 4) + 4) % 4;
 
-/** The core values at a position on the loop: 0 Comfort, 1 Wireframe, 2 Broken, 3 Reactive. */
+/** The core values at a position on the loop: 0 Standard, 1 Wireframe, 2 Broken, 3 Hyper. */
 export function blend(pos: number): Values {
   const p = wrapPos(pos);
   const i = Math.floor(p + 1e-9) % 4;
@@ -264,6 +284,11 @@ export const CORE_GROUPS: PanelGroup[] = [
       { id: "stuck", label: "Stuck states", fmt: "pct" },
       { id: "overflow", label: "Overflow", fmt: "pct" },
       { id: "tear", label: "Tear on scroll", fmt: "pct" },
+      { id: "missing", label: "Missing textures", fmt: "pct" },
+      { id: "mojibake", label: "Mojibake", fmt: "pct" },
+      { id: "smear", label: "Cursor smear" },
+      { id: "overgrowth", label: "Overgrowth", fmt: "pct" },
+      { id: "intrude", label: "Intrusions", fmt: "pct" },
       { action: "reroll" },
     ],
   },
@@ -277,6 +302,10 @@ export const CORE_GROUPS: PanelGroup[] = [
       { id: "gravity", label: "Gravity", fmt: "pct" },
       { id: "tilt", label: "Tilt", fmt: "pct" },
       { id: "shock", label: "Shockwave", fmt: "pct" },
+      { id: "wake", label: "Wake", fmt: "pct" },
+      { id: "recoil", label: "Recoil", fmt: "pct" },
+      { id: "frenzy", label: "Frenzy", fmt: "pct" },
+      { id: "groove", label: "Groove", fmt: "pct" },
     ],
   },
   {
@@ -303,6 +332,7 @@ export const CORE_GROUPS: PanelGroup[] = [
       { id: "defocus", label: "Defocus", fmt: "px" },
       { id: "horizon", label: "Horizon", fmt: "hor" },
       { id: "parity", label: "Parity" },
+      { id: "huedrift", label: "Hue drift", fmt: "pct" },
     ],
   },
 ];
@@ -332,11 +362,41 @@ export const LAMPS: { label: string; keys: string[]; tone?: "r" | "a" }[] = [
   { label: "TYPE", keys: ["wdth", "wght", "track", "lead", "face", "case", "braces", "epoch"] },
   {
     label: "FAULT",
-    keys: ["misreg", "zfight", "drift", "fallback", "stuck", "overflow", "tear"],
+    keys: [
+      "misreg",
+      "zfight",
+      "drift",
+      "fallback",
+      "stuck",
+      "overflow",
+      "tear",
+      "missing",
+      "mojibake",
+      "smear",
+      "overgrowth",
+      "intrude",
+    ],
     tone: "r",
   },
-  { label: "DYN", keys: ["field", "magnet", "inertia", "gravity", "tilt", "shock"] },
+  {
+    label: "DYN",
+    keys: [
+      "field",
+      "magnet",
+      "inertia",
+      "gravity",
+      "tilt",
+      "shock",
+      "wake",
+      "recoil",
+      "frenzy",
+      "groove",
+    ],
+  },
   { label: "MECH", keys: ["steps", "baud", "cursor", "trail", "fps", "tempo"] },
   { label: "AUDIO", keys: ["clack"], tone: "a" },
-  { label: "OPTIC", keys: ["hue", "sat", "contrast", "invert", "defocus", "horizon", "parity"] },
+  {
+    label: "OPTIC",
+    keys: ["hue", "sat", "contrast", "invert", "defocus", "horizon", "parity", "huedrift"],
+  },
 ];

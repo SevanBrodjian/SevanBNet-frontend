@@ -9,9 +9,9 @@
   display: flex;
   flex-wrap: wrap;
   gap: 4px 14px;
-  margin: 18px 0 0;
+  margin: 14px 0 0;
   color: var(--tx2);
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .sr-au b {
@@ -32,7 +32,7 @@
   display: grid;
   grid-template-columns: minmax(0, 0.8fr) minmax(0, 0.8fr) minmax(0, 2fr);
   gap: 1px;
-  height: clamp(300px, 34vw, 440px);
+  height: clamp(220px, 21vw, 300px);
   border: 1px solid var(--rule2);
   background: var(--rule2);
 }
@@ -92,14 +92,14 @@
 /* ---------- the paper ---------- */
 .sr-sec {
   display: grid;
-  grid-template-columns: 200px minmax(0, 1fr);
+  grid-template-columns: 180px minmax(0, 1fr);
   gap: var(--gap);
-  padding: 44px 0 52px;
+  padding: 36px 0 42px;
   border-top: 1px solid var(--rule);
 }
 
 .sr-demo + .sr-sec {
-  margin-top: 56px;
+  margin-top: 44px;
 }
 
 /* The paper's sections below the first: laid out only when they come near the screen. */
@@ -124,9 +124,9 @@
 
 .sr-body.prose,
 .sr-body .prose {
-  max-width: 70ch;
+  max-width: 68ch;
   color: var(--tx2);
-  font: var(--w4) 18.5px / calc(1.65 * var(--k-lead)) var(--serif);
+  font: var(--w4) 17px / calc(1.65 * var(--k-lead)) var(--serif);
 }
 
 .sr-body .prose p,
@@ -143,11 +143,16 @@
   margin-top: 36px;
 }
 
+/* Figures and the video: a reading width, not the whole column. */
 .sr-vid {
+  display: block;
+  width: 100%;
+  max-width: 760px;
   border: 1px solid var(--rule2);
 }
 
 .sr-fig {
+  max-width: 760px;
   margin: 28px 0 0;
   border: 1px solid var(--rule);
   background: #111215;
@@ -160,7 +165,7 @@
 }
 
 .sr-narrow {
-  max-width: 680px;
+  max-width: 520px;
 }
 
 .sr-math {

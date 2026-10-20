@@ -4,7 +4,8 @@
 // couple, a reference phase pulls harder as t grows, noise is added, and the field falls
 // into synchrony. The trajectory is integrated once per sample, in slices; t scrubs it
 // either way. Nothing here is learned or generated: the paper trains the model that runs
-// it backward. While active it plays: data, the fall into sync, then the next sample.
+// it backward. While active it plays there and back, again and again (data, the fall into
+// sync, back out to the data, the way the model goes), a new sample every few trips.
 
 import { living, STILL } from "../frame/live";
 import { clamp, rng } from "../frame/util";
@@ -13,9 +14,11 @@ import { gauss, type MountWidget, onControls, readPalette, rgba, Surface, slice 
 const TAU = Math.PI * 2;
 const wrap = (a: number) => a - TAU * Math.floor((a + Math.PI) / TAU);
 const P = { cell: 9, K: 2.4, Kref: 1.3, D: 0.045, local: 0.85, steps: 120, len: 0.8 };
-const PLAY_MS = 2900; // data to sync
-const HOLD_DATA = 1000;
-const HOLD_SYNC = 800;
+const PLAY_MS = 1500; // data to sync, or back
+const HOLD_DATA = 650;
+const HOLD_SYNC = 420;
+/** Round trips on one sample before the next. */
+const TRIPS = 2;
 
 type Field = (u: number, v: number) => number; // orientation at (u, v), radians
 
@@ -192,6 +195,8 @@ const mount: MountWidget = (host) => {
   let tt = 0;
   let anim: 1 | -1 | 0 = 0; // playing forward, back, or not
   let auto = false; // playing on its own (pointer over the paper)
+  let autoDir: 1 | -1 = 1; // on its own: toward sync, or back to the data
+  let trips = 0;
   let manual = false; // someone took the controls; no autoplay until the next visit
   let hold = 0;
   let job = 0;
@@ -343,19 +348,23 @@ const mount: MountWidget = (host) => {
     paused: true,
     tick(dt) {
       if (auto) {
-        // data, the fall into sync, a moment of sync, the next sample
+        // data, the fall into sync, a moment of sync, back out to the data, and again
         if (hold > 0) {
           hold -= dt;
           if (hold > 0) return;
-          if (tt >= 1) {
+        }
+        tt = clamp(tt + (autoDir * dt) / PLAY_MS, 0, 1);
+        if (autoDir > 0 && tt >= 1) {
+          autoDir = -1;
+          hold = HOLD_SYNC;
+        } else if (autoDir < 0 && tt <= 0) {
+          autoDir = 1;
+          hold = HOLD_DATA;
+          if (++trips >= TRIPS) {
+            trips = 0;
             newSample();
-            hold = HOLD_DATA;
-            icon();
-            return;
           }
         }
-        tt = clamp(tt + dt / PLAY_MS, 0, 1);
-        if (tt >= 1) hold = HOLD_SYNC;
         draw();
         return;
       }
@@ -436,11 +445,9 @@ const mount: MountWidget = (host) => {
       }
       if (STILL || manual || auto) return;
       auto = true;
-      // A finished run starts on a new sample; otherwise carry on from here.
-      if (tt >= 1) {
-        newSample();
-        hold = HOLD_DATA;
-      } else hold = tt === 0 ? HOLD_DATA * 0.5 : 0;
+      // carry on from here: back out from sync, or on toward it
+      autoDir = tt >= 1 ? -1 : 1;
+      hold = tt === 0 ? HOLD_DATA * 0.5 : 0;
       icon();
       live.setPaused(false);
     },

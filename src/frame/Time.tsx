@@ -1,6 +1,6 @@
 import { useControl } from "../controls/store";
 
-// Dates, in whatever calendar the controls ask for (Comfort writes 2026.03; Wireframe
+// Dates, in whatever calendar the controls ask for (Standard writes 2026.03; Wireframe
 // writes ISO; Broken writes Unix seconds). Use <Time> for every date on the site.
 
 /** y: 2026 · ym: 2026.03 · ymd: 2026.03.04 · my: Mar 2026 · day: Mar 4, 2026 · long: March 4, 2026 */

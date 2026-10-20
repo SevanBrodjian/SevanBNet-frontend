@@ -7,6 +7,7 @@ import { preloadPath } from "../routes";
 import { PROFILES } from "../site";
 import Boundary from "./Boundary";
 import ExternalLink from "./ExternalLink";
+import StarSky from "./StarSky";
 import Time from "./Time";
 
 // The panel is found, not shown: load it only when it opens.
@@ -18,6 +19,9 @@ const NAV = [
   { to: "/writing", label: "Writing" },
   { to: "/about", label: "About" },
 ];
+
+/** The rooms that sit in space (StarSky behind them). */
+const SPACE = new Set(["projects", "project"]);
 
 /** The room a path belongs to: page areas colour their room in their own CSS file. */
 export function roomFor(path: string) {
@@ -121,6 +125,8 @@ export default function Layout({ children }: { children: ReactNode }) {
           </span>
         </div>
       </footer>
+      {/* One sky for the Projects list and every project page: it carries on across them. */}
+      {SPACE.has(roomFor(pathname)) && <StarSky page={pathname} />}
       {panelOpen && (
         <Boundary quiet onError={closePanel}>
           <Suspense fallback={null}>

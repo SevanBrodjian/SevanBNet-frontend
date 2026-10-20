@@ -41,11 +41,20 @@ export default function About() {
             ))}
           </Actions>
         </div>
-        <div className="bio" data-slot="about.text">
-          {site.about.map((t) => (
-            <p key={t}>{t}</p>
-          ))}
-        </div>
+        {site.about_html ? (
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: Markdown sanitized by the backend (nh3)
+          <div
+            className="bio"
+            data-slot="about.text"
+            dangerouslySetInnerHTML={{ __html: site.about_html }}
+          />
+        ) : (
+          <div className="bio" data-slot="about.text">
+            {site.about.map((t) => (
+              <p key={t}>{t}</p>
+            ))}
+          </div>
+        )}
       </section>
       {/* biome-ignore lint/a11y/useKeyWithClickEvents: Escape closes it; the click is only the backdrop */}
       <dialog
