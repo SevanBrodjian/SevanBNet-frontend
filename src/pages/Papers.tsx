@@ -3,14 +3,18 @@ import { type FocusEvent, type MouseEvent, type PointerEvent, useRef, useState }
 import { Link } from "react-router";
 import { SEVAN, venueLine } from "../format";
 import Action, { Actions } from "../frame/Action";
+import ExternalLink from "../frame/ExternalLink";
 import Loading from "../frame/Loading";
 import Time from "../frame/Time";
 import useApi from "../frame/useApi";
 import PaperWidget from "../papers/PaperWidget";
 import { WIDGETS } from "../papers/registry";
-import { PAGES } from "../site";
+import { PAGES, PROFILES } from "../site";
 import type { Paper } from "../types";
 import "../styles/papers.css";
+
+/** The complete list, beyond the selection here. */
+const SCHOLAR = PROFILES.find((p) => p.label === "Google Scholar")?.url;
 
 /** The paper's project page on this site, while that project is visible. */
 const projectPath = (p: Paper) => (p.project ? `/projects/${p.project.slug}` : null);
@@ -74,8 +78,31 @@ function Entry({ p, active, on }: { p: Paper; active: boolean; on: Handlers }) {
   const bibId = `bib-${p.id}`;
   return (
     <li className={widget ? "pa" : "pa pa-plain"} data-active={active || undefined} {...on}>
-      <div className="pa-dt">
-        <Time iso={p.date ?? ""} f="ym" />
+      {/* The date, and under it the way out to the project, the paper and the code */}
+      <div className="pa-side">
+        <div className="pa-dt">
+          <Time iso={p.date ?? ""} f="ym" />
+        </div>
+        <Actions className="pa-acts">
+          {page ? (
+            <Action to={page}>Project</Action>
+          ) : (
+            p.project_url && <Action href={p.project_url}>Project</Action>
+          )}
+          {p.paper_url && <Action href={p.paper_url}>Paper</Action>}
+          {p.project?.source && <Action href={p.project.source}>Code</Action>}
+        </Actions>
+        {p.bibtex && (
+          <button
+            type="button"
+            className="pa-bibt"
+            aria-expanded={bib}
+            aria-controls={bibId}
+            onClick={() => setBib((b) => !b)}
+          >
+            BibTeX <i aria-hidden="true">{bib ? "▴" : "▾"}</i>
+          </button>
+        )}
       </div>
       <div className="pa-main">
         <h2 className="pa-ti">
@@ -84,27 +111,13 @@ function Entry({ p, active, on }: { p: Paper; active: boolean; on: Handlers }) {
         {p.authors && <Authors text={p.authors} />}
         <p className="pa-ve">{venueLine(p)}</p>
         {p.description && <p className="pa-ds">{p.description}</p>}
-        <Actions className="pa-acts">
-          {p.paper_url && <Action href={p.paper_url}>Paper</Action>}
-          {page ? (
-            <Action to={page}>Project</Action>
-          ) : (
-            p.project_url && <Action href={p.project_url}>Project</Action>
-          )}
-          {p.project?.source && <Action href={p.project.source}>Code</Action>}
-          {p.bibtex && (
-            <Action onClick={() => setBib((b) => !b)} pressed={bib}>
-              BibTeX
-            </Action>
-          )}
-        </Actions>
-        {bib && p.bibtex && <Bib text={p.bibtex} id={bibId} />}
       </div>
       {widget && (
         <div className="pa-w">
           <PaperWidget id={widget} active={active} />
         </div>
       )}
+      {bib && p.bibtex && <Bib text={p.bibtex} id={bibId} />}
     </li>
   );
 }
@@ -143,8 +156,13 @@ export default function Papers() {
   return (
     <div className="wrap papers-page">
       <title>{PAGES.papers.title}</title>
-      <div className="ptitle">
-        <h1>Papers</h1>
+      <div className="ptitle pa-head">
+        <h1>Selected Publications</h1>
+        {SCHOLAR && (
+          <ExternalLink href={SCHOLAR} className="pa-full">
+            (full list)
+          </ExternalLink>
+        )}
       </div>
       {papers?.length ? (
         <ol className="pas">
