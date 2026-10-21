@@ -33,6 +33,7 @@ export default function Page({ project: p }: CustomPageProps) {
     <ProjectRoom className="sr">
       <title>{p.title}</title>
       <ProjectHead
+        standalone={p.standalone}
         when="CVPR 2026 Workshops · PBVS · Poster"
         title="Single-View Seafloor Recovery from Imaging Sonar via Differentiable Rendering"
         sub={

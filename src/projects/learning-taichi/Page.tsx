@@ -8,7 +8,12 @@ export default function Page({ project: p }: CustomPageProps) {
   return (
     <ProjectRoom className="lt">
       <title>{pageTitle(p.title)}</title>
-      <ProjectHead when={<When p={p} />} title={p.title} line={p.summary ?? undefined} />
+      <ProjectHead
+        standalone={p.standalone}
+        when={<When p={p} />}
+        title={p.title}
+        line={p.summary ?? undefined}
+      />
       <Lab />
       <div className="prose pj-notes lt-notes">
         <p>

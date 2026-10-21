@@ -22,12 +22,14 @@ export const ROLE = {
   institutionUrl: "https://www.caltech.edu/",
 };
 
-// <title> and meta description for each top-level page.
+// <title> and meta description for each top-level page. The home and About descriptions
+// are made at build time from Site settings (seo.ts), so they follow the text; these two
+// are only fallbacks, kept general so they can't go stale.
 export const PAGES = {
   home: {
     path: "/",
     title: `${NAME} · Generative models and simulators`,
-    description: `${NAME}: generative models and simulators for next-generation virtual environments.`,
+    description: `${NAME}: generative models and simulators.`,
   },
   projects: {
     path: "/projects",
@@ -47,8 +49,7 @@ export const PAGES = {
   about: {
     path: "/about",
     title: `About · ${NAME}`,
-    description:
-      "Sevan Brodjian studies perception as an active, generative process, building machines that perceive by synthesizing multimodal representations grounded in physical interaction.",
+    description: `About ${NAME}: research and background.`,
   },
 };
 

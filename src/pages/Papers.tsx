@@ -85,9 +85,9 @@ function Entry({ p, active, on }: { p: Paper; active: boolean; on: Handlers }) {
         </div>
         <Actions className="pa-acts">
           {page ? (
-            <Action to={page}>Project</Action>
+            <Action to={page}>Site</Action>
           ) : (
-            p.project_url && <Action href={p.project_url}>Project</Action>
+            p.project_url && <Action href={p.project_url}>Site</Action>
           )}
           {p.paper_url && <Action href={p.paper_url}>Paper</Action>}
           {p.project?.source && <Action href={p.project.source}>Code</Action>}
@@ -143,13 +143,19 @@ export default function Papers() {
     },
     onClick: (e) => {
       if (pointer.current !== "touch") return;
-      if ((e.target as Element).closest(INTERACTIVE)) return;
+      // A tap on a link, button or the like inside the entry does its own thing. (Only inside:
+      // <main> itself carries a tabindex, so every target has an "interactive" ancestor.)
+      const hit = (e.target as Element).closest(INTERACTIVE);
+      if (hit && e.currentTarget.contains(hit)) return;
       setActive((a) => (a === id ? null : id));
     },
     onFocus: () => setActive(id),
     onBlur: (e) => {
-      if (!e.currentTarget.contains(e.relatedTarget as Node | null))
-        setActive((a) => (a === id ? null : a));
+      if (e.currentTarget.contains(e.relatedTarget as Node | null)) return;
+      // Focus leaving (a click on the entry's text, say) does not put to sleep an entry the
+      // pointer is still over. (Not for touch, whose :hover sticks after a tap.)
+      if (pointer.current !== "touch" && e.currentTarget.matches(":hover")) return;
+      setActive((a) => (a === id ? null : a));
     },
   });
 

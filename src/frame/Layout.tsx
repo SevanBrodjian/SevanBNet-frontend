@@ -1,3 +1,4 @@
+import { PROJECTS } from "virtual:projects";
 import { lazy, type ReactNode, Suspense, useEffect, useLayoutEffect, useRef } from "react";
 import { Link, NavLink, useLocation, useNavigationType } from "react-router";
 import { startFx } from "../controls/fx";
@@ -5,10 +6,12 @@ import { closePanel, usePanelOpen } from "../controls/store";
 import ViewToggle from "../controls/ViewToggle";
 import { preloadPath } from "../routes";
 import { PROFILES } from "../site";
+import type { Project } from "../types";
 import Boundary from "./Boundary";
 import ExternalLink from "./ExternalLink";
 import StarSky from "./StarSky";
 import Time from "./Time";
+import useApi from "./useApi";
 
 // The panel is found, not shown: load it only when it opens.
 const Panel = lazy(() => import("../controls/Panel"));
@@ -39,10 +42,17 @@ export default function Layout({ children }: { children: ReactNode }) {
   const main = useRef<HTMLElement>(null);
   const panelOpen = usePanelOpen();
 
+  // A standalone project page (a paper's, set in the control panel) has no navbar, no sky
+  // and the plain ground: its own room. Only project pages read the list to find out.
+  const slug = /^\/projects\/([^/]+)\/?$/.exec(pathname)?.[1];
+  const { data: projects } = useApi<Project[]>(slug ? "projects/" : null, PROJECTS);
+  const standalone = !!slug && !!projects?.find((p) => p.slug === slug)?.standalone;
+  const room = standalone ? "standalone" : roomFor(pathname);
+
   // <html data-room> before paint, so a room's colours never flash.
   useLayoutEffect(() => {
-    document.documentElement.dataset.room = roomFor(pathname);
-  }, [pathname]);
+    document.documentElement.dataset.room = room;
+  }, [room]);
 
   useScrollPlace(key, pathname, hash, how, main);
 
@@ -84,7 +94,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       <a className="skip" href="#main">
         Skip to content
       </a>
-      <header ref={header} className="hdr">
+      <header ref={header} className="hdr" hidden={standalone}>
         <div className="hdr-in">
           <Link to="/" className="mark" aria-label="SevanB.net, home">
             <img className="mark-logo" src="/sneb.svg" alt="" width={28} height={28} />
@@ -126,7 +136,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         </div>
       </footer>
       {/* One sky for the Projects list and every project page: it carries on across them. */}
-      {SPACE.has(roomFor(pathname)) && <StarSky page={pathname} />}
+      {SPACE.has(room) && <StarSky page={pathname} />}
       {panelOpen && (
         <Boundary quiet onError={closePanel}>
           <Suspense fallback={null}>

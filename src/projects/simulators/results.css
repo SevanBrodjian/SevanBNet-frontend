@@ -1,0 +1,414 @@
+/* The paper's tables and the depth chart on /projects/generative-models-as-simulators
+   (Results.tsx, DepthChart.tsx). Owned by the Projects area.
+   Rules for one kind of element run from least to most specific. */
+
+.gr {
+  /* The tables' scale (heat.ts): translucent poles over the ground, a faint neutral. Red
+     stays darker than green, as in the paper, so the two ends differ in lightness too. */
+  --hb: color-mix(in oklab, var(--gs-bad) 34%, transparent);
+  --hg: color-mix(in oklab, var(--gs-good) 54%, transparent);
+  --hm: color-mix(in oklab, var(--tx) 4%, transparent);
+  margin: 0;
+  /* Opaque, so the sky stays out from behind the tinted cells and the marks. */
+  background: var(--g0);
+}
+
+.gr + .gr {
+  margin-top: 40px;
+}
+
+.gr .cap {
+  margin-top: 14px;
+}
+
+.gr code {
+  font: 0.93em var(--mono);
+}
+
+/* Math letters: the sans has no true italic, so the slanted letter needs room after it. */
+.gr i {
+  margin-right: 0.12em;
+}
+
+.gr-ph code {
+  color: var(--tx2);
+  font: var(--w4) 12.5px var(--mono);
+}
+
+.gr-hi {
+  color: color-mix(in oklab, var(--gs-good), #fff 12%);
+}
+
+.gr-lo {
+  color: color-mix(in oklab, var(--gs-bad), #fff 22%);
+}
+
+/* ---------- tables ---------- */
+
+/* Narrow screens scroll the table sideways inside this box; the page never does. */
+.gr-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.gr-scroll:focus-visible {
+  outline: 1px solid var(--tx3);
+  outline-offset: 4px;
+}
+
+.gr-tbl {
+  border-collapse: separate;
+  border-spacing: 0;
+  border-top: 1px solid var(--rule2);
+  border-bottom: 1px solid var(--rule2);
+  color: var(--tx);
+  font: var(--w4) 14px / 1.2 var(--sans);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.gr-tbl abbr {
+  text-decoration: none;
+}
+
+.gr-tbl th,
+.gr-tbl td {
+  padding: 7px 14px;
+  background-clip: padding-box;
+  text-align: right;
+}
+
+.gr-tbl td {
+  position: relative;
+  min-width: 72px;
+}
+
+.gr-tbl thead th {
+  padding-top: 9px;
+  padding-bottom: 8px;
+  color: var(--tx3);
+  font: var(--w45) 12.5px / 1.25 var(--sans);
+  vertical-align: bottom;
+}
+
+.gr-tbl thead code {
+  color: var(--tx2);
+  font-weight: var(--w4);
+}
+
+.gr-tbl thead tr:first-child th {
+  padding-top: 12px;
+}
+
+.gr-tbl thead tr:last-child th {
+  border-bottom: 1px solid var(--rule2);
+}
+
+/* A gap of ground between column groups, as the paper's white gaps. */
+.gr-tbl .gr-g {
+  border-left: 3px solid transparent;
+}
+
+/* The row names: the variant in the typewriter face, a note in roman. Pinned on the left
+   while the numbers scroll under it. */
+.gr-tbl .gr-var {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  padding-left: 0;
+  padding-right: 22px;
+  background: var(--g0);
+  text-align: left;
+}
+
+.gr-tbl thead .gr-var {
+  border-bottom: 1px solid var(--rule2);
+}
+
+.gr-tbl tbody .gr-var {
+  color: var(--tx2);
+  font-weight: var(--w4);
+}
+
+.gr-tbl tbody .gr-var code {
+  color: var(--tx);
+  font-size: 13.5px;
+}
+
+/* An editor (or a model) over its two columns, with a trimmed rule under it. */
+.gr-tbl thead .gr-ed {
+  padding-bottom: 7px;
+  box-shadow: inset 0 -1px 0 var(--rule2);
+  color: var(--tx);
+  font-size: 13px;
+  font-weight: var(--w5);
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+.gr-tbl thead .gr-up {
+  padding-bottom: 0;
+}
+
+.gr-note {
+  color: var(--tx3);
+  font-size: 13.5px;
+}
+
+/* The dagger in the system's typewriter face: Archivo and Source Serif have it only in a
+   subset this page would otherwise not load. */
+.gr-dag {
+  font-family: var(--mono);
+}
+
+.gr-tbl .gr-dag {
+  position: absolute;
+  top: 5px;
+  right: 4px;
+  color: var(--tx2);
+  font: 10.5px / 1 var(--mono);
+}
+
+/* Each class of variant is its own block, named above it. */
+.gr-tbl .gr-gl {
+  padding: 16px 0 7px;
+  background: var(--g0);
+  color: var(--tx2);
+  font: var(--w5) 11.5px / 1.3 var(--sans);
+  font-stretch: 87.5%;
+  letter-spacing: 0.085em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.gr-tbl tbody + tbody .gr-gl {
+  border-top: 1px solid var(--rule);
+}
+
+.gr-gl > span {
+  position: sticky;
+  left: 0;
+}
+
+.gr-sub {
+  color: var(--tx3);
+}
+
+.gr-tbl tbody tr:last-child > * {
+  padding-bottom: 8px;
+}
+
+/* ---------- Table 10 ---------- */
+
+.gr-t10 tbody .gr-var {
+  font-family: var(--sans);
+}
+
+/* Where IM lands on Othello: a thin mark at the edge of the block, rows 4 and 5. */
+.gr-tbl td.gr-bn {
+  box-shadow: inset 2px 0 0 var(--gs-post);
+}
+
+.gr-bnk {
+  display: inline-block;
+  width: 2px;
+  height: 0.95em;
+  margin: 0 7px 0 1px;
+  background: var(--gs-post);
+  vertical-align: -0.12em;
+}
+
+/* The residual point being looked at (here or in the chart). */
+.gr-t10 tbody tr {
+  cursor: default;
+}
+
+.gr-t10 tbody tr.gr-on > * {
+  box-shadow:
+    inset 0 1px 0 var(--tx3),
+    inset 0 -1px 0 var(--tx3);
+}
+
+.gr-t10 tbody tr.gr-on > td.gr-bn {
+  box-shadow:
+    inset 2px 0 0 var(--gs-post),
+    inset 0 1px 0 var(--tx3),
+    inset 0 -1px 0 var(--tx3);
+}
+
+.gr-t10 tr.gr-on .gr-var {
+  color: var(--tx);
+}
+
+/* ---------- the depth chart ---------- */
+
+.gr-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 24px;
+  margin: 0 0 14px;
+  padding: 0;
+  list-style: none;
+  color: var(--tx3);
+  font-size: 13.5px;
+}
+
+.gr-key li {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.gr-key svg {
+  flex: none;
+  overflow: visible;
+}
+
+.gr-panels {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1px;
+  border: 1px solid var(--rule);
+  background: var(--rule);
+}
+
+/* The keyboard's slider: laid over both panels so its focus ring frames them, but empty and
+   out of the pointer's way. */
+.gr-sl {
+  position: absolute;
+  inset: -1px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.gr-sl:focus-visible {
+  outline: 1px solid var(--tx3);
+  outline-offset: 3px;
+}
+
+.gr-pane {
+  min-width: 0;
+  padding: 12px 14px 6px 12px;
+  background: var(--gs-well, #020203);
+  container-type: inline-size;
+}
+
+/* The plot's height (H in DepthChart.tsx: 278 below 440px wide, else 330), held before its
+   width is measured, so the page is already its full height when Back restores the scroll
+   position. */
+.gr-box {
+  height: 330px;
+}
+
+@container (width < 440px) {
+  .gr-box {
+    height: 278px;
+  }
+}
+
+.gr-ph {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+  margin: 0 0 4px 2px;
+}
+
+.gr-ph h3 {
+  margin: 0;
+  color: var(--tx);
+  font: var(--w5) 13.5px / 1.3 var(--sans);
+}
+
+/* The readout: kept in place when idle (hidden), so nothing moves when a point is looked at. */
+.gr-rd {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  margin: 0;
+  color: var(--tx3);
+  font: 11.5px / 1.3 var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.gr-rd[data-idle] {
+  visibility: hidden;
+}
+
+.gr-rdi {
+  white-space: nowrap;
+}
+
+.gr-rd b {
+  display: inline-block;
+  color: var(--tx);
+  font-weight: 500;
+}
+
+.gr-svg {
+  display: block;
+  overflow: visible;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.gr-svg text {
+  fill: var(--tx3);
+  font: 10.5px var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.gr-svg .gr-ax {
+  font: var(--w5) 10px var(--sans);
+  font-stretch: 87.5%;
+  letter-spacing: 0.085em;
+  text-transform: uppercase;
+}
+
+.gr-svg .gr-bnt {
+  fill: color-mix(in oklab, var(--gs-post), #fff 18%);
+}
+
+@media (max-width: 760px) {
+  .gr-panels {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .gr-tbl {
+    font-size: 13.5px;
+  }
+
+  .gr-tbl th,
+  .gr-tbl td {
+    padding: 7px 11px;
+  }
+
+  .gr-tbl td {
+    min-width: 62px;
+  }
+
+  .gr-tbl .gr-var {
+    padding-right: 14px;
+  }
+
+  .gr-tbl tbody .gr-var code {
+    font-size: 12.5px;
+  }
+
+  .gr-note {
+    font-size: 12.5px;
+  }
+
+  .gr-key {
+    gap: 6px 18px;
+    font-size: 13px;
+  }
+
+  .gr-rd {
+    gap: 2px 10px;
+    font-size: 10.5px;
+  }
+}

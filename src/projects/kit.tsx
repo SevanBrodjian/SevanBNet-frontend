@@ -117,26 +117,36 @@ export function ProjectRoom({ children, className }: { children: ReactNode; clas
   return <article className={className ? `wrap pj ${className}` : "wrap pj"}>{children}</article>;
 }
 
-/** A project page's header: where it sits, its name, one line, and its main actions. */
+/** A project page's header: where it sits, its name, one line, and its main actions. A
+ * standalone page (no navbar) starts from the site's home instead of the Projects list. */
 export function ProjectHead({
   when,
   title,
   sub,
   line,
   actions,
+  standalone,
 }: {
   when: ReactNode;
   title: string;
   sub?: ReactNode;
   line?: string;
   actions?: ReactNode;
+  standalone?: boolean;
 }) {
   return (
     <header className="pj-head">
       <p className="pj-crumb">
-        <Link to="/projects" className="pj-up">
-          Projects
-        </Link>
+        {standalone ? (
+          <Link to="/" className="pj-up pj-home">
+            <img src="/sneb.svg" alt="" width={18} height={18} />
+            SevanB.net
+          </Link>
+        ) : (
+          <Link to="/projects" className="pj-up">
+            Projects
+          </Link>
+        )}
         <span aria-hidden="true">/</span>
         <span>{when}</span>
       </p>

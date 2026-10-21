@@ -29,7 +29,7 @@ import { clamp, hash, oklch } from "./util";
 
 /** Blocks of words the sky stays behind, on the list and on project pages. */
 const QUIET =
-  "main .prose, main .cap, main figcaption, main .pj-head, main .pj-pager, main .ptitle, main .pjl-item";
+  "main .prose, main .cap, main figcaption, main h2, main .pj-head, main .pj-pager, main .ptitle, main .pjl-item";
 
 /** Distances: the nearest a star comes, and the farthest. */
 const ZN = 0.3;
