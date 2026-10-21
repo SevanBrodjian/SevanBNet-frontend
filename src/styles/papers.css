@@ -378,3 +378,15 @@
     margin-top: 16px;
   }
 }
+
+/* When Generative Models Act as Simulators: cyan and magenta are the paper's, where an edited
+   disc was and where it went. The well takes keys (Enter makes an edit), so it shows focus. */
+.pw[data-w="simulators"] {
+  --sim-pre: oklch(0.8 0.12 205);
+  --sim-post: oklch(0.7 0.2 350);
+}
+
+.pw[data-w="simulators"] canvas:focus-visible {
+  outline: 1px solid var(--tx);
+  outline-offset: -1px;
+}

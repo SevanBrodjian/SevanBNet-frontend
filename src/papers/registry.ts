@@ -9,6 +9,7 @@ export const WIDGETS: Record<string, Loader> = {
   temporal: () => import("./temporal"),
   sonar: () => import("./sonar"),
   kuramoto: () => import("./kuramoto"),
+  simulators: () => import("./simulators"),
 };
 
 /** Widgets with a row of controls under the well (so the page can hold their place). */

@@ -1,0 +1,311 @@
+/* The test (Loop.tsx): the paper's figure 2 redrawn, with a choice of editor below it.
+   Cyan (--gs-pre) is the world as it was, magenta (--gs-post) the edit and where it goes. */
+
+.gl {
+  margin: 0;
+  container-type: inline-size;
+}
+
+/* The well holds the diagram's height (geo() in Loop.tsx: 484, or 325 once the well is
+   824px wide) before the diagram is measured and drawn, so the page is already its full
+   height when Back restores the scroll position. */
+.gl-well {
+  min-height: 486px;
+  overflow-x: auto; /* below 260px the diagram scrolls inside its box, never the page */
+  border: 1px solid var(--rule);
+  background: var(--gs-well);
+}
+
+@container (min-width: 824px) {
+  .gl-well {
+    min-height: 327px;
+  }
+}
+
+.gl-svg {
+  display: block;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+/* regions: the simulator and the frozen model */
+.gl-reg {
+  fill: color-mix(in oklab, var(--g1), transparent 35%);
+  stroke: var(--rule);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.gl-rl {
+  fill: var(--tx3);
+  font-family: var(--sans);
+  font-weight: var(--w5);
+  font-stretch: 87.5%;
+  letter-spacing: 0.085em;
+  text-transform: uppercase;
+}
+
+/* narrow: the simulator's name sits in a smaller corner */
+.gl-rlv {
+  letter-spacing: 0.05em;
+}
+
+.gl-flake {
+  fill: none;
+  stroke: var(--tx3);
+  stroke-width: 1;
+  stroke-linecap: square;
+}
+
+/* wires */
+.gl-w {
+  color: var(--tx3);
+}
+
+.gl-line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.gl-head {
+  fill: currentColor;
+}
+
+.gl-pre {
+  color: var(--gs-pre);
+}
+
+.gl-post {
+  color: var(--gs-post);
+}
+
+.gl-mute {
+  color: var(--tx3);
+}
+
+.gl-off {
+  color: var(--tx4);
+}
+
+.gl-off .gl-line,
+.gl-measure .gl-line {
+  stroke-dasharray: 3 3;
+}
+
+.gl-measure {
+  color: var(--tx3);
+}
+
+.gl-gap {
+  fill: var(--gs-well);
+}
+
+.gl-meas {
+  fill: var(--tx3);
+  font-family: var(--sans);
+}
+
+.gl-measb {
+  fill: var(--tx2);
+  font-weight: var(--w6);
+}
+
+/* symbols */
+.gl-m {
+  font-family: var(--serif);
+  font-style: italic;
+  fill: var(--tx);
+}
+
+.gl-up {
+  font-style: normal;
+}
+
+.gl-hat {
+  fill: none;
+  stroke: var(--tx);
+  stroke-width: 1;
+}
+
+.gl-hat.gl-tmute {
+  stroke: var(--tx2);
+}
+
+.gl-hat.gl-tpre {
+  stroke: var(--gs-pre);
+}
+
+.gl-hat.gl-tpost {
+  stroke: var(--gs-post);
+}
+
+.gl-tmute {
+  fill: var(--tx2);
+}
+
+.gl-tpre {
+  fill: var(--gs-pre);
+}
+
+.gl-tpost {
+  fill: var(--gs-post);
+}
+
+/* boxes */
+.gl-box rect {
+  fill: var(--g2);
+  stroke: var(--tx4);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.gl-bmute rect {
+  fill: var(--g1);
+  stroke: var(--rule2);
+}
+
+.gl-bpost rect {
+  stroke: var(--gs-post);
+}
+
+.gl-bt {
+  fill: var(--tx2);
+  font-family: var(--mono);
+}
+
+.gl-box .gl-m {
+  fill: var(--tx);
+}
+
+.gl-bmute .gl-m,
+.gl-bmute .gl-bt {
+  fill: var(--tx3);
+}
+
+.gl-tag {
+  fill: var(--tx3);
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+}
+
+.gl-tag.gl-tpost {
+  fill: var(--gs-post);
+}
+
+.gl-abbr {
+  fill: var(--gs-post);
+  font-family: var(--mono);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+/* ---------- under the diagram: the choice of editor and what it does ---------- */
+.gl-under {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 18px 48px;
+  align-items: start;
+  margin-top: 16px;
+}
+
+.gl-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 28px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.gl-grp {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* A legend set on its own line above the buttons, like a label. */
+.gl-grp legend {
+  float: left;
+  width: 100%;
+  margin: 0 0 8px;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.gl-seg {
+  display: flex;
+  clear: both;
+}
+
+.gl-seg .btn {
+  min-width: 56px;
+  justify-content: center;
+  font-family: var(--mono);
+  letter-spacing: 0.06em;
+}
+
+.gl-seg .btn + .btn {
+  margin-left: -1px;
+}
+
+.gl-seg .btn:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 1px solid var(--tx);
+  outline-offset: 2px;
+}
+
+.gl-read {
+  display: grid;
+  min-width: 0;
+}
+
+.gl-one {
+  grid-area: 1 / 1;
+  min-width: 0;
+  visibility: hidden;
+}
+
+.gl-one[data-on] {
+  visibility: visible;
+}
+
+.gl-tex {
+  margin: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  color: var(--tx);
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.gl-tex .katex {
+  font-size: 1.12em;
+}
+
+.gl-desc {
+  max-width: 64ch;
+  margin: 4px 0 0;
+  color: var(--tx2);
+  font-size: 15px;
+  line-height: calc(1.5 * var(--k-lead));
+}
+
+.gl-desc b {
+  color: var(--tx);
+  font-weight: var(--w5);
+}
+
+@container (max-width: 720px) {
+  .gl-under {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .gl-tex {
+    font-size: 16px;
+  }
+}

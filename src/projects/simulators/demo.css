@@ -1,0 +1,187 @@
+/* The two environments, live (EditWorlds.tsx): Rayworld and Othello side by side, stacked on
+   narrow screens. Each is a canvas well (.live) with readouts (.osd) and a bar of controls. */
+
+.ew {
+  container-type: inline-size;
+}
+
+.ew-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px 24px;
+}
+
+.ew-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ew-well {
+  height: 400px;
+  border: 1px solid var(--rule);
+  background: var(--gs-well);
+}
+
+.ew-well canvas {
+  display: block;
+  touch-action: manipulation;
+}
+
+.ew-well canvas:focus-visible {
+  outline: 1px solid var(--tx);
+  outline-offset: -2px;
+}
+
+.ew .ew-name {
+  top: 12px;
+  left: 13px;
+  color: var(--tx2);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.ew .ew-rd {
+  top: 12px;
+  right: 13px;
+  white-space: pre;
+}
+
+.ew .ew-rd[data-bad] {
+  color: color-mix(in oklab, var(--gs-bad), #fff 25%);
+}
+
+.ew .ew-low {
+  bottom: 17px;
+  left: 13px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 2.2em;
+  max-width: calc(100% - 150px);
+}
+
+.ew-low > span {
+  white-space: pre;
+}
+
+/* ---------- controls ---------- */
+.ew-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.ew-seg {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.ew-seg .btn {
+  flex: 1 1 auto;
+  justify-content: center;
+  padding: 0 9px;
+  font: 11.5px var(--mono);
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.ew-seg .btn + .btn {
+  margin-left: -1px;
+}
+
+.ew-bar .btn:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 1px solid var(--tx);
+  outline-offset: 2px;
+}
+
+/* The well's own controls (Bins, Pause, New opening): small instrument buttons in its corner. */
+.ew-acts {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 4;
+  display: flex;
+  gap: 6px;
+}
+
+.ew-act {
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid rgb(236 233 226 / 0.26);
+  background: rgb(10 11 13 / 0.78);
+  color: rgb(236 233 226 / 0.9);
+  font: 10.5px / 1 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.ew-act:hover {
+  border-color: rgb(236 233 226 / 0.6);
+}
+
+.ew-act:active {
+  translate: 0 1px;
+}
+
+.ew-act[aria-pressed="true"] {
+  border-color: var(--tx);
+  background: var(--tx);
+  color: #0a0b0d;
+}
+
+.ew-run {
+  min-width: 62px;
+}
+
+.ew-act:focus-visible {
+  outline: 1px solid var(--tx);
+  outline-offset: 2px;
+}
+
+/* a finger's size */
+@media (pointer: coarse) {
+  .ew-act {
+    height: 32px;
+    padding: 0 12px;
+  }
+}
+
+/* ---------- one column ---------- */
+@container (max-width: 880px) {
+  .ew-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ew-ray .ew-well {
+    height: clamp(270px, 76cqi, 400px);
+  }
+
+  .ew-oth .ew-well {
+    height: clamp(300px, calc(100cqi + 44px), 440px);
+  }
+}
+
+@container (max-width: 420px) {
+  .ew-oth .ew-seg {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ew-oth .ew-seg .btn:nth-child(odd of .btn) {
+    margin-left: 0;
+  }
+
+  .ew-oth .ew-seg .btn:nth-child(n + 3 of .btn) {
+    margin-top: -1px;
+  }
+}
