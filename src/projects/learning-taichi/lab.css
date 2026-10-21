@@ -115,6 +115,86 @@ html:has(.lab-win) {
   margin-top: 8px;
 }
 
+/* ---------- sections: what it is about, then the points ---------- */
+.lt-sec {
+  margin-top: 48px;
+  padding: 40px 0 8px;
+  border-top: 1px solid var(--rule);
+}
+
+.lt-h {
+  display: grid;
+  gap: 10px;
+  max-width: 34ch;
+  margin: 0 0 26px;
+  font-weight: inherit;
+}
+
+.lt-k {
+  color: var(--tx3);
+  font: var(--w5) 12.5px / 1.3 var(--sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.lt-hl {
+  color: var(--tx);
+  font: var(--w45) clamp(22px, 2.1vw, 27px) / 1.25 var(--sans);
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+/* The loop in four steps, side by side; the results, two by two. */
+.lt-steps,
+.lt-finds {
+  display: grid;
+  gap: 22px 32px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lt-steps {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.lt-finds {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: 980px;
+}
+
+.lt-steps li,
+.lt-finds li {
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  padding-left: 14px;
+  border-left: 1px solid var(--rule2);
+  color: var(--tx2);
+  font: var(--w4) 15.5px / 1.55 var(--sans);
+}
+
+.lt-steps b,
+.lt-finds b {
+  color: var(--tx);
+  font: var(--w5) 12.5px / 1.4 var(--mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 1000px) {
+  .lt-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .lt-steps,
+  .lt-finds {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 @media (max-width: 760px) {
   .lab-vp {
     height: 72svh;

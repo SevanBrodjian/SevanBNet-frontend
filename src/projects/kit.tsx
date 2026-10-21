@@ -117,6 +117,23 @@ export function ProjectRoom({ children, className }: { children: ReactNode; clas
   return <article className={className ? `wrap pj ${className}` : "wrap pj"}>{children}</article>;
 }
 
+/** A title for wrapping: hyphenated words stay whole ("User-Led", never "User-" then "Led"). */
+function KeepWhole({ text }: { text: string }) {
+  const out: ReactNode[] = [];
+  let at = 0;
+  for (const m of text.matchAll(/\S+-\S+/g)) {
+    out.push(text.slice(at, m.index));
+    out.push(
+      <span key={m.index} style={{ whiteSpace: "nowrap" }}>
+        {m[0]}
+      </span>,
+    );
+    at = m.index + m[0].length;
+  }
+  out.push(text.slice(at));
+  return out;
+}
+
 /** A project page's header: where it sits, its name, one line, and its main actions. A
  * standalone page (no navbar) starts from the site's home instead of the Projects list. */
 export function ProjectHead({
@@ -150,7 +167,9 @@ export function ProjectHead({
         <span aria-hidden="true">/</span>
         <span>{when}</span>
       </p>
-      <h1>{title}</h1>
+      <h1>
+        <KeepWhole text={title} />
+      </h1>
       {sub}
       {line && <p className="pj-line">{line}</p>}
       {actions && <div className="acts pj-acts">{actions}</div>}
