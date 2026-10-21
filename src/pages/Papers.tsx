@@ -90,7 +90,7 @@ function Entry({ p, active, on }: { p: Paper; active: boolean; on: Handlers }) {
             p.project_url && <Action href={p.project_url}>Site</Action>
           )}
           {p.paper_url && <Action href={p.paper_url}>Paper</Action>}
-          {p.project?.source && <Action href={p.project.source}>Code</Action>}
+          {p.code_url && <Action href={p.code_url}>Code</Action>}
         </Actions>
         {p.bibtex && (
           <button

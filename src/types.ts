@@ -50,6 +50,8 @@ export type Paper = {
   status: string | null;
   date: string | null;
   paper_url: string | null;
+  /** The paper's code (its own field; missing from older APIs). */
+  code_url?: string | null;
   /** The project page on this site; null when there is none or it is hidden. */
   project: { slug: string; title: string; source: string | null } | null;
   /** A project page hosted elsewhere. */
