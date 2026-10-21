@@ -63,6 +63,26 @@ const SONAR = {
   ],
 };
 
+// The page for "When Generative Models Act as Simulators", kept in sync by hand with
+// src/projects/simulators/Page.tsx (an arXiv preprint: no conference or pages yet).
+const SIMULATORS = {
+  slug: "generative-models-as-simulators",
+  fullTitle: "When Generative Models Act as Simulators",
+  authors: ["Sevan Brodjian", "Michael Hobley", "Pietro Perona"],
+  affiliation: "California Institute of Technology",
+  venue: "arXiv 2026 · Preprint",
+  date: "2026/10/09",
+  paper: "https://arxiv.org/abs/2610.12847",
+  pdf: "https://arxiv.org/pdf/2610.12847",
+  description:
+    "When a generative model trained on observations alone can be driven from a simulator’s state: probes, inverse maps and editability in Othello and Rayworld.",
+  abstract: [
+    "A simulator summarizes an environment in a state that users can read and change. Generative models learn representations of the world without explicit specification, but offer no built-in way to edit that world’s state. We investigate the conditions under which a generative model can act as a simulator through editability: whether changing a model’s latent representation produces the next-step outputs we get by editing a simulator’s state. Plainly stated, our goal is to find a mapping between a generative model’s latent state and the simulator state, where the model is trained on observations alone and the mapping is learned afterward.",
+    "We test two kinds of mappings, both learned from observations paired with simulator states. In one, we train probes to decode the simulator state from the model, then steer along them. In the other, we learn the mapping directly with an inverse map, which can succeed even where steering fails. We study both in two contrasting environments: the discrete board game Othello, and Rayworld, our own continuous world of moving discs seen through partial renderings, closer to physical scenes and video.",
+    "We find that which mapping succeeds depends strongly on the environment, even though the state is decodable in every variant. In Othello, editability falls smoothly as the game is simplified, and even small rule changes have large consequences. In Rayworld, probes fail to steer along the simulator’s continuous state, yet an inverse map sets the model from that state anyway. A model can therefore be driven by a simulator it may have never learned.",
+  ],
+};
+
 // ---------------------------------------------------------------------------------
 // Helpers
 
@@ -133,13 +153,27 @@ const crawlable = (url: string | null) => (url && !url.includes("/r/") ? url : n
 
 const PERSON_ID = `${SITE_URL}/#person`;
 
-const person = {
+// The home and About descriptions, from Site settings (the control panel), so they change
+// with the text instead of going stale in code: the home line, and the About text's first
+// sentence. The fallbacks in site.js only cover an empty field.
+function descriptions(site: Site) {
+  const line = plain(site.home_line);
+  const about = plain(site.about[0] ?? "");
+  const first = (about.match(/^.*?[.!?](?=\s|$)/)?.[0] ?? about).trim();
+  return {
+    home: line ? truncate(`${NAME}: ${line}`, 160) : PAGES.home.description,
+    about: first ? truncate(first, 160) : PAGES.about.description,
+    person: line || PAGES.home.description,
+  };
+}
+
+const person = (site: Site) => ({
   "@type": "Person",
   "@id": PERSON_ID,
   name: NAME,
   url: `${SITE_URL}/`,
   image: `${SITE_URL}/headshot.jpg`,
-  description: PAGES.about.description,
+  description: descriptions(site).person,
   jobTitle: ROLE.title,
   affiliation: {
     "@type": "CollegeOrUniversity",
@@ -156,7 +190,7 @@ const person = {
     "Real-time graphics",
   ],
   sameAs: PROFILES.map((p) => p.url),
-};
+});
 
 // ---------------------------------------------------------------------------------
 // Page bodies: plain HTML versions of what each page shows.
@@ -221,9 +255,11 @@ function pages({ site, projects, papers, posts }: Content): Page[] {
         `<p>${esc(day(p.date))}</p></li>`,
     );
 
+  const d = descriptions(site);
   return [
     {
       ...PAGES.home,
+      description: d.home,
       file: "index.html",
       body: page(`<p>${esc(`${NAME}. ${site.role}.`)}</p><h1>${esc(site.home_line)}</h1>`),
       jsonLd: {
@@ -237,12 +273,13 @@ function pages({ site, projects, papers, posts }: Content): Page[] {
             alternateName: ["SevanB.net", "sevanb.net"],
             publisher: { "@id": PERSON_ID },
           },
-          person,
+          person(site),
         ],
       },
     },
     {
       ...PAGES.about,
+      description: d.about,
       file: "about.html",
       body: page(
         `<h1>${esc(NAME)}</h1>` +
@@ -254,7 +291,7 @@ function pages({ site, projects, papers, posts }: Content): Page[] {
         "@context": "https://schema.org",
         "@graph": [
           { "@type": "ProfilePage", url: `${SITE_URL}/about`, mainEntity: { "@id": PERSON_ID } },
-          person,
+          person(site),
         ],
       },
     },
@@ -299,6 +336,26 @@ function projectPage(p: Project): Pick<Page, "title" | "description" | "body" | 
         `<meta name="citation_conference_title" content="${esc(SONAR.conference)}" />`,
         `<meta name="citation_firstpage" content="${SONAR.pages[0]}" />`,
         `<meta name="citation_lastpage" content="${SONAR.pages[1]}" />`,
+      ].join("\n    "),
+    };
+  }
+  if (p.slug === SIMULATORS.slug) {
+    const S = SIMULATORS;
+    const links = [link(S.paper, "Paper (arXiv)"), ...(p.source ? [link(p.source, "Code")] : [])];
+    return {
+      title: pageTitle(p.title),
+      description: S.description,
+      body:
+        `<div class="static-page"><main><p>${esc(S.venue)}</p><h1>${esc(S.fullTitle)}</h1>` +
+        `<p>${esc(S.authors.join(" · "))}</p><p>${esc(S.affiliation)}</p>` +
+        `<p>${links.join(" · ")}</p>` +
+        `<h2>Abstract</h2>${S.abstract.map((t) => `<p>${esc(t)}</p>`).join("")}</main></div>`,
+      // Google Scholar indexing tags.
+      extraHead: [
+        `<meta name="citation_title" content="${esc(S.fullTitle)}" />`,
+        ...S.authors.map((a) => `<meta name="citation_author" content="${esc(a)}" />`),
+        `<meta name="citation_publication_date" content="${S.date}" />`,
+        `<meta name="citation_pdf_url" content="${esc(S.pdf)}" />`,
       ].join("\n    "),
     };
   }
@@ -403,7 +460,6 @@ function render(template: string, head: string, body = "") {
 
 // The page served for /projects/<slug>, /blog/<slug> and during development: generic
 // head, no canonical (React adds the right one).
-const SHELL_HEAD = headTags({ title: NAME, description: PAGES.home.description });
 
 // ---------------------------------------------------------------------------------
 // Text files
@@ -419,7 +475,7 @@ function llmsTxt({ site, projects, papers, posts }: Content) {
   const lines = [
     `# ${NAME}`,
     "",
-    `> ${PAGES.home.description}`,
+    `> ${descriptions(site).home}`,
     "",
     `${ROLE.title} in ${ROLE.department}, ${ROLE.institution} (${ROLE.institutionShort}).`,
     "",
@@ -500,7 +556,8 @@ export function sitePages({
       }
     },
     transformIndexHtml(html) {
-      const withHead = html.replace(/<!-- page-head -->[\s\S]*?<!-- \/page-head -->/, SHELL_HEAD);
+      const shellHead = headTags({ title: NAME, description: descriptions(api.site).home });
+      const withHead = html.replace(/<!-- page-head -->[\s\S]*?<!-- \/page-head -->/, shellHead);
       return indexable
         ? withHead
         : withHead.replace(
@@ -558,6 +615,10 @@ export function sitePages({
           /^\/projects\/sonar-inverse-rendering$/,
           ["/src/pages/ProjectPage.tsx", "/src/projects/sonar/Page.tsx"],
         ],
+        [
+          /^\/projects\/generative-models-as-simulators$/,
+          ["/src/pages/ProjectPage.tsx", "/src/projects/simulators/Page.tsx"],
+        ],
         [/^\/projects\//, ["/src/pages/ProjectPage.tsx"]],
         [/^\/papers$/, ["/src/pages/Papers.tsx"]],
         [/^\/writing$/, ["/src/pages/Writing.tsx"]],
@@ -602,7 +663,7 @@ export function sitePages({
           template,
           headTags({
             title: `Not found · ${NAME}`,
-            description: PAGES.home.description,
+            description: descriptions(content.site).home,
             noindex: true,
           }),
           page("<h1>Page not found</h1>"),

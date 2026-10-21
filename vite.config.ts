@@ -61,7 +61,7 @@ export default defineConfig(async ({ command, isPreview }) => {
   const contentApi = apiBase.startsWith("/") ? `${apiTarget}${apiBase}` : apiBase;
   const plugins: PluginOption[] = [react(), ownDevicesOnly];
   if (!isPreview) {
-    const content = await loadContent(contentApi);
+    const content = await loadContent(contentApi, { strict: railwayEnv === "production" });
     plugins.push(
       builtContent(content),
       // Essays: content/writing/<slug>.md, compiled to HTML at build time, published when

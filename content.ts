@@ -59,7 +59,7 @@ const loads = new Map<string, Promise<Content>>();
  * Everything visible on the site, from `api` (a base URL ending in /api). With `save`, a
  * complete answer is written to the snapshot (`npm run snapshot`, production API only).
  */
-export function loadContent(api: string, { save = false } = {}): Promise<Content> {
+export function loadContent(api: string, { save = false, strict = false } = {}): Promise<Content> {
   let load = loads.get(api);
   if (!load) {
     load = (async () => {
@@ -80,6 +80,12 @@ export function loadContent(api: string, { save = false } = {}): Promise<Content
         }),
       );
       const content = Object.fromEntries(entries) as Content;
+      // A production build never ships the snapshot: it may be older than the live text,
+      // and crawlers would read it. Failing keeps the last good deploy online instead.
+      if (strict && fresh !== entries.length)
+        throw new Error(
+          "[content] the production API didn't answer in full; not building from the snapshot",
+        );
       if (save && fresh === entries.length) {
         const text = `${JSON.stringify(content, null, 2)}\n`;
         if (!existsSync(SNAPSHOT) || readFileSync(SNAPSHOT, "utf8") !== text) {
