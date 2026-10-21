@@ -22,7 +22,8 @@ file; ask the frame instead.
   (decoration only), `--acc` (the old site's cyan; earned, not default), `--acc-tx`
   (cyan for words), `--wire` (Wireframe's phosphor).
 - Rooms: `<html data-room>` is `home`, `projects`, `project`, `papers`, `writing`,
-  `essay`, `about` or `page` (set by Layout from the path). To colour a room, set the
+  `essay`, `about` or `page` (set by Layout from the path), or `standalone` for a project
+  page marked "Standalone page" in the control panel (no navbar, no sky, plain ground). To colour a room, set the
   `--r-*` inputs (`--r-g0`, `--r-g1`, `--r-g2`, `--r-rule`, `--r-rule2`, `--r-tx`...
   `--r-tx4`) on `html[data-room="..."]` in your CSS file. Never set `--g0`/`--tx`
   directly: they are derived from `--r-*` so the controls (ground, temperature,

@@ -53,6 +53,7 @@ function DefaultPage({ p }: { p: Project }) {
     <ProjectRoom>
       <title>{pageTitle(p.title)}</title>
       <ProjectHead
+        standalone={p.standalone}
         when={<When p={p} />}
         title={p.title}
         line={p.summary ?? undefined}

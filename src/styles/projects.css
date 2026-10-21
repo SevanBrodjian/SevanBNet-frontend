@@ -69,6 +69,19 @@ html[data-room="project"] {
   text-underline-offset: 4px;
 }
 
+/* A standalone page starts from home: the snake, then the site's name. */
+.pj-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pj-home img {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+
 .pj-crumb [aria-hidden] {
   color: var(--tx4);
 }

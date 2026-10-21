@@ -25,6 +25,9 @@ export type Project = {
   slug: string;
   title: string;
   listed: boolean;
+  /** A page that stands on its own (a paper's): no navbar, a link home, a plain ground.
+   *  Missing from older APIs. */
+  standalone?: boolean;
   rank: number | null;
   start: string | null;
   end: string | null;
