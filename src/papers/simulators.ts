@@ -2,9 +2,10 @@
 // left, Rayworld (the paper's continuous world) seen from above: two discs drifting through a
 // frustum watched by one fan of rays. On the right, the generator's frames, rays across and time
 // down. Until frame 20 each frame the simulator renders goes into the generator (the faint wire);
-// at frame 20 one disc is teleported, the paper's edit (cyan where it was, magenta where it went),
-// and the edited state is written into the generator (the magenta wire), whose frames below the
-// dashed line follow the edited world. A click in the frustum teleports the nearer disc to the
+// at frame 20 the world waits while a touch drags one disc to its new spot, the paper's edit (a
+// teleport: cyan where it was, magenta where it went), and the edited state is written into the
+// generator (the magenta wire), whose frames below the dashed line follow the edited world. A
+// click in the frustum teleports the nearer disc to the
 // nearest spot from which the rest of the episode stays valid (as the paper's edits do); Enter on
 // the well makes a random one.
 // This is a schematic of what a successful edit looks like, not the paper's results. In the paper
@@ -29,9 +30,11 @@ import {
   type Rng,
   randomTeleport,
   renderAt,
+  renderFrame,
   SCALE,
   SEPARATION,
   sampleEpisode,
+  shownAt,
   stateAt,
   teleport,
   VARIANTS,
@@ -50,6 +53,12 @@ import {
 
 const FRAME_MS = 105; // one world frame while playing
 const HOLD_MS = 1500; // the finished record, before the next episode
+// The episode's own edit, drawn as a hand would make it: a touch presses on the disc, drags it
+// to where the edit puts it, and lifts, while the world waits.
+const PRESS_MS = 320;
+const DRAG_MS = 1000;
+const LIFT_MS = 280;
+const HAND_MS = PRESS_MS + DRAG_MS + LIFT_MS;
 
 /** One edit as drawn: when and which disc, where it was and went, and its ray centres on the
  * edit row (the mean of the rays it vacates, and of the rays it lights; NaN if none). */
@@ -286,8 +295,9 @@ function centre(n: number, m: (k: number) => boolean) {
 }
 
 /** For a larger, slower showing (the project page's figure): `frameMs` per frame; `editHold`
- * ms with the edit made in the simulator but not yet written into the generator; `onPhase`
- * hears 0 (running), 1 (the edit), 2 (written in; the generator carries on) or -1 (the still). */
+ * ms, after the drag, with the edit made in the simulator but not yet written into the
+ * generator (without one, its wire and EDIT show from the drag's start); `onPhase` hears 0
+ * (running), 1 (the edit), 2 (written in; the generator carries on) or -1 (the still). */
 export type StageOptions = {
   frameMs?: number;
   editHold?: number;
@@ -332,6 +342,8 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
   let figure = true; // the still: the edit's moment over the whole record
   let transferred = true; // the latest edit has been written into the generator
   let wait = 0; // ms left before it is
+  /** The episode's edit while it is drawn as a drag: disc j from `from` to `to`, `ms` in. */
+  let drag: { j: number; from: V2; to: V2; ms: number } | null = null;
   let hold = 0;
   let on = false;
   let hover: [number, number] | null = null;
@@ -470,6 +482,7 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
     hold = 0;
     transferred = true;
     wait = 0;
+    drag = null;
   }
 
   /** Make an edit at time tt (`act` teleports a disc and says what it did), keeping the marks
@@ -483,6 +496,7 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
     if (!e) return false;
     transferred = true;
     wait = 0;
+    drag = null;
     const j = e.disc;
     const after = from < FRAMES ? ep.hit.subarray(from * R, from * R + R) : null;
     marks = marks.filter((m) => m.t < tt);
@@ -524,10 +538,10 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
     record();
   }
 
-  /** Record every frame reached so far. */
+  /** Record every frame reached so far (the edited frame only once the drag is done). */
   function record() {
     const last = marks.length ? marks[marks.length - 1].row : FRAMES;
-    const want = Math.min(limit, Math.floor(t + 1e-9) + 1, transferred ? FRAMES : last);
+    const want = Math.min(limit, Math.floor(t + 1e-9) + 1, transferred && !drag ? FRAMES : last);
     if (want !== shown) {
       shown = want;
       paintHistory();
@@ -540,6 +554,16 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
     paused: true,
     tick(dt) {
       if (figure) return;
+      if (drag) {
+        drag.ms += dt;
+        if (drag.ms >= HAND_MS) {
+          drag = null;
+          if (!transferred) wait = editHold;
+          record();
+        }
+        draw();
+        return;
+      }
       if (wait > 0) {
         wait -= dt;
         if (wait <= 0) transferred = true;
@@ -559,10 +583,9 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
         applied = true;
         move(plan.disc, EDIT_FRAME, plan.x, plan.z);
         t = Math.min(EDIT_FRAME, end);
-        if (editHold > 0) {
-          wait = editHold;
-          transferred = false;
-        }
+        const m = marks[marks.length - 1];
+        drag = { j: plan.disc, from: m.was, to: m.went, ms: 0 };
+        if (editHold > 0) transferred = false;
       }
       record();
       if (t >= end) hold = HOLD_MS;
@@ -647,6 +670,17 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
     ctx.setLineDash([]);
   }
 
+  /** Where the touch holds the dragged disc, and how present the touch is (0 to 1). */
+  function held(g: NonNullable<typeof drag>): [number, number, number] {
+    const u = clamp((g.ms - PRESS_MS) / DRAG_MS, 0, 1);
+    const e = u * u * (3 - 2 * u);
+    return [
+      g.from[0] + (g.to[0] - g.from[0]) * e,
+      g.from[1] + (g.to[1] - g.from[1]) * e,
+      clamp(Math.min(g.ms / PRESS_MS, (HAND_MS - g.ms) / LIFT_MS), 0, 1),
+    ];
+  }
+
   function draw() {
     const { d, rowD, hx, hy, hw } = L;
     const R = v.rays;
@@ -654,9 +688,15 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.imageSmoothingEnabled = false;
 
-    // the world now
-    renderAt(ep, t, row, rowHit, rowDepth);
+    // the world now; mid-drag, the dragged disc where the touch holds it
     stateAt(ep, t, P);
+    const g = drag;
+    const h = g ? held(g) : null;
+    if (g && h) {
+      P[2 * g.j] = h[0];
+      P[2 * g.j + 1] = h[1];
+      renderFrame(v, P, row, 0, shownAt(ep, t), rowHit, rowDepth);
+    } else renderAt(ep, t, row, rowHit, rowDepth);
 
     // the frustum: the observer's lines to the near corners, then the frustum itself
     const nearY = crisp(Y(NEAR));
@@ -716,7 +756,7 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
     const seen = m && t >= m.t ? m : null;
     if (seen) {
       ring(seen.was[0], seen.was[1], pre);
-      ring(seen.went[0], seen.went[1], post);
+      ring(h ? h[0] : seen.went[0], h ? h[1] : seen.went[1], post);
     }
     const aim =
       hover && (figure || t < end) ? target(hover[0], hover[1], figure ? EDIT_FRAME : t) : null;
@@ -781,13 +821,14 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
     };
     const written = seen && seen.row < FRAMES && transferred;
     if (written) {
-      const gx = X(seen.went[0]) + v.radius * L.s + 2.5 * d;
-      const gy = Y(seen.went[1]);
+      const gx = X(h ? h[0] : seen.went[0]) + v.radius * L.s + 2.5 * d;
+      const gy = Y(h ? h[1] : seen.went[1]);
       const ey = hy + seen.row * rowD;
       wire(gx, gy, ey, post, 0.95);
-      // EDIT, centred on the wire's vertical run, on the side its turn leaves free
+      // EDIT, centred on the wire's vertical run, on the side its turn leaves free once the
+      // disc has landed (so it holds still through a drag)
       const tw = ctx.measureText("EDIT").width;
-      const below = gy < ey - 2 * d;
+      const below = Y(seen.went[1]) < ey - 2 * d;
       const ty = below ? ey + L.fs + Math.round(5 * d) : ey - Math.round(6 * d);
       const tx = Math.round(Math.min(xm - tw / 2, hx - 3 * d - tw));
       ctx.fillStyle = rgba(pal.well);
@@ -807,9 +848,9 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
 
     // the edits on the record: a dashed line at each edited frame, and the latest one's
     // locators, the edited disc's ray centres before (cyan) and after (magenta)
-    // (the generator shows an edit only once it has been written in)
+    // (the generator shows an edit only once it has been written in and the drag is done)
     for (const k of marks) {
-      if (t < k.t || k.row >= FRAMES || (k === seen && !transferred)) continue;
+      if (t < k.t || k.row >= FRAMES || (k === seen && (!transferred || g))) continue;
       const y = hy + k.row * rowD;
       ctx.fillStyle = rgba(pal.tx, 0.85);
       const dash = Math.round(3 * d);
@@ -817,7 +858,7 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
       for (let x = hx; x < hx + hw; x += dash * 2)
         ctx.fillRect(x, y - (lw >> 1), Math.min(dash, hx + hw - x), lw);
     }
-    if (seen && transferred) {
+    if (seen && transferred && !g) {
       const lw = Math.max(1, Math.round(d));
       for (const [c, col] of [
         [seen.pre, pre],
@@ -828,6 +869,19 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
         ctx.fillStyle = rgba(col);
         ctx.fillRect(x, hy, lw, hh);
       }
+    }
+
+    // the touch making the edit: a translucent fingertip on the disc, settling as it presses
+    // and spreading a little as it lifts
+    if (g && h) {
+      const s = 1 + (g.ms < PRESS_MS ? 0.3 : 0.15) * (1 - h[2]);
+      ctx.beginPath();
+      ctx.arc(X(h[0]), Y(h[1]), (v.radius * L.s + 13 * d) * s, 0, Math.PI * 2);
+      ctx.fillStyle = rgba(pal.tx, 0.2 * h[2]);
+      ctx.fill();
+      ctx.lineWidth = d;
+      ctx.strokeStyle = rgba(pal.tx, 0.5 * h[2]);
+      ctx.stroke();
     }
   }
 
