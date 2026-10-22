@@ -2,9 +2,9 @@ import type { ReactNode } from "react";
 import { Link } from "react-router";
 import { isExternal } from "./util";
 
-// The main things to do on a page (Code, Paper, CV): big, clear, pressable buttons with
-// the frame's four-corner carets. Pass exactly one of `to` (a page on this site), `href`
-// (a link; leaving the site opens a new tab and shows ↗) or `onClick` (a button).
+// The main things to do on a page (Code, Paper, CV): big, clear, pressable buttons whose
+// four-corner carets show while they are pointed at. Pass exactly one of `to` (a page on this
+// site), `href` (a link; leaving the site opens a new tab and shows ↗) or `onClick` (a button).
 // `primary` marks the one action that matters most on the page. Wrap several in <Actions>.
 
 type Common = { children: ReactNode; primary?: boolean; className?: string; title?: string };

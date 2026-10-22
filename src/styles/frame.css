@@ -702,11 +702,13 @@ h3 {
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.06),
     0 1px 0 rgb(0 0 0 / 0.45);
-  --cx: var(--tx3);
+  /* the corner marks only while it is pointed at */
+  --cx: transparent;
   --cx-o: 4px;
 }
 
-.act:hover {
+.act:hover,
+.act:focus-visible {
   border-color: var(--tx3);
   background: var(--g2);
   --cx: var(--tx);
@@ -723,7 +725,6 @@ h3 {
   border-color: var(--tx3);
   background: var(--g0);
   box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.55);
-  --cx: var(--tx);
 }
 
 .act .ext-mark {
@@ -736,10 +737,10 @@ h3 {
   border-color: color-mix(in oklab, var(--acc) 75%, transparent);
   background: color-mix(in oklab, var(--acc) 13%, var(--g1));
   color: var(--acc-tx);
-  --cx: color-mix(in oklab, var(--acc) 80%, transparent);
 }
 
-.act.pri:hover {
+.act.pri:hover,
+.act.pri:focus-visible {
   border-color: var(--acc);
   background: color-mix(in oklab, var(--acc) 22%, var(--g1));
   --cx: var(--acc-tx);
@@ -1142,7 +1143,6 @@ html[data-framed] .ftr-in {
 
 html[data-framed] .ftr-in a {
   color: var(--tx);
-  --cx: var(--rule2);
 }
 
 html[data-framed] .ftr-in a:hover {

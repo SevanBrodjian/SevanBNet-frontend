@@ -28,7 +28,7 @@ export default function Idea() {
   useEffect(() => {
     const el = host.current;
     if (!el) return;
-    const w = mountStage(el, { frameMs: 170, editHold: 1500, onPhase: setPhase });
+    const w = mountStage(el, { frameMs: 170, editHold: 800, onPhase: setPhase });
     w.setActive(true);
     return () => {
       w.dispose();
