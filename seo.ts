@@ -233,7 +233,7 @@ function pages({ site, projects, papers, posts }: Content): Page[] {
       p.project
         ? link(projectPath(p.project.slug), "Project page")
         : crawlable(p.project_url) && link(p.project_url as string, "Project page"),
-      p.project?.source && link(p.project.source, "Code"),
+      p.code_url && link(p.code_url, "Code"),
     ].filter(Boolean);
     return (
       `<li><h2>${esc(p.title)}</h2>` +

@@ -93,7 +93,7 @@ export default function Page({ project: p }: CustomPageProps) {
 
       <section className="gs-sec" aria-labelledby="gs-worlds">
         <Head id="gs-worlds" label="The environments">
-          Two worlds whose simulators we know exactly.
+          Two environments whose simulators we know exactly.
         </Head>
         <div className="prose">
           <p>
@@ -133,7 +133,7 @@ export default function Page({ project: p }: CustomPageProps) {
 
       <section className="gs-sec" aria-labelledby="gs-results">
         <Head id="gs-results" label="Results">
-          Decodable everywhere. Editable where the environment allows.
+          The Conditions for Editability.
         </Head>
         <div className="gs-split">
           <div className="gs-side">
