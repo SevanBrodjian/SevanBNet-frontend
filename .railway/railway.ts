@@ -28,7 +28,8 @@ export default defineRailway((ctx) => {
     healthcheck: "/",
     env: {
       // The build fetches content from the API, so "Rebuild site" in the control panel
-      // must never reuse a cached build.
+      // must never reuse a cached build. This alone doesn't ensure it: Railpack (v0.43)
+      // still reuses the `npm run build` step when no file in the repo has changed.
       NO_CACHE: "1",
       // The Learning Taichi lab, embedded on its project page (the taichi_lab service below).
       VITE_LAB_URL: "https://taichi-lab.sevanb.net/",
