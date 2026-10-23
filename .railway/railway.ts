@@ -31,6 +31,9 @@ export default defineRailway((ctx) => {
       // must never reuse a cached build. This alone doesn't ensure it: Railpack (v0.43)
       // still reuses the `npm run build` step when no file in the repo has changed.
       NO_CACHE: "1",
+      // What does: the backend sets this to the current time before each rebuild
+      // (sevanbnet/rebuild.py), and a changed variable makes the build step run again.
+      CONTENT_REBUILD: preserve(),
       // The Learning Taichi lab, embedded on its project page (the taichi_lab service below).
       VITE_LAB_URL: "https://taichi-lab.sevanb.net/",
       CI: preserve(),
