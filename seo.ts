@@ -619,6 +619,10 @@ export function sitePages({
           /^\/projects\/generative-models-as-simulators$/,
           ["/src/pages/ProjectPage.tsx", "/src/projects/simulators/Page.tsx"],
         ],
+        [
+          /^\/projects\/crowdcast$/,
+          ["/src/pages/ProjectPage.tsx", "/src/projects/crowdcast/Page.tsx"],
+        ],
         [/^\/projects\//, ["/src/pages/ProjectPage.tsx"]],
         [/^\/papers$/, ["/src/pages/Papers.tsx"]],
         [/^\/writing$/, ["/src/pages/Writing.tsx"]],
