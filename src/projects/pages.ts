@@ -10,4 +10,5 @@ export const CUSTOM_PAGES: Record<string, RouteComponent<CustomPageProps>> = {
   "learning-taichi": route(() => import("./learning-taichi/Page")),
   "sonar-inverse-rendering": route(() => import("./sonar/Page")),
   "generative-models-as-simulators": route(() => import("./simulators/Page")),
+  crowdcast: route(() => import("./crowdcast/Page")),
 };
