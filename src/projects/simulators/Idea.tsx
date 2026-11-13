@@ -51,7 +51,8 @@ export default function Idea() {
           ))}
         </ol>
         <figcaption className="cap">
-          A visualization of a successful edit in Rayworld, not an actual example.
+          A visualization of a successful edit in Rayworld, not an actual example. Drag either disc
+          to make your own.
         </figcaption>
       </div>
     </figure>

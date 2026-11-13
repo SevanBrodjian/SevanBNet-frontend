@@ -19,12 +19,11 @@ import {
 import { isTap, setPoint, travel, usePoint } from "./Results";
 import "./results.css";
 
-// Editability across residual points: the paper's figure 6 on top, Table 10 below. On top,
-// the Edit Index of PI (read from figure 6, see data.ts) and of the inverse map (hollow where
-// its Edit Fidelity is below 0, outside the fidelity guard); below, the inverse map's R² and
-// the MLP probe's skill. Hovering, tapping or
-// focusing a point shows its values here and marks its row in Table 10, and the other way
-// round. A finger also scrubs sideways; a swipe up or down scrolls the page and picks nothing.
+// Editability across residual points: the paper's figure 6 on top, Table 10's fits below. On
+// top, the Edit Index of PI (read from figure 6, see data.ts) and of the inverse map (hollow
+// where its Edit Fidelity is below 0, outside the fidelity guard); below, the inverse map's R²
+// and the MLP probe's skill. Hovering, tapping or focusing a point shows its values here. A
+// finger also scrubs sideways; a swipe up or down scrolls the page and picks nothing.
 
 const LAST = POINTS.length - 1;
 
@@ -427,10 +426,10 @@ export default function DepthChart() {
         ))}
       </div>
       <figcaption className="cap">
-        From the embedding (0) to the last block (8). Top, the Edit Index of PI and of the inverse
-        map, hollow where the inverse map leaves the prediction worse than no edit. Bottom, the
-        inverse map's <i>R²</i> and the MLP probe's skill, as in the table above. PI's points are
-        read from the paper's figure 6, which no table prints.
+        The <code>standard</code> models, from the embedding (0) to the last block (8). Top, the
+        Edit Index of PI and of the inverse map, hollow where the inverse map leaves the prediction
+        worse than no edit. Bottom, the inverse map's <i>R²</i> and the MLP probe's skill. Point to
+        read the values. PI's points are read from the paper's figure 6.
       </figcaption>
     </figure>
   );

@@ -167,17 +167,6 @@ export const FIG6_PI: Record<Model, string[]> = {
   rayworld: "−0.93 −0.23 −0.29 −0.24 −0.17 −0.10 −0.20 −0.42 −0.69".split(" "),
 };
 
-/* ---------- Attention restricted from a block onward (A.7, in the text) ----------
-   standard Othello: each position attends only to itself from the given block onward, so
-   those blocks cannot read the history. The rise in held-out loss, nats per move; the
-   model's own loss is 2.029, 0.018 above the Bayes floor of 2.011 (Table 3). */
-
-export const ATTENTION_CUT: { from: number; earlier?: true; cost: string }[] = [
-  { from: 7, cost: "+0.013" },
-  { from: 6, cost: "+0.076" },
-  { from: 5, earlier: true, cost: "> +0.258" },
-];
-
 /* ---------- Table 16 (p. 38): withholding the viewpoint ----------
    Editability of continuous positions when the model must commit to a state before it
    knows the next viewpoint. One step: the step that renders the next frame reads only that

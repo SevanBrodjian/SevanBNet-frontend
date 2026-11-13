@@ -1,9 +1,10 @@
 // The Othello half of EditWorlds: a real 20-move opening (every move uniform over the legal set,
-// as the paper's generator plays) under one of the four rule variants, then a wait for the edit.
-// The visitor recolours one token outside the centre four; the board then shows the cells whose
-// legality changed, cyan for legal before and not after, magenta for legal only after (figures
-// 5b and 12), and fills the legal moves of the edited board. A second flip of the same token
-// undoes the edit; a flip of another token replaces it (one flip at a time, as in the paper).
+// as the paper's generator plays) under one of the four rule variants. The visitor recolours any
+// token, at any move: the opening stops there, and the board shows the cells whose legality
+// changed, cyan for legal before and not after, magenta for legal only after (figures 5b and 12),
+// and fills the legal moves of the edited board. A second flip of the same token undoes the edit
+// and the opening carries on; a flip of another token replaces it (one flip at a time, as in the
+// paper, which edits only after move 20 and never the centre four).
 // - the opening plays on the shared loop when it first comes on screen; STILL shows move 20
 // - a mouse acts on press, a finger or pen on a tap, so a swipe that scrolls the page past the
 //   board never changes it
@@ -15,9 +16,9 @@ import * as O from "./othello";
 /** Moves in an opening, as the paper cuts its edit cases. */
 export const OPENING = 20;
 /** Milliseconds per move while the opening plays. */
-const STEP_MS = 700;
+const STEP_MS = 1300;
 /** Held on the start position before the first move. */
-const LEAD_MS = 500;
+const LEAD_MS = 900;
 const REFUSE_MS = 700;
 const FIRST_SEED = 20;
 
@@ -47,7 +48,7 @@ export type OthReport = {
 export type OthEvent =
   | { kind: "flip"; edit: O.Edit }
   | { kind: "unflip"; sq: number }
-  | { kind: "refused"; sq: number; why: "center" | "empty" };
+  | { kind: "refused"; sq: number };
 
 export type OthOptions = {
   variant: O.Variant;
@@ -102,8 +103,9 @@ export function othelloDemo(cv: HTMLCanvasElement, opts: OthOptions): OthelloDem
     cursor = moves[moves.length - 1]?.sq ?? 19;
   }
 
-  const base = () => boards[OPENING];
   const now = () => boards[shown];
+  /** Any token may be flipped here (the paper keeps to the outer squares, see othello.ts). */
+  const flippable = (sq: number) => sq >= 0 && sq < 64 && now().cells[sq] !== 0;
 
   function report() {
     const st = ed ? ed.state : now();
@@ -135,12 +137,6 @@ export function othelloDemo(cv: HTMLCanvasElement, opts: OthOptions): OthelloDem
       playing = shown < OPENING;
     }
     loop.setPaused(!playing);
-  }
-
-  function finish() {
-    shown = OPENING;
-    playing = false;
-    loop.setPaused(true);
   }
 
   // ---------- drawing ----------
@@ -203,7 +199,7 @@ export function othelloDemo(cv: HTMLCanvasElement, opts: OthOptions): OthelloDem
       ctx.stroke();
     }
 
-    // the last move, while the opening is on screen
+    // the last move
     if (!ed && shown > 0) {
       const m = moves[shown - 1];
       const x = cx(m.sq) + inner / 2;
@@ -235,8 +231,8 @@ export function othelloDemo(cv: HTMLCanvasElement, opts: OthOptions): OthelloDem
 
     // where a press would land: the keyboard cursor, or the token under the mouse
     const at = keys ? cursor : hover;
-    if (at >= 0 && !playing) {
-      const ok = O.canEdit(base(), at);
+    if (at >= 0) {
+      const ok = flippable(at);
       ctx.fillStyle = ok || keys ? "rgba(236,233,226,0.9)" : "rgba(236,233,226,0.35)";
       const o = Math.round(2 * d);
       carets(ctx, cx(at) - o, cy(at) - o, inner + 2 * o, inner + 2 * o, Math.round(5 * d), lw);
@@ -254,32 +250,39 @@ export function othelloDemo(cv: HTMLCanvasElement, opts: OthOptions): OthelloDem
 
   function press(sq: number) {
     if (sq < 0) return;
-    if (shown < OPENING) {
-      finish();
-      after();
-      return;
-    }
-    const b = base();
-    if (!O.canEdit(b, sq)) {
+    if (!flippable(sq)) {
       refuse = sq;
       clearTimeout(refuseTimer);
       refuseTimer = window.setTimeout(() => {
         refuse = -1;
         draw();
       }, REFUSE_MS);
-      opts.announce({ kind: "refused", sq, why: b.cells[sq] ? "center" : "empty" });
+      opts.announce({ kind: "refused", sq });
       draw();
       return;
     }
     refuse = -1;
     if (ed && ed.sq === sq) {
+      // undone: the opening carries on from here
       ed = null;
       opts.announce({ kind: "unflip", sq });
+      resume();
     } else {
-      ed = O.edit(b, sq);
+      // the opening stops on this move while the edit is shown
+      playing = false;
+      loop.setPaused(true);
+      ed = O.edit(now(), sq, O.legal(now()), true);
       opts.announce({ kind: "flip", edit: ed });
     }
+    setCursor();
     after();
+  }
+
+  function resume() {
+    if (STILL || shown >= OPENING) return;
+    acc = 0;
+    playing = true;
+    loop.setPaused(false);
   }
 
   function after() {
@@ -288,7 +291,7 @@ export function othelloDemo(cv: HTMLCanvasElement, opts: OthOptions): OthelloDem
   }
 
   function setCursor() {
-    cv.style.cursor = playing ? "pointer" : hover >= 0 && O.canEdit(base(), hover) ? "pointer" : "";
+    cv.style.cursor = hover >= 0 && flippable(hover) ? "pointer" : "";
   }
 
   const down = (e: PointerEvent) => {
@@ -356,7 +359,7 @@ export function othelloDemo(cv: HTMLCanvasElement, opts: OthOptions): OthelloDem
       e.preventDefault();
       const was = keys;
       keys = true;
-      if (was || shown < OPENING) press(cursor);
+      if (was) press(cursor);
       else draw();
     }
   };

@@ -69,12 +69,12 @@ export const EDIT_WORDS = {
     rejected: { unchanged: "unchanged", empty: "no moves" },
     /** The canvas's description: what it shows, and its keys. */
     about:
-      "Othello board after a real 20-move opening, legal moves filled. Click a token outside the centre four to flip its colour; click it again to undo. From the keyboard: the arrow keys move a cursor and Enter flips.",
+      "Othello board playing a real 20-move opening, legal moves filled. Click any token to flip its colour, which stops the opening at that move; click it again to undo and carry on. From the keyboard: the arrow keys move a cursor and Enter flips.",
     say: {
       flip: (sq: string, before: number, after: number, changed: number) =>
         `${sq} flipped. Legal moves ${before} to ${after}, ${changed} changed.`,
       unflip: (sq: string) => `${sq} restored`,
-      refused: { center: "The centre four cannot be flipped", empty: "Nothing to flip there" },
+      refused: "Nothing to flip there",
     },
   },
 };
@@ -250,7 +250,7 @@ function OthelloPanel() {
           ),
         );
       } else if (e.kind === "unflip") setSay(W.oth.say.unflip(squareName(e.sq)));
-      else setSay(W.oth.say.refused[e.why]);
+      else setSay(W.oth.say.refused);
     };
     const d = othelloDemo(el, { variant: "standard", tones: tones(el), report: paint, announce });
     demo.current = d;

@@ -1,124 +1,192 @@
-/* What the models compute and how to change it, on /projects/generative-models-as-simulators:
-   the decoder readout (Readout.tsx), the attention cut (Attention.tsx), the withheld
-   viewpoint (Viewpoint.tsx) and the causal state's definition. Owned by the Projects area. */
+/* The findings under the statement (Findings.tsx), the causal state's definition, and the
+   withheld viewpoint (Withheld.tsx) on /projects/generative-models-as-simulators. Owned by the
+   Projects area. */
 
-/* ---------- figure 17: eight readouts, four across (two on phones), each cropped from the
-   one image. The tick column sits in the grid's left gutter, beside each row's first panel. */
-.gi-rd {
-  margin: 36px 0 0;
+/* ---------- the three findings, each with its numbers drawn small ---------- */
+.gt {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px 40px;
+  margin: 0 0 64px;
+  padding: 0;
+  list-style: none;
+  counter-reset: gt;
 }
 
-.gi-rd-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 22px 14px;
-  padding-left: 64px;
-}
-
-.gi-rd-cell {
-  display: grid;
-  gap: 8px;
+.gt > li {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   min-width: 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule2);
+  counter-increment: gt;
 }
 
-.gi-rd-lbl {
-  color: var(--tx2);
-  font: 12px / 1.3 var(--mono);
+.gt-h {
+  margin: 0;
+  font: var(--w5) 17px / 1.3 var(--sans);
 }
 
-.gi-rd-box {
-  position: relative;
-}
-
-.gi-rd-crop {
-  position: relative;
-  aspect-ratio: 676 / 515;
-  overflow: hidden;
-  outline: 1px solid var(--rule2);
-}
-
-.gi-rd-crop img {
-  position: absolute;
-  top: 0;
-  left: calc(var(--k) * -700 / 676 * 100%);
-  width: calc(5576 / 676 * 100%);
-  max-width: none;
-  height: 100%;
-}
-
-.gi-ax {
-  position: absolute;
-  top: 0;
-  right: calc(100% + 9px);
-  bottom: 0;
-  display: none;
-  width: 56px;
+.gt-h::before {
+  content: counter(gt) "  ";
   color: var(--tx3);
-  font: 10.5px / 1 var(--mono);
+  font: var(--w4) 12.5px var(--mono);
+  white-space: pre;
+}
+
+.gt-h a {
+  color: var(--tx);
+  text-decoration: none;
+}
+
+.gt-h a:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--tx3);
+  text-underline-offset: 3px;
+}
+
+.gt > li > p {
+  margin: 0;
+  color: var(--tx2);
+  font: var(--w4) 15px / 1.55 var(--sans);
+}
+
+/* The numbers sit at the foot of each finding, level across the row. */
+.gt .gt-rules,
+.gt .gt-depth,
+.gt .gt-fix {
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+.gt-note {
+  color: var(--tx3);
+  font: 11.5px / 1.3 var(--mono);
+}
+
+.gt .gt-rules {
+  display: grid;
+  gap: 4px;
+}
+
+.gt-rule {
+  display: grid;
+  grid-template-columns: 15ch 120px auto;
+  gap: 10px;
+  align-items: center;
+  font: 12px / 1.2 var(--mono);
   font-variant-numeric: tabular-nums;
-  text-align: right;
+}
+
+.gt-rule code {
+  overflow: hidden;
+  color: var(--tx2);
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.gi-ax > span {
-  position: absolute;
-  right: 0;
-  transform: translateY(-50%);
-}
-
-.gi-ax i {
-  font-family: var(--serif);
-  font-size: 12px;
-}
-
-.gi-rd-cell:nth-child(4n + 1) .gi-ax {
+.gt-rule svg,
+.gt-depth svg {
   display: block;
+  overflow: visible;
 }
 
-/* ---------- the attention cut ---------- */
-.gi-att {
-  justify-self: start;
+.gt-bar {
+  fill: color-mix(in oklab, var(--gs-bad) 70%, var(--g0));
 }
 
-.gi-att .gr-tbl td {
-  min-width: 0;
+.gt-bar.gt-ok {
+  fill: color-mix(in oklab, var(--gs-good) 80%, var(--g0));
 }
 
-.gi-att .gr-tbl .gi-att-bl {
-  text-align: left;
+.gt-zero {
+  stroke: var(--tx3);
+  stroke-width: 1;
 }
 
-.gi-att .cap {
-  max-width: 48ch;
+.gt-thr {
+  stroke: color-mix(in oklab, var(--gs-good) 55%, transparent);
+  stroke-dasharray: 1 2;
+  stroke-width: 1;
 }
 
-.gi-att .cap code {
-  font-size: 0.92em;
+.gt .gt-depth {
+  margin-right: 0;
+  margin-bottom: 0;
+  margin-left: 0;
 }
 
-.gi-blocks {
-  display: inline-flex;
-  gap: 3px;
-  vertical-align: -1px;
+.gt-depth svg {
+  width: 100%;
+  max-width: 260px;
+  height: auto;
 }
 
-.gi-blocks i,
-.gi-key {
+.gt-bn {
+  fill: color-mix(in oklab, var(--gs-post) 9%, transparent);
+}
+
+.gt-line {
+  fill: none;
+  stroke: var(--tx);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.gt-line.gt-ray {
+  stroke: var(--tx2);
+  stroke-dasharray: 5 3;
+}
+
+.gt-depth figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  margin-top: 6px;
+  color: var(--tx3);
+  font: 11.5px / 1.3 var(--mono);
+}
+
+.gt-depth .gt-oth {
+  color: var(--tx);
+}
+
+.gt-depth .gt-oth::before,
+.gt-depth .gt-rw::before {
+  content: "";
   display: inline-block;
-  width: 11px;
-  height: 11px;
-  background: var(--tx2);
+  width: 14px;
+  margin-right: 6px;
+  border-top: 1.5px solid var(--tx);
+  vertical-align: 0.3em;
 }
 
-.gi-blocks i[data-cut],
-.gi-key[data-cut] {
-  box-shadow: inset 0 0 0 1px var(--tx3);
-  background: transparent;
+.gt-depth .gt-rw::before {
+  border-top: 1.5px dashed var(--tx2);
 }
 
-.gi-key {
-  margin: 0 3px 0 2px;
-  vertical-align: -1px;
+.gt .gt-fix {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin-bottom: 0;
+  font: var(--w45) 34px / 1.1 var(--sans);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.gt-arrow {
+  color: var(--tx3);
+  font-size: 26px;
+}
+
+.gt-unit {
+  flex-basis: 100%;
+  color: var(--tx3);
+  font: 11.5px / 1.3 var(--mono);
+  letter-spacing: 0;
 }
 
 /* ---------- the causal state's definition ---------- */
@@ -133,103 +201,228 @@
 
 .gi-eq .katex {
   padding: 6px 0;
+  white-space: nowrap;
 }
 
-/* ---------- the withheld viewpoint: the two rows of the setup beside Table 16 ---------- */
-.gi-fix {
+/* One line, scrolled sideways on narrow screens, never broken at a relation. */
+.gi-eq .katex-html {
+  white-space: nowrap;
+}
+
+/* ---------- the withheld viewpoint: the orbit beside the two steps, the score below ---------- */
+.vf {
+  --vf-amber: oklch(0.78 0.13 70);
+  margin: 36px 0 0;
+}
+
+.vf-top {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 36px 56px;
+  align-items: center;
+  gap: 24px 40px;
 }
 
-.gi-view {
-  flex: 0 1 440px;
-  min-width: 0;
-  margin: 0;
-}
-
-.gi-view-rows {
-  display: grid;
-  gap: 10px;
-}
-
-.gi-vw {
-  display: block;
+.vf-orbit {
+  flex: none;
+  width: 300px;
   max-width: 100%;
   height: auto;
   overflow: visible;
 }
 
-.gi-vw-l {
-  fill: var(--tx3);
-  font: var(--w5) 11px var(--sans);
-  font-stretch: 87.5%;
-  letter-spacing: 0.085em;
-  text-transform: uppercase;
+.vf-pipes {
+  flex: 1 1 540px;
+  min-width: 0;
 }
 
-.gi-vw-m {
-  fill: var(--tx);
-  font: 20px var(--serif);
+.vf-pipe {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
 }
 
-.gi-vw .gi-it {
-  font-style: italic;
+.vf-wide {
+  max-width: 584px;
 }
 
-.gi-vw-sub {
-  font-size: 13px;
+.vf-narrow {
+  display: none;
+  max-width: 340px;
 }
 
-.gi-vw-dots {
-  fill: var(--tx3);
-  font: 15px var(--sans);
-}
-
-.gi-vw-arc {
+.vf-ring {
   fill: none;
-  stroke: var(--tx2);
+  stroke: var(--tx3);
+  stroke-dasharray: 3 4;
   stroke-width: 1;
 }
 
-.gi-vw-head {
-  fill: var(--tx2);
+.vf-arena {
+  fill: none;
+  stroke: var(--tx3);
+  stroke-dasharray: 1 3;
+  stroke-linecap: round;
+  stroke-width: 1;
 }
 
-.gi-vw-o,
-.gi-vw-v,
-.gi-vw-out {
-  fill: var(--gs-well);
+.vf-vp {
+  fill: var(--g0);
   stroke: var(--tx3);
   stroke-width: 1;
 }
 
-.gi-vw-v {
-  fill: none;
+.vf-ray {
+  stroke: color-mix(in oklab, var(--tx) 22%, transparent);
+  stroke-width: 1;
 }
 
-.gi-vw-out {
-  fill: none;
-  stroke-dasharray: 3 3;
+.vf-ray.vf-hit {
+  stroke: color-mix(in oklab, var(--tx) 55%, transparent);
 }
 
-/* The state the one-step model must commit to: every viewpoint is rendered from it. */
-.gi-vw-o[data-hold] {
+.vf-edge {
+  fill: none;
+  stroke: color-mix(in oklab, var(--vf-amber) 70%, transparent);
+  stroke-width: 1;
+}
+
+.vf-disc {
+  fill: color-mix(in oklab, var(--tx) 45%, var(--g0));
+}
+
+.vf-disc.vf-bright {
+  fill: color-mix(in oklab, var(--tx) 92%, var(--g0));
+}
+
+.vf-obs {
+  fill: var(--vf-amber);
+}
+
+.vf-obs-l {
+  fill: var(--vf-amber);
+  font: 12px var(--mono);
+}
+
+.vf-stage {
+  fill: var(--tx2);
+  font: var(--w5) 11px var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.vf-lbl {
+  fill: var(--tx3);
+  font: 12px var(--mono);
+}
+
+.vf-m {
+  fill: var(--tx);
+  font: 19px var(--serif);
+}
+
+.vf-m.vf-amber {
+  fill: var(--vf-amber);
+}
+
+.vf-it {
+  font-style: italic;
+}
+
+.vf-sub {
+  font-size: 12.5px;
+}
+
+.vf-hat {
+  fill: none;
   stroke: var(--tx);
+  stroke-width: 1.2;
 }
 
-.gi-vw g[data-dim] {
-  opacity: 0.5;
+.vf-sbox {
+  fill: none;
+  stroke: var(--tx3);
+  stroke-width: 1;
 }
 
-.gi-view .cap {
-  max-width: 46ch;
+.vf-sbox.vf-out {
+  stroke: var(--vf-amber);
+  stroke-width: 1.5;
 }
 
-.gi-fix > .gr {
-  flex: 0 1 auto;
-  min-width: 0;
+.vf-wire {
+  fill: none;
+  stroke: var(--tx3);
+  stroke-width: 1;
+}
+
+.vf-head {
+  fill: var(--tx3);
+}
+
+.vf-tf {
+  fill: color-mix(in oklab, var(--tx) 8%, var(--g0));
+  stroke: var(--tx3);
+  stroke-width: 1;
+}
+
+.vf-tf-t {
+  fill: var(--tx);
+  font: var(--w5) 14px var(--sans);
+}
+
+.vf-lat {
+  fill: var(--vf-amber);
+}
+
+.vf-lat-box {
+  fill: none;
+  stroke: var(--vf-amber);
+  stroke-width: 1;
+}
+
+.vf-score {
+  margin-top: 28px;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.vf-score th,
+.vf-score td {
+  padding: 2px 0;
+  text-align: left;
+  vertical-align: baseline;
+}
+
+.vf-score thead th {
+  padding-bottom: 6px;
+}
+
+.vf-score tbody th {
+  padding-right: 28px;
+  color: var(--tx2);
+  font: var(--w4) 16px / 1.3 var(--sans);
+}
+
+.vf-score tbody td {
+  font: var(--w45) clamp(24px, 2.4vw, 32px) / 1.2 var(--sans);
+  letter-spacing: -0.01em;
+}
+
+.vf-score .vf-go {
+  padding: 0 22px;
+  vertical-align: middle;
+}
+
+.vf-go svg {
+  display: block;
+  fill: var(--tx2);
+  stroke: var(--tx2);
+  stroke-width: 1.5;
+}
+
+.vf .cap {
+  margin-top: 18px;
 }
 
 .gr-t16 .gr-gl code {
@@ -239,52 +432,82 @@
   text-transform: none;
 }
 
+@media (max-width: 1180px) {
+  .gt {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+    max-width: 68ch;
+  }
+}
+
 @media (max-width: 760px) {
-  .gi-rd-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px 10px;
-    padding-left: 30px;
-  }
-
-  .gi-ax {
-    right: calc(100% + 6px);
-    width: 24px;
-    font-size: 10px;
-  }
-
-  .gi-ax-w {
-    display: none;
-  }
-
-  .gi-rd-cell:nth-child(4n + 1) .gi-ax {
-    display: none;
-  }
-
-  .gi-rd-cell:nth-child(2n + 1) .gi-ax {
-    display: block;
-  }
-
   .gi-eq {
-    font-size: 15px;
+    font-size: 17px;
   }
 
-  .gi-att .gr-tbl th,
-  .gi-att .gr-tbl td {
-    padding-right: 8px;
-    padding-left: 8px;
+  /* On a phone, three lines: broken after the ⟺ and after the =, the only places it reads
+     well (each KaTeX base is a flex item; the two pseudo-elements are the breaks). */
+  .gi-eq .katex-html {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    row-gap: 0.35em;
   }
 
-  .gi-att .gr-tbl .gr-var {
-    padding-left: 0;
-    white-space: normal;
+  .gi-eq .katex-html::before,
+  .gi-eq .katex-html::after {
+    content: "";
+    flex-basis: 100%;
   }
 
-  .gi-blocks {
-    gap: 2px;
+  .gi-eq .katex-base:nth-child(-n + 2) {
+    order: 1;
   }
 
-  .gi-blocks i {
-    width: 9px;
-    height: 9px;
+  .gi-eq .katex-html::before {
+    order: 2;
+  }
+
+  .gi-eq .katex-base:nth-child(n + 3) {
+    order: 3;
+  }
+
+  .gi-eq .katex-html::after {
+    order: 4;
+  }
+
+  .gi-eq .katex-base:nth-child(n + 5) {
+    order: 5;
+  }
+
+  .vf-top {
+    justify-content: center;
+  }
+
+  .vf-orbit {
+    width: 250px;
+  }
+
+  .vf-wide {
+    display: none;
+  }
+
+  .vf-narrow {
+    display: block;
+    margin: 0 auto;
+  }
+
+  .vf-score tbody th {
+    padding-right: 14px;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .vf-score .vf-go {
+    padding: 0 10px;
+  }
+
+  .vf-go svg {
+    width: 32px;
   }
 }

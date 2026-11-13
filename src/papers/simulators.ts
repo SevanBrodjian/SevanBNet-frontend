@@ -5,9 +5,9 @@
 // at frame 20 the world waits while a touch drags one disc to its new spot, the paper's edit (a
 // teleport: cyan where it was, magenta where it went), and the edited state is written into the
 // generator (the magenta wire), whose frames below the dashed line follow the edited world. A
-// click in the frustum teleports the nearer disc to the
-// nearest spot from which the rest of the episode stays valid (as the paper's edits do); Enter on
-// the well makes a random one.
+// visitor drags either disc to teleport it, the world waiting while they hold it; it lands on
+// the nearest spot from which the rest of the episode stays valid (as the paper's edits do).
+// Enter on the well makes a random one.
 // This is a schematic of what a successful edit looks like, not the paper's results. In the paper
 // a single write lands at the edit frame and falls back a step later; history rewriting (appendix
 // A.10) is what holds an edit through a rollout, and that is the case drawn here. The trained
@@ -16,7 +16,7 @@
 
 import { living, STILL } from "../frame/live";
 import { clamp } from "../frame/util";
-import { local } from "../projects/simulators/demo-draw";
+import { local, localTouch } from "../projects/simulators/demo-draw";
 import {
   EDIT_FRAME,
   type Edit,
@@ -344,9 +344,20 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
   let wait = 0; // ms left before it is
   /** The episode's edit while it is drawn as a drag: disc j from `from` to `to`, `ms` in. */
   let drag: { j: number; from: V2; to: V2; ms: number } | null = null;
+  /** The visitor's hold on disc j, from where it was; `at` is where it would land (null until
+   * it has a valid spot), `moved` once it has left the press. */
+  let grab: {
+    j: number;
+    from: V2;
+    at: V2 | null;
+    pointer: number;
+    px: number;
+    py: number;
+    moved: boolean;
+  } | null = null;
   let hold = 0;
   let on = false;
-  let hover: [number, number] | null = null;
+  let hover = -1; // the disc under the mouse
   const P = new Float64Array(4);
   const Q = new Float64Array(4);
   let row = new Float32Array(v.rays);
@@ -355,7 +366,7 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
 
   const surface = new Surface(
     well,
-    "A schematic of a successful edit, drawn from the simulator because the trained model can't run in the browser. Left, the simulator: Rayworld seen from above, two discs and the fan of rays that sees them. Right, the generator's frames over time. At frame 20 a disc is teleported in the simulator and the edited state is written into the generator, whose frames then follow it, as the paper's history rewriting (appendix A.10) holds an edit through a rollout. Teleport a disc.",
+    "A schematic of a successful edit, drawn from the simulator because the trained model can't run in the browser. Left, the simulator: Rayworld seen from above, two discs and the fan of rays that sees them. Right, the generator's frames over time. At frame 20 a disc is teleported in the simulator and the edited state is written into the generator, whose frames then follow it, as the paper's history rewriting (appendix A.10) holds an edit through a rollout. Drag a disc to teleport it, or press Enter for a random edit.",
     () => {
       layout();
       draw();
@@ -483,6 +494,7 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
     transferred = true;
     wait = 0;
     drag = null;
+    grab = null;
   }
 
   /** Make an edit at time tt (`act` teleports a disc and says what it did), keeping the marks
@@ -553,7 +565,7 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
     fps: 30,
     paused: true,
     tick(dt) {
-      if (figure) return;
+      if (figure || grab) return; // the world waits while the visitor holds a disc
       if (drag) {
         drag.ms += dt;
         if (drag.ms >= HAND_MS) {
@@ -692,9 +704,14 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
     stateAt(ep, t, P);
     const g = drag;
     const h = g ? held(g) : null;
+    const gr = grab?.moved && grab.at ? grab : null;
     if (g && h) {
       P[2 * g.j] = h[0];
       P[2 * g.j + 1] = h[1];
+      renderFrame(v, P, row, 0, shownAt(ep, t), rowHit, rowDepth);
+    } else if (gr?.at) {
+      P[2 * gr.j] = gr.at[0];
+      P[2 * gr.j + 1] = gr.at[1];
       renderFrame(v, P, row, 0, shownAt(ep, t), rowHit, rowDepth);
     } else renderAt(ep, t, row, rowHit, rowDepth);
 
@@ -754,13 +771,15 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
     // the latest edit: where the disc was, and where it went
     const m = marks.length ? marks[marks.length - 1] : null;
     const seen = m && t >= m.t ? m : null;
-    if (seen) {
+    if (gr?.at) {
+      ring(gr.from[0], gr.from[1], pre);
+      ring(gr.at[0], gr.at[1], post);
+    } else if (seen) {
       ring(seen.was[0], seen.was[1], pre);
       ring(h ? h[0] : seen.went[0], h ? h[1] : seen.went[1], post);
     }
-    const aim =
-      hover && (figure || t < end) ? target(hover[0], hover[1], figure ? EDIT_FRAME : t) : null;
-    if (aim) ring(aim[1], aim[2], pal.tx, 0.55, true);
+    if (hover >= 0 && !grab && !g && (figure || t < end))
+      ring(P[2 * hover], P[2 * hover + 1], pal.tx, 0.55, true);
 
     // the frame as a 1D image, over the far edge
     if (simg && sctx) {
@@ -820,7 +839,9 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
       ctx.fill();
     };
     const written = seen && seen.row < FRAMES && transferred;
-    if (written) {
+    if (gr) {
+      // nothing goes into the generator while the visitor holds a disc
+    } else if (written) {
       const gx = X(h ? h[0] : seen.went[0]) + v.radius * L.s + 2.5 * d;
       const gy = Y(h ? h[1] : seen.went[1]);
       const ey = hy + seen.row * rowD;
@@ -840,7 +861,7 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
       wire(Math.round(X(b)) + 3 * d, L.sy + L.sh / 2, hy + rows * rowD, pal.tx, 0.32);
     }
 
-    const now = figure ? -1 : !seen ? 0 : transferred ? 2 : 1;
+    const now = figure ? -1 : gr ? 1 : !seen ? 0 : transferred ? 2 : 1;
     if (now !== phase) {
       phase = now;
       opts.onPhase?.(now);
@@ -858,7 +879,7 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
       for (let x = hx; x < hx + hw; x += dash * 2)
         ctx.fillRect(x, y - (lw >> 1), Math.min(dash, hx + hw - x), lw);
     }
-    if (seen && transferred && !g) {
+    if (seen && transferred && !g && !gr) {
       const lw = Math.max(1, Math.round(d));
       for (const [c, col] of [
         [seen.pre, pre],
@@ -887,30 +908,35 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
 
   // ---- input
 
-  /** Canvas point to world (x, z), through any mirror or turn the views give the canvas. */
-  function world(e: MouseEvent): [number, number] {
-    const [px, py] = local(canvas, e);
-    return [(px - L.fx) / L.s, (L.oy - py) / L.s];
-  }
+  /** Canvas point (device pixels) to world (x, z). */
+  const world = (px: number, py: number): V2 => [(px - L.fx) / L.s, (L.oy - py) / L.s];
 
   /** Nothing is moving, so the loop will not draw. */
   const quiet = () => live.paused || figure || t >= end;
 
-  /** In the frustum, give or take a little. */
-  const near = (x: number, z: number) =>
-    z >= NEAR - 0.6 && z <= FAR + 0.6 && Math.abs(x) <= SCALE * z + 0.6;
+  /** The disc under a canvas point, as drawn, within a fingertip's reach; -1 if none. */
+  function discAt(px: number, py: number) {
+    stateAt(ep, t, Q);
+    const reach = Math.max(v.radius * L.s, 12 * L.d) + 4 * L.d;
+    let best = -1;
+    let bd = Number.POSITIVE_INFINITY;
+    for (let j = 0; j < 2; j++) {
+      const dd = Math.hypot(px - X(Q[2 * j]), py - Y(Q[2 * j + 1]));
+      if (dd <= reach && dd < bd) {
+        bd = dd;
+        best = j;
+      }
+    }
+    return best;
+  }
 
-  /** The disc a click at (x, z) moves (the nearer one, as drawn), and where it lands: the
-   * nearest spot from which the rest of the episode stays valid, as the paper's edits do. */
-  function target(x: number, z: number, at: number): [number, number, number] | null {
-    stateAt(ep, at, Q);
-    const d0 = (Q[0] - x) ** 2 + (Q[1] - z) ** 2;
-    const d1 = (Q[2] - x) ** 2 + (Q[3] - z) ** 2;
-    const j = d1 < d0 ? 1 : 0;
+  /** Where disc j lands if dropped at (x, z) at time `at`: the nearest spot from which the rest
+   * of the episode stays valid, as the paper's edits do. */
+  function target(j: number, x: number, z: number, at: number): V2 | null {
     const k = 1 - j;
     // the still redoes its one edit from the unedited world, so the partner sits there
-    if (figure) stateAt(orig, at, Q);
-    const c = clampFuture(
+    stateAt(figure ? orig : ep, at, Q);
+    return clampFuture(
       v,
       x,
       z,
@@ -922,31 +948,28 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
       vel[2 * k + 1],
       Math.max(0, FRAMES - 1 - at),
     );
-    return c ? [j, c[0], c[1]] : null;
   }
 
-  function teleportTo(x: number, z: number) {
+  /** The visitor's edit: disc j teleported to (x, z), already a valid spot. */
+  function drop(j: number, x: number, z: number) {
     if (figure) {
-      const g = target(x, z, EDIT_FRAME);
-      if (!g) return;
       rewind();
-      move(g[0], EDIT_FRAME, g[1], g[2]);
+      move(j, EDIT_FRAME, x, z);
       applied = true;
       t = Math.min(EDIT_FRAME, end);
       shown = limit;
       paintHistory();
-    } else if (t >= end) {
-      // the record is full: on to the next
-      next();
-    } else {
-      const g = target(x, z, t);
-      if (!g) return;
-      applied = true; // the visitor's edit replaces the episode's own
-      move(g[0], t, g[1], g[2]);
-      record();
-      if (t >= end) hold = HOLD_MS;
+      return;
     }
-    draw();
+    applied = true; // the visitor's edit replaces the episode's own
+    move(j, t, x, z);
+    // as the episode's own: made in the simulator, then a moment later written in
+    if (editHold > 0) {
+      transferred = false;
+      wait = editHold;
+    }
+    record();
+    if (t >= end) hold = HOLD_MS;
   }
 
   /** The paper's edit, now (Enter on the well). */
@@ -963,36 +986,99 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
     draw();
   }
 
-  let lastPointer = "mouse";
-  let asleep = false; // the widget was resting when this press began
+  const setCursor = () => {
+    canvas.style.cursor = grab ? "grabbing" : hover >= 0 ? "grab" : "";
+  };
+
   canvas.addEventListener("pointerdown", (e) => {
-    lastPointer = e.pointerType;
-    asleep = !on;
-    if (e.pointerType === "touch" || e.button !== 0) return;
-    const [x, z] = world(e);
-    if (near(x, z)) teleportTo(x, z);
-  });
-  canvas.addEventListener("click", (e) => {
-    if (lastPointer !== "touch") return;
-    // a tap that wakes the widget (by focusing it) only wakes it: the first wake starts the
-    // episode over, so an edit would land on a frame the tap was not aimed at
-    if (asleep && on && !STILL) return;
-    const [x, z] = world(e);
-    if (near(x, z)) teleportTo(x, z);
+    if (e.button !== 0 || grab || (!figure && t >= end)) return;
+    // a press that wakes the widget only wakes it: waking starts the episode over
+    if (!on && !STILL) return;
+    // an edit of the episode's own still on screen completes at once, and the visitor takes over
+    if (drag || wait > 0) {
+      drag = null;
+      wait = 0;
+      transferred = true;
+      record();
+    }
+    const [px, py] = local(canvas, e);
+    const j = discAt(px, py);
+    if (j < 0) {
+      draw();
+      return;
+    }
+    const at = figure ? EDIT_FRAME : t;
+    stateAt(figure ? orig : ep, at, Q);
+    grab = {
+      j,
+      from: [Q[2 * j], Q[2 * j + 1]],
+      at: null,
+      pointer: e.pointerId,
+      px,
+      py,
+      moved: false,
+    };
+    try {
+      canvas.setPointerCapture(e.pointerId);
+    } catch {
+      // capture is a nicety; dragging still works without it
+    }
+    setCursor();
+    draw();
   });
   canvas.addEventListener("pointermove", (e) => {
-    if (e.pointerType === "touch") return;
-    const [x, z] = world(e);
-    const was = hover;
-    hover = near(x, z) ? [x, z] : null;
-    canvas.style.cursor = hover ? "crosshair" : "";
-    if (quiet() && (hover || was)) draw();
-  });
-  canvas.addEventListener("pointerleave", () => {
-    if (!hover) return;
-    hover = null;
+    const [px, py] = local(canvas, e);
+    if (grab) {
+      if (e.pointerId !== grab.pointer) return;
+      if (!grab.moved && Math.hypot(px - grab.px, py - grab.py) < 4 * L.d) return;
+      grab.moved = true;
+      const [x, z] = world(px, py);
+      grab.at = target(grab.j, x, z, figure ? EDIT_FRAME : t) ?? grab.at;
+      draw();
+      return;
+    }
+    if (e.pointerType !== "mouse") return;
+    const h = !figure && t >= end ? -1 : discAt(px, py);
+    if (h === hover) return;
+    hover = h;
+    setCursor();
     if (quiet()) draw();
   });
+  const release = (e: PointerEvent, keep: boolean) => {
+    const gr = grab;
+    if (!gr || e.pointerId !== gr.pointer) return;
+    grab = null;
+    if (keep && gr.moved && gr.at) drop(gr.j, gr.at[0], gr.at[1]);
+    const [px, py] = local(canvas, e);
+    hover = e.pointerType === "mouse" ? discAt(px, py) : -1;
+    setCursor();
+    draw();
+  };
+  canvas.addEventListener("pointerup", (e) => release(e, true));
+  canvas.addEventListener("pointercancel", (e) => release(e, false));
+  canvas.addEventListener("pointerleave", () => {
+    if (hover < 0 || grab) return;
+    hover = -1;
+    setCursor();
+    if (quiet()) draw();
+  });
+  // A finger on a disc drags it instead of scrolling the page; anywhere else the page scrolls.
+  canvas.addEventListener(
+    "touchstart",
+    (e) => {
+      if (e.touches.length !== 1 || (!figure && t >= end) || (!on && !STILL)) return;
+      const [px, py] = localTouch(canvas, e.touches[0]);
+      if (discAt(px, py) >= 0) e.preventDefault();
+    },
+    { passive: false },
+  );
+  canvas.addEventListener(
+    "touchmove",
+    (e) => {
+      if (grab) e.preventDefault();
+    },
+    { passive: false },
+  );
   canvas.addEventListener("keydown", (e) => {
     if (e.key !== "Enter" && e.key !== " ") return;
     e.preventDefault();

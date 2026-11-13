@@ -1,23 +1,11 @@
 import { Fragment, type ReactNode, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import {
-  BOTTLENECK,
-  type Cell,
-  EDITORS,
-  MODELS,
-  type Model,
-  POINTS,
-  TABLE1,
-  TABLE10,
-  TABLE16,
-  type Variant,
-} from "./data";
+import { type Cell, EDITORS, TABLE1, TABLE16, type Variant } from "./data";
 import { heat, type Scale } from "./heat";
 import "./results.css";
 
 // The paper's result tables, coloured as in the paper: Table 1 (decodability and
-// editability, every variant) and Table 10 (the standard models through every residual
-// point). Table 10 and the depth
-// chart share the residual point being looked at through `usePoint` / `setPoint`.
+// editability, every variant) and Table 16 (the withheld viewpoint). The depth chart keeps the
+// residual point being looked at through `usePoint` / `setPoint`.
 
 /* ---------- the residual point under the pointer (shared with DepthChart) ---------- */
 let point: number | null = null;
@@ -40,7 +28,7 @@ export function setPoint(k: number | null) {
   for (const f of subs) f();
 }
 
-/** The residual point being looked at, in the chart or in Table 10. */
+/** The residual point being looked at in the chart. */
 export const usePoint = () =>
   useSyncExternalStore(
     subscribe,
@@ -51,7 +39,7 @@ export const usePoint = () =>
 /* ---------- taps ----------
    A mouse looks at a point by hovering; touch and pen pick one with a tap. A tap comes up
    where it went down (a press that scrolls is cancelled by the browser), and a tap anywhere
-   but Table 10's rows and the chart lets go of the point. */
+   but the chart lets go of the point. */
 let press: { x: number; y: number } | null = null;
 const down = (e: PointerEvent) => {
   press = { x: e.clientX, y: e.clientY };
@@ -60,7 +48,7 @@ const cancel = () => {
   press = null;
 };
 const up = (e: PointerEvent) => {
-  const out = !(e.target instanceof Element && e.target.closest(".gr-t10 tbody, .gr-panels"));
+  const out = !(e.target instanceof Element && e.target.closest(".gr-panels"));
   if (point !== null && out && isTap(e)) setPoint(null);
   press = null;
 };
@@ -236,93 +224,6 @@ export function EditTable() {
       </figcaption>
     </figure>
   );
-}
-
-/* ---------- Table 10 ---------- */
-
-const COLS: { key: "skill" | "r2" | "index" | "fid"; top: string; bot: ReactNode; scale: Scale }[] =
-  [
-    { key: "skill", top: "Probe", bot: "Skill", scale: "skill" },
-    { key: "r2", top: "Inverse", bot: <i>R²</i>, scale: "skill" },
-    { key: "index", top: "IM", bot: "Index", scale: "index" },
-    { key: "fid", top: "IM", bot: "Fid.", scale: "fid" },
-  ];
-
-/** Table 10: decodability and inverse-map editability at every residual point. */
-export function DepthTable() {
-  const k = usePoint();
-  return (
-    <figure className="gr gr-t10">
-      <Scroll label="Table 10: by residual point">
-        <table className="gr-tbl">
-          <thead>
-            <tr>
-              <th scope="col" rowSpan={2} className="gr-var">
-                Residual point
-              </th>
-              {MODELS.map((m) => (
-                <th key={m.id} scope="colgroup" colSpan={4} className="gr-g gr-ed">
-                  {m.label} <code>standard</code>
-                </th>
-              ))}
-            </tr>
-            <tr>
-              {MODELS.map((m) =>
-                COLS.map((col, i) => (
-                  <th key={m.id + col.key} scope="col" className={i === 0 ? "gr-g" : undefined}>
-                    {col.top}
-                    <br />
-                    {col.bot}
-                  </th>
-                )),
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {POINTS.map((p) => (
-              <tr
-                key={p}
-                className={p === k ? "gr-on" : undefined}
-                onPointerEnter={(e) => e.pointerType === "mouse" && setPoint(p)}
-                onPointerLeave={(e) => e.pointerType === "mouse" && setPoint(null)}
-                onPointerUp={(e) =>
-                  e.pointerType !== "mouse" && isTap(e) && setPoint(p === k ? null : p)
-                }
-              >
-                <th scope="row" className="gr-var">
-                  {p}
-                  {p === 0 && <span className="gr-note"> (embedding)</span>}
-                </th>
-                {MODELS.map((m) => (
-                  <Cells key={m.id} model={m.id} p={p} />
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </Scroll>
-      <figcaption className="cap">
-        Every residual point of the <code>standard</code> models <Better />. Point <i>k</i> follows
-        block <i>k</i>; Probe Skill is the MLP probe's, inverse <i>R²</i> the inverse map's held-out
-        fit there, IM its edit. Fit alone does not locate the bottleneck: Othello's <i>R²</i> is
-        highest at point 8, where IM fails. <span className="gr-bnk" aria-hidden="true" />
-        Othello's bottleneck, points 4 and 5, the only points where IM succeeds.
-      </figcaption>
-    </figure>
-  );
-}
-
-function Cells({ model, p }: { model: Model; p: number }) {
-  const r = TABLE10[model][p];
-  const bn = model === "othello" && BOTTLENECK.includes(p);
-  return COLS.map((col, i) => {
-    const cls = [i === 0 && "gr-g", i === 0 && bn && "gr-bn"].filter(Boolean).join(" ");
-    return (
-      <td key={col.key} className={cls || undefined} style={heat(r[col.key], col.scale)}>
-        {r[col.key]}
-      </td>
-    );
-  });
 }
 
 /* ---------- Table 16 ---------- */

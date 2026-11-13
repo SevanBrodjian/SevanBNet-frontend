@@ -31,7 +31,7 @@
 /* ---------- the statement: what the paper does, in one sentence ---------- */
 .gs-statement {
   max-width: 38ch;
-  margin: 0 0 52px;
+  margin: 0 0 40px;
   color: var(--tx);
   font: var(--w4) clamp(21px, 2vw, 27px) / 1.4 var(--sans);
   letter-spacing: -0.005em;
@@ -212,6 +212,44 @@
   margin-bottom: 40px;
 }
 
+/* Othello and Rayworld side by side, each over its panel of the depth chart below. */
+.gs-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px 1px;
+  margin-bottom: 32px;
+  padding: 0 1px;
+}
+
+.gs-pair > div {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 0 28px 0 12px;
+  border-left: 1px solid var(--rule2);
+}
+
+.gs-pair-k {
+  color: var(--tx3);
+  font: var(--w5) 12.5px / 1.4 var(--sans);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.gs-pair-t {
+  max-width: 54ch;
+  margin: 0;
+  color: var(--tx2);
+  font: var(--w4) 15.5px / 1.55 var(--sans);
+}
+
+.gs-pair-t.gs-pair-h {
+  margin-bottom: 4px;
+  color: var(--tx);
+  font: var(--w45) 20px / 1.3 var(--sans);
+  letter-spacing: -0.005em;
+}
+
 .gs-v {
   font-family: var(--mono);
   font-size: 0.86em;
@@ -286,6 +324,15 @@
 @media (max-width: 760px) {
   .gs-idea {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .gs-pair {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 0;
+  }
+
+  .gs-pair > div {
+    padding-right: 0;
   }
 
   .gs-sec {
