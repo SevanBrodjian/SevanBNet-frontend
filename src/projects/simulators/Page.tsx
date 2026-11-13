@@ -114,8 +114,8 @@ export default function Page({ project: p }: CustomPageProps) {
           <EditWorlds />
           <p className="cap">
             Both run by their true simulators; a model sees only Rayworld's 1D frames of rays and
-            Othello's moves. Drag a disc to teleport it, or click a token to flip it. Cyan marks the
-            world before an edit, magenta after.
+            Othello's moves. Drag a disc to teleport it, or click a token to swap its color. Cyan
+            marks the world before an edit, magenta after.
           </p>
         </div>
       </section>
@@ -216,14 +216,15 @@ export default function Page({ project: p }: CustomPageProps) {
 
       <section className="gs-sec" aria-labelledby="gs-fix">
         <Head id="gs-fix" label="Forcing a simulator-like state">
-          Withholding the viewpoint makes the Rayworld model's state more simulator-like.
+          Inputs a model cannot foresee pull its state toward the simulator's.
         </Head>
         <div className="prose">
           <p>
             To predict well, a model must keep some summary of its history. Computational mechanics
             calls the smallest summary that does not worsen prediction the causal state. Two
             histories <i>x</i> share one when they predict the same future observations <i>o</i>{" "}
-            under every sequence of future inputs <i>u</i>, such as a camera's viewpoint:
+            under every sequence of future inputs <i>u</i>, which are set from outside, such as a
+            camera's viewpoint or an agent's actions:
           </p>
         </div>
         <div className="gi-eq" dangerouslySetInnerHTML={{ __html: causal }} />
@@ -237,10 +238,12 @@ export default function Page({ project: p }: CustomPageProps) {
             a model that already predicts nearly optimally no reason to tighten it.
           </p>
           <p>
-            Allowing more future inputs draws the air out, like vacuum sealing: two histories must
-            then predict more futures alike to share a causal state. We render each Rayworld frame
-            from a different viewpoint, given to the model only after it has committed to a latent
-            state, so that state must serve every viewpoint.
+            Every future input a model must be ready for draws the air out, like vacuum sealing: two
+            histories must then predict more futures alike to share a causal state, so the sheet
+            conforms more closely to the simulator's state. Training a model to serve inputs it
+            cannot foresee may be a general way to make it hold a state a simulator can set. We test
+            this in Rayworld by rendering each frame from a different viewpoint, given to the model
+            only after it has committed to a latent state, so that state must serve every viewpoint.
           </p>
         </div>
         <Withheld />
@@ -252,10 +255,6 @@ export default function Page({ project: p }: CustomPageProps) {
               points at once, and then very well, at +0.84. When the rendering step can read the
               whole history, the gain disappears, as the theory predicts: the viewpoint becomes part
               of the history rather than a future input.
-            </p>
-            <p>
-              An agent's future actions are inputs too. Training a model to serve inputs it does not
-              know in advance may be a general way to make it hold a state a simulator can set.
             </p>
           </div>
           <ViewTable />

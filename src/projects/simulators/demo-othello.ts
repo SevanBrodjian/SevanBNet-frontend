@@ -2,9 +2,9 @@
 // as the paper's generator plays) under one of the four rule variants. The visitor recolours any
 // token, at any move: the opening stops there, and the board shows the cells whose legality
 // changed, cyan for legal before and not after, magenta for legal only after (figures 5b and 12),
-// and fills the legal moves of the edited board. A second flip of the same token undoes the edit
-// and the opening carries on; a flip of another token replaces it (one flip at a time, as in the
-// paper, which edits only after move 20 and never the centre four).
+// and fills the legal moves of the edited board. A second flip of the same token, or resume(),
+// undoes the edit and the opening carries on; a flip of another token replaces it (one flip at a
+// time, as in the paper, which edits only after move 20 and never the centre four).
 // - the opening plays on the shared loop when it first comes on screen; STILL shows move 20
 // - a mouse acts on press, a finger or pen on a tap, so a swipe that scrolls the page past the
 //   board never changes it
@@ -61,6 +61,8 @@ export type OthelloDemo = {
   setVariant: (v: O.Variant) => void;
   /** A new opening, played from the start. */
   renew: () => void;
+  /** Undo the flip and carry on with the opening. */
+  resume: () => void;
   dispose: () => void;
 };
 
@@ -263,10 +265,7 @@ export function othelloDemo(cv: HTMLCanvasElement, opts: OthOptions): OthelloDem
     }
     refuse = -1;
     if (ed && ed.sq === sq) {
-      // undone: the opening carries on from here
-      ed = null;
-      opts.announce({ kind: "unflip", sq });
-      resume();
+      undo();
     } else {
       // the opening stops on this move while the edit is shown
       playing = false;
@@ -278,7 +277,12 @@ export function othelloDemo(cv: HTMLCanvasElement, opts: OthOptions): OthelloDem
     after();
   }
 
-  function resume() {
+  /** The flip undone: the opening carries on from this move. */
+  function undo() {
+    if (!ed) return;
+    const sq = ed.sq;
+    ed = null;
+    opts.announce({ kind: "unflip", sq });
     if (STILL || shown >= OPENING) return;
     acc = 0;
     playing = true;
@@ -432,6 +436,11 @@ export function othelloDemo(cv: HTMLCanvasElement, opts: OthOptions): OthelloDem
       seed++;
       build();
       if (started || STILL) play(true);
+      after();
+    },
+    resume() {
+      undo();
+      setCursor();
       after();
     },
     renew() {

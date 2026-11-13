@@ -2,15 +2,16 @@ import { num, TABLE1, TABLE10, TABLE16 } from "./data";
 import "./inside.css";
 
 // The paper's three findings, under its one-sentence statement, each with the numbers behind
-// it, drawn small: Table 1's Othello rows, Table 10's inverse map by residual point, and
-// Table 16's PI on 8-ray. Each links to the section that makes the case.
+// it, drawn small: PI on Table 1's Othello rows, Table 10's inverse map by residual point, and
+// Table 16's PI on 8-ray. Each links to the section that makes the case. PI stands for the
+// representations, since the inverse map can steer a model through its own rendering instead.
 
 const SUCCESS = 0.4; // an editor succeeds from this Edit Index (with Fid. ≥ 0.25)
 
-/** Each Othello variant's best Edit Index over the three editors, as Table 1 selects them. */
+/** Each Othello variant's PI Edit Index, from Table 1. */
 const OTHELLO = (TABLE1.find((g) => g.id === "othello")?.rows ?? []).map((r) => ({
   name: r.name,
-  best: Math.max(num(r.pi.index.v), num(r.gs.index.v), num(r.im.index.v)),
+  pi: num(r.pi.index.v),
 }));
 
 const sign = (v: number) => (v < 0 ? `−${Math.abs(v).toFixed(2)}` : `+${v.toFixed(2)}`);
@@ -23,7 +24,7 @@ function Rules() {
     <div
       className="gt-rules"
       role="img"
-      aria-label={OTHELLO.map((o) => `${o.name}: best Edit Index ${sign(o.best)}`).join(". ")}
+      aria-label={OTHELLO.map((o) => `${o.name}: PI Edit Index ${sign(o.pi)}`).join(". ")}
     >
       {OTHELLO.map((o) => (
         <div key={o.name} className="gt-rule" aria-hidden="true">
@@ -31,15 +32,15 @@ function Rules() {
           <svg viewBox={`0 0 ${W} 10`} width={W} height={10} aria-hidden="true">
             <path d={`M${x(SUCCESS)} 0V10`} className="gt-thr" />
             <rect
-              x={Math.min(x(0), x(o.best))}
+              x={Math.min(x(0), x(o.pi))}
               y={1}
-              width={Math.abs(x(o.best) - x(0))}
+              width={Math.abs(x(o.pi) - x(0))}
               height={8}
-              className={o.best >= SUCCESS ? "gt-bar gt-ok" : "gt-bar"}
+              className={o.pi >= SUCCESS ? "gt-bar gt-ok" : "gt-bar"}
             />
             <path d={`M${x(0)} 0V10`} className="gt-zero" />
           </svg>
-          <span className={o.best >= SUCCESS ? "gr-hi" : "gr-lo"}>{sign(o.best)}</span>
+          <span className={o.pi >= SUCCESS ? "gr-hi" : "gr-lo"}>{sign(o.pi)}</span>
         </div>
       ))}
     </div>
@@ -112,7 +113,7 @@ export default function Findings() {
           editability, in ways decodability does not predict.
         </p>
         <Rules />
-        <span className="gt-note">best Edit Index; edits succeed from +0.4</span>
+        <span className="gt-note">PI Edit Index; edits succeed from +0.4</span>
       </li>
       <li>
         <h2 className="gt-h">
@@ -127,14 +128,15 @@ export default function Findings() {
       </li>
       <li>
         <h2 className="gt-h">
-          <a href="#gs-fix">A state that serves any viewpoint</a>
+          <a href="#gs-fix">Forcing a simulator-like state</a>
         </h2>
         <p>
-          A model only has to learn the causal state. Withholding the next viewpoint refines it
-          toward the simulator's, and steering continuous positions succeeds.
+          A model only has to learn the causal state, which can be coarser than the simulator's.
+          Making it serve inputs it cannot foresee, such as a viewpoint or an action, tightens that
+          state toward the simulator's, and in Rayworld, steering then succeeds.
         </p>
         <Fix />
-        <span className="gt-note">single observer → viewpoint withheld</span>
+        <span className="gt-note">fixed viewpoint → unforeseen viewpoint</span>
       </li>
     </ol>
   );

@@ -59,6 +59,7 @@
   --pw-well: var(--gs-well);
   --sim-pre: var(--gs-pre);
   --sim-post: var(--gs-post);
+  --sim-bad: var(--gs-bad);
 }
 
 .gs-stage .pw-well {

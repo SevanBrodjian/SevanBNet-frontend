@@ -41,6 +41,14 @@
   letter-spacing: 0.1em;
 }
 
+.ew .ew-hint {
+  top: 12px;
+  left: 50%;
+  translate: -50% 0;
+  color: rgb(236 233 226 / 0.55);
+  white-space: nowrap;
+}
+
 .ew .ew-rd {
   top: 12px;
   right: 13px;
@@ -102,7 +110,8 @@
   outline-offset: 2px;
 }
 
-/* The well's own controls (Bins, Pause, New opening): small instrument buttons in its corner. */
+/* The well's own controls (Bins, Pause, Resume, New opening): small instrument buttons in its
+   corner. */
 .ew-acts {
   position: absolute;
   right: 10px;
@@ -168,6 +177,23 @@
 
   .ew-oth .ew-well {
     height: clamp(300px, calc(100cqi + 44px), 440px);
+  }
+}
+
+/* A narrow Othello well: the hint takes the name's place, and while a flip holds the opening,
+   Resume stands alone, so the readout keeps its room. */
+@container (max-width: 520px) {
+  .ew-oth .ew-name {
+    display: none;
+  }
+
+  .ew .ew-hint {
+    left: 13px;
+    translate: none;
+  }
+
+  .ew-oth .ew-acts:has(.ew-resume) .ew-renew {
+    display: none;
   }
 }
 

@@ -380,10 +380,12 @@
 }
 
 /* When Generative Models Act as Simulators: cyan and magenta are the paper's, where an edited
-   disc was and where it went. The well takes keys (Enter makes an edit), so it shows focus. */
+   disc was and where it went; red marks where a visitor's edit broke the world. The well takes
+   keys (Enter makes an edit), so it shows focus. */
 .pw[data-w="simulators"] {
   --sim-pre: oklch(0.8 0.12 205);
   --sim-post: oklch(0.7 0.2 350);
+  --sim-bad: oklch(0.63 0.19 27);
 }
 
 .pw[data-w="simulators"] canvas:focus-visible {

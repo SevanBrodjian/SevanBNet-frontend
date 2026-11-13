@@ -5,9 +5,10 @@
 // at frame 20 the world waits while a touch drags one disc to its new spot, the paper's edit (a
 // teleport: cyan where it was, magenta where it went), and the edited state is written into the
 // generator (the magenta wire), whose frames below the dashed line follow the edited world. A
-// visitor drags either disc to teleport it, the world waiting while they hold it; it lands on
-// the nearest spot from which the rest of the episode stays valid (as the paper's edits do).
-// Enter on the well makes a random one.
+// visitor drags either disc to teleport it, the world waiting while they hold it; it lands
+// anywhere the world allows at that moment, and if the disc later reaches a wall or the other
+// disc, the run ends there, marked in red. Enter on the well makes a random one (the paper's,
+// which keeps the rest of the episode valid).
 // This is a schematic of what a successful edit looks like, not the paper's results. In the paper
 // a single write lands at the edit frame and falls back a step later; history rewriting (appendix
 // A.10) is what holds an edit through a rollout, and that is the case drawn here. The trained
@@ -24,6 +25,7 @@ import {
   FAR,
   FRAMES,
   fan,
+  inside,
   makeEpisode,
   makeRng,
   NEAR,
@@ -53,6 +55,7 @@ import {
 
 const FRAME_MS = 105; // one world frame while playing
 const HOLD_MS = 1500; // the finished record, before the next episode
+const HOLD_BREAK = 2400; // a run the visitor's edit broke, before the next episode
 // The episode's own edit, drawn as a hand would make it: a touch presses on the disc, drags it
 // to where the edit puts it, and lifts, while the world waits.
 const PRESS_MS = 320;
@@ -315,12 +318,14 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
   let pal: Palette = readPalette(host);
   let pre: RGB = [68, 212, 226];
   let post: RGB = [244, 95, 176];
+  let bad: RGB = [229, 72, 77];
   let mono = "ui-monospace, monospace";
   const colours = () => {
     pal = readPalette(host);
     mono = getComputedStyle(host).getPropertyValue("--mono").trim() || mono;
     pre = cssRGB(host, "--sim-pre", pre);
     post = cssRGB(host, "--sim-post", post);
+    bad = cssRGB(host, "--sim-bad", bad);
   };
   colours();
 
@@ -338,6 +343,8 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
   let t = 0; // frames
   let end = FRAMES - 1; // when this run stops: the last frame, or the moment the world breaks
   let limit = FRAMES; // rows the record may hold (the frames before a break)
+  const broke = () => limit < FRAMES;
+  const holdFor = () => (broke() ? HOLD_BREAK : HOLD_MS);
   let shown = 0; // rows recorded so far
   let figure = true; // the still: the edit's moment over the whole record
   let transferred = true; // the latest edit has been written into the generator
@@ -345,11 +352,13 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
   /** The episode's edit while it is drawn as a drag: disc j from `from` to `to`, `ms` in. */
   let drag: { j: number; from: V2; to: V2; ms: number } | null = null;
   /** The visitor's hold on disc j, from where it was; `at` is where it would land (null until
-   * it has a valid spot), `moved` once it has left the press. */
+   * it has a valid spot), `run` the run that drop would make (on a copy of the episode),
+   * `moved` once it has left the press. */
   let grab: {
     j: number;
     from: V2;
     at: V2 | null;
+    run: { ep: Episode; ed: Edit } | null;
     pointer: number;
     px: number;
     py: number;
@@ -520,8 +529,8 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
       pre: before && after ? centre(R, (k) => before[k] === j && after[k] !== j) : Number.NaN,
       post: after ? centre(R, (k) => after[k] === j) : Number.NaN,
     });
-    // every edit made here keeps the episode valid; were one to break the world's rules (a wall,
-    // or the discs too close), the run would end where it breaks
+    // the paper's edits keep the episode valid; a visitor's may break the world's rules later
+    // (a disc reaches a wall, or the discs come too close), and the run then ends where it breaks
     limit = e.ok ? e.frame : from;
     end = e.ok ? Math.min(FRAMES - 1, e.time) : tt;
     if (shown > limit) shown = limit;
@@ -600,7 +609,7 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
         if (editHold > 0) transferred = false;
       }
       record();
-      if (t >= end) hold = HOLD_MS;
+      if (t >= end) hold = holdFor();
       draw();
     },
   });
@@ -680,6 +689,40 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
     ctx.setLineDash(dash ? [2 * L.d, 2 * L.d] : []);
     ctx.stroke();
     ctx.setLineDash([]);
+  }
+
+  /** A held disc's path from `at` to the end of the run that dropping it there would make
+   * (dashed magenta), and a red cross where that run breaks the world: on the disc that would
+   * reach a wall, or between the two discs when they come too close. */
+  function path(j: number, at: V2, run: Episode, ed: Edit) {
+    const stop = Math.min(FRAMES - 1, ed.time);
+    stateAt(run, stop, Q);
+    ctx.setLineDash([2 * L.d, 3 * L.d]);
+    ctx.strokeStyle = rgba(post, 0.9);
+    ctx.lineWidth = L.d;
+    ctx.beginPath();
+    ctx.moveTo(X(at[0]), Y(at[1]));
+    ctx.lineTo(X(Q[2 * j]), Y(Q[2 * j + 1]));
+    ctx.stroke();
+    ctx.setLineDash([]);
+    if (ed.frame >= FRAMES) return;
+    const q = run.pos.subarray(4 * ed.frame, 4 * ed.frame + 4);
+    const out = [0, 1].filter((k) => !inside(v, q[2 * k], q[2 * k + 1]));
+    const spots: V2[] =
+      ed.cause === "disc" || !out.length
+        ? [[(Q[0] + Q[2]) / 2, (Q[1] + Q[3]) / 2]]
+        : out.map((k) => [Q[2 * k], Q[2 * k + 1]] as V2);
+    const c = 4 * L.d;
+    ctx.strokeStyle = rgba(bad);
+    ctx.lineWidth = 1.5 * L.d;
+    ctx.beginPath();
+    for (const [x, z] of spots) {
+      ctx.moveTo(X(x) - c, Y(z) - c);
+      ctx.lineTo(X(x) + c, Y(z) + c);
+      ctx.moveTo(X(x) + c, Y(z) - c);
+      ctx.lineTo(X(x) - c, Y(z) + c);
+    }
+    ctx.stroke();
   }
 
   /** Where the touch holds the dragged disc, and how present the touch is (0 to 1). */
@@ -774,12 +817,19 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
     if (gr?.at) {
       ring(gr.from[0], gr.from[1], pre);
       ring(gr.at[0], gr.at[1], post);
+      if (gr.run) path(gr.j, gr.at, gr.run.ep, gr.run.ed);
     } else if (seen) {
       ring(seen.was[0], seen.was[1], pre);
       ring(h ? h[0] : seen.went[0], h ? h[1] : seen.went[1], post);
     }
     if (hover >= 0 && !grab && !g && (figure || t < end))
       ring(P[2 * hover], P[2 * hover + 1], pal.tx, 0.55, true);
+    // a broken world, once the run has stopped there: the disc that reached a wall, or both
+    if (broke() && t >= end && !gr) {
+      const q = ep.pos.subarray(4 * limit, 4 * limit + 4);
+      const out = [0, 1].filter((j) => !inside(v, q[2 * j], q[2 * j + 1]));
+      for (const j of out.length ? out : [0, 1]) ring(P[2 * j], P[2 * j + 1], bad);
+    }
 
     // the frame as a 1D image, over the far edge
     if (simg && sctx) {
@@ -879,6 +929,10 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
       for (let x = hx; x < hx + hw; x += dash * 2)
         ctx.fillRect(x, y - (lw >> 1), Math.min(dash, hx + hw - x), lw);
     }
+    if (broke() && (figure || t >= end)) {
+      ctx.fillStyle = rgba(bad);
+      ctx.fillRect(hx, Math.round(hy + limit * rowD), hw, Math.max(1, Math.round(d)));
+    }
     if (seen && transferred && !g && !gr) {
       const lw = Math.max(1, Math.round(d));
       for (const [c, col] of [
@@ -930,8 +984,9 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
     return best;
   }
 
-  /** Where disc j lands if dropped at (x, z) at time `at`: the nearest spot from which the rest
-   * of the episode stays valid, as the paper's edits do. */
+  /** Where disc j lands if dropped at (x, z) at time `at`: the nearest spot the world allows
+   * then, inside the frustum and clear of the other disc. Whether the rest of the episode stays
+   * valid is the run's to find out. */
   function target(j: number, x: number, z: number, at: number): V2 | null {
     const k = 1 - j;
     // the still redoes its one edit from the unedited world, so the partner sits there
@@ -946,8 +1001,16 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
       Q[2 * k + 1],
       vel[2 * k],
       vel[2 * k + 1],
-      Math.max(0, FRAMES - 1 - at),
+      0,
     );
+  }
+
+  /** The run a drop of disc j at (x, z) at time `at` would make, edited on a copy: the still
+   * edits the unedited episode, a run the one as edited so far. */
+  function trial(j: number, x: number, z: number, at: number) {
+    const c = makeEpisode(v, p0, vel);
+    if (!figure) for (let k = 0; k < 2; k++) c.anchors[k].splice(0, Infinity, ...ep.anchors[k]);
+    return { ep: c, ed: teleport(c, j, at, x, z) };
   }
 
   /** The visitor's edit: disc j teleported to (x, z), already a valid spot. */
@@ -969,7 +1032,7 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
       wait = editHold;
     }
     record();
-    if (t >= end) hold = HOLD_MS;
+    if (t >= end) hold = holdFor();
   }
 
   /** The paper's edit, now (Enter on the well). */
@@ -1013,6 +1076,7 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
       j,
       from: [Q[2 * j], Q[2 * j + 1]],
       at: null,
+      run: null,
       pointer: e.pointerId,
       px,
       py,
@@ -1033,7 +1097,12 @@ export const mountStage = (host: HTMLElement, opts: StageOptions = {}): Widget =
       if (!grab.moved && Math.hypot(px - grab.px, py - grab.py) < 4 * L.d) return;
       grab.moved = true;
       const [x, z] = world(px, py);
-      grab.at = target(grab.j, x, z, figure ? EDIT_FRAME : t) ?? grab.at;
+      const at = figure ? EDIT_FRAME : t;
+      const to = target(grab.j, x, z, at);
+      if (to) {
+        grab.at = to;
+        grab.run = trial(grab.j, to[0], to[1], at);
+      }
       draw();
       return;
     }
