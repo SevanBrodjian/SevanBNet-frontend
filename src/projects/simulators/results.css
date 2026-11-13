@@ -205,7 +205,7 @@
   font-family: var(--sans);
 }
 
-/* Where IM lands on Othello: a thin mark at the edge of the block, rows 4 and 5. */
+/* Where IM succeeds on Othello: a thin mark at the edge of the block, rows 4 and 5. */
 .gr-tbl td.gr-bn {
   box-shadow: inset 2px 0 0 var(--gs-post);
 }

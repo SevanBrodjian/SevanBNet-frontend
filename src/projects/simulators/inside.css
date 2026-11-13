@@ -1,0 +1,290 @@
+/* What the models compute and how to change it, on /projects/generative-models-as-simulators:
+   the decoder readout (Readout.tsx), the attention cut (Attention.tsx), the withheld
+   viewpoint (Viewpoint.tsx) and the causal state's definition. Owned by the Projects area. */
+
+/* ---------- figure 17: eight readouts, four across (two on phones), each cropped from the
+   one image. The tick column sits in the grid's left gutter, beside each row's first panel. */
+.gi-rd {
+  margin: 36px 0 0;
+}
+
+.gi-rd-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px 14px;
+  padding-left: 64px;
+}
+
+.gi-rd-cell {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.gi-rd-lbl {
+  color: var(--tx2);
+  font: 12px / 1.3 var(--mono);
+}
+
+.gi-rd-box {
+  position: relative;
+}
+
+.gi-rd-crop {
+  position: relative;
+  aspect-ratio: 676 / 515;
+  overflow: hidden;
+  outline: 1px solid var(--rule2);
+}
+
+.gi-rd-crop img {
+  position: absolute;
+  top: 0;
+  left: calc(var(--k) * -700 / 676 * 100%);
+  width: calc(5576 / 676 * 100%);
+  max-width: none;
+  height: 100%;
+}
+
+.gi-ax {
+  position: absolute;
+  top: 0;
+  right: calc(100% + 9px);
+  bottom: 0;
+  display: none;
+  width: 56px;
+  color: var(--tx3);
+  font: 10.5px / 1 var(--mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.gi-ax > span {
+  position: absolute;
+  right: 0;
+  transform: translateY(-50%);
+}
+
+.gi-ax i {
+  font-family: var(--serif);
+  font-size: 12px;
+}
+
+.gi-rd-cell:nth-child(4n + 1) .gi-ax {
+  display: block;
+}
+
+/* ---------- the attention cut ---------- */
+.gi-att {
+  justify-self: start;
+}
+
+.gi-att .gr-tbl td {
+  min-width: 0;
+}
+
+.gi-att .gr-tbl .gi-att-bl {
+  text-align: left;
+}
+
+.gi-att .cap {
+  max-width: 48ch;
+}
+
+.gi-att .cap code {
+  font-size: 0.92em;
+}
+
+.gi-blocks {
+  display: inline-flex;
+  gap: 3px;
+  vertical-align: -1px;
+}
+
+.gi-blocks i,
+.gi-key {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  background: var(--tx2);
+}
+
+.gi-blocks i[data-cut],
+.gi-key[data-cut] {
+  box-shadow: inset 0 0 0 1px var(--tx3);
+  background: transparent;
+}
+
+.gi-key {
+  margin: 0 3px 0 2px;
+  vertical-align: -1px;
+}
+
+/* ---------- the causal state's definition ---------- */
+.gi-eq {
+  max-width: 100%;
+  margin: 26px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  color: var(--tx);
+  font-size: 18px;
+}
+
+.gi-eq .katex {
+  padding: 6px 0;
+}
+
+/* ---------- the withheld viewpoint: the two rows of the setup beside Table 16 ---------- */
+.gi-fix {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 36px 56px;
+}
+
+.gi-view {
+  flex: 0 1 440px;
+  min-width: 0;
+  margin: 0;
+}
+
+.gi-view-rows {
+  display: grid;
+  gap: 10px;
+}
+
+.gi-vw {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.gi-vw-l {
+  fill: var(--tx3);
+  font: var(--w5) 11px var(--sans);
+  font-stretch: 87.5%;
+  letter-spacing: 0.085em;
+  text-transform: uppercase;
+}
+
+.gi-vw-m {
+  fill: var(--tx);
+  font: 20px var(--serif);
+}
+
+.gi-vw .gi-it {
+  font-style: italic;
+}
+
+.gi-vw-sub {
+  font-size: 13px;
+}
+
+.gi-vw-dots {
+  fill: var(--tx3);
+  font: 15px var(--sans);
+}
+
+.gi-vw-arc {
+  fill: none;
+  stroke: var(--tx2);
+  stroke-width: 1;
+}
+
+.gi-vw-head {
+  fill: var(--tx2);
+}
+
+.gi-vw-o,
+.gi-vw-v,
+.gi-vw-out {
+  fill: var(--gs-well);
+  stroke: var(--tx3);
+  stroke-width: 1;
+}
+
+.gi-vw-v {
+  fill: none;
+}
+
+.gi-vw-out {
+  fill: none;
+  stroke-dasharray: 3 3;
+}
+
+/* The state the one-step model must commit to: every viewpoint is rendered from it. */
+.gi-vw-o[data-hold] {
+  stroke: var(--tx);
+}
+
+.gi-vw g[data-dim] {
+  opacity: 0.5;
+}
+
+.gi-view .cap {
+  max-width: 46ch;
+}
+
+.gi-fix > .gr {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.gr-t16 .gr-gl code {
+  color: var(--tx);
+  font: var(--w4) 12px var(--mono);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+@media (max-width: 760px) {
+  .gi-rd-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 10px;
+    padding-left: 30px;
+  }
+
+  .gi-ax {
+    right: calc(100% + 6px);
+    width: 24px;
+    font-size: 10px;
+  }
+
+  .gi-ax-w {
+    display: none;
+  }
+
+  .gi-rd-cell:nth-child(4n + 1) .gi-ax {
+    display: none;
+  }
+
+  .gi-rd-cell:nth-child(2n + 1) .gi-ax {
+    display: block;
+  }
+
+  .gi-eq {
+    font-size: 15px;
+  }
+
+  .gi-att .gr-tbl th,
+  .gi-att .gr-tbl td {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .gi-att .gr-tbl .gr-var {
+    padding-left: 0;
+    white-space: normal;
+  }
+
+  .gi-blocks {
+    gap: 2px;
+  }
+
+  .gi-blocks i {
+    width: 9px;
+    height: 9px;
+  }
+}

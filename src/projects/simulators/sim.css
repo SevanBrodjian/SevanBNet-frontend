@@ -203,6 +203,15 @@
   text-transform: uppercase;
 }
 
+/* The findings in a row above their table, on wide screens. */
+.gs-finds-row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: 14px 32px;
+  max-width: none;
+  margin-bottom: 40px;
+}
+
 .gs-v {
   font-family: var(--mono);
   font-size: 0.86em;
@@ -266,6 +275,11 @@
 @media (max-width: 1180px) {
   .gs-split {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .gs-finds-row {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 68ch;
   }
 }
 

@@ -1,7 +1,8 @@
-// The paper's numbers, transcribed from "When Generative Models Act as Simulators"
-// (arXiv 2610.12847v1). Each row is written as the paper prints it, left to right: strings
-// exactly as printed (sign, decimals, the true minus −), † where the paper has a dagger.
-// Nothing here is computed or read off a figure.
+// The paper's numbers, transcribed from "When Generative Models Act as Simulators" (the
+// revision of November 2026; table numbers are the revision's). Each row is written as the
+// paper prints it, left to right: strings exactly as printed (sign, decimals, the true
+// minus −), † where the paper has a dagger. Nothing here is computed. One series is read off
+// a figure, because no table prints it: PI by residual point (FIG6_PI, below).
 
 /** A printed number; `dag`: seed standard deviation above 0.1 (the paper's †). */
 export type Cell = { v: string; dag?: true };
@@ -19,14 +20,23 @@ const cells = (line: string): Cell[] =>
 /** A variant: its name in the typewriter face, then a note in roman, as the paper sets it. */
 export type Variant = { name: string; note?: string };
 
-/* ---------- Table 2 (p. 8): editability ----------
-   Each editor's highest Edit Index across residual points and step sizes among settings
-   with Edit Fidelity ≥ 0, with the Edit Fidelity at that setting (the highest Fidelity
-   where none reaches 0). Averaged over 1000 edit cases; one training run each. */
+/* ---------- Table 1 (p. 8): decodability and editability ----------
+   Probe Skill of the linear probe on the raw observation history (Obs.) and on the trained
+   model (Trained). Then each editor's highest Edit Index across residual points and step
+   sizes among settings with Edit Fidelity ≥ 0, with the Edit Fidelity at that setting (the
+   highest Fidelity where none reaches 0). Averaged over 1000 edit cases; one training run
+   each. An editor succeeds when its Index reaches +0.4 and its Fidelity 0.25. */
 
 export type Editor = "pi" | "gs" | "im";
 export type Pair = { index: Cell; fid: Cell };
-export type EditRow = Variant & { unedited: Cell; pi: Pair; gs: Pair; im: Pair };
+export type EditRow = Variant & {
+  obs: Cell;
+  trained: Cell;
+  unedited: Cell;
+  pi: Pair;
+  gs: Pair;
+  im: Pair;
+};
 export type EditGroup = { id: string; label: string; sub?: string; rows: EditRow[] };
 
 export const EDITORS: { id: Editor; short: string; name: string }[] = [
@@ -35,12 +45,15 @@ export const EDITORS: { id: Editor; short: string; name: string }[] = [
   { id: "im", short: "IM", name: "the inverse map" },
 ];
 
-/** Columns: Unedited Index | PI Index, Fid. | GS Index, Fid. | IM Index, Fid. */
+/** Columns: Obs. Lin. | Trained Lin. | Unedited Index | PI Index, Fid. | GS Index, Fid. |
+    IM Index, Fid. */
 function edit(name: string, note: string, line: string): EditRow {
-  const [u, pi, pf, gi, gf, ii, imf] = cells(line);
+  const [obs, trained, u, pi, pf, gi, gf, ii, imf] = cells(line);
   return {
     name,
     ...(note ? { note } : {}),
+    obs,
+    trained,
     unedited: u,
     pi: { index: pi, fid: pf },
     gs: { index: gi, fid: gf },
@@ -49,15 +62,15 @@ function edit(name: string, note: string, line: string): EditRow {
 }
 
 // biome-ignore format: the rows stay as the paper prints them
-export const TABLE2: EditGroup[] = [
+export const TABLE1: EditGroup[] = [
   {
     id: "othello",
     label: "Othello",
     rows: [
-      edit("standard",        "",          "−0.93   +0.82  0.70    +0.83  0.72    +0.81  0.62"),
-      edit("adjacent-flip",   "",          "−0.96   +0.35† 0.17    −0.06  0.21    +0.66  0.49†"),
-      edit("adjacent-noflip", "",          "−0.96   −0.23† 0.19    −0.96 −0.01    −0.03† 0.26"),
-      edit("standard-noflip", "",          "−0.98   −0.95  0.00    −0.97 −0.01    −0.93 −0.01"),
+      edit("standard",        "",          "0.792 0.975   −0.93   +0.82  0.70    +0.83  0.72    +0.81  0.62"),
+      edit("adjacent-flip",   "",          "0.888 0.947   −0.96   +0.35† 0.17    −0.06  0.21    +0.66  0.49†"),
+      edit("adjacent-noflip", "",          "0.988 0.988   −0.96   −0.23† 0.19    −0.96 −0.01    −0.03† 0.26"),
+      edit("standard-noflip", "",          "1.000 1.000   −0.98   −0.95  0.00    −0.97 −0.01    −0.93 −0.01"),
     ],
   },
   {
@@ -65,12 +78,12 @@ export const TABLE2: EditGroup[] = [
     label: "Rayworld",
     sub: "continuous",
     rows: [
-      edit("standard",        "128 rays",  "−0.93   −0.10  0.04    −0.16  0.04    +0.59  0.66"),
-      edit("blink",           "128 rays",  "−0.92   +0.02  0.01    −0.09  0.02    +0.51  0.55"),
-      edit("128-ray",         "big discs", "−0.94   −0.02  0.02    −0.10  0.03    +0.57  0.68"),
-      edit("16-ray",          "",          "−0.91   +0.16  0.04    −0.10  0.10    +0.66  0.71"),
-      edit("8-ray",           "",          "−0.90   +0.21  0.00    −0.07  0.12    +0.71  0.73"),
-      edit("5-ray",           "",          "−0.89   +0.14  0.15    −0.10  0.14    +0.81  0.77"),
+      edit("standard",        "128 rays",  "0.305 0.872   −0.93   −0.10  0.04    −0.16  0.04    +0.59  0.66"),
+      edit("blink",           "128 rays",  "0.216 0.907   −0.92   +0.02  0.01    −0.09  0.02    +0.51  0.55"),
+      edit("128-ray",         "big discs", "0.377 0.914   −0.94   −0.02  0.02    −0.10  0.03    +0.57  0.68"),
+      edit("16-ray",          "",          "0.360 0.892   −0.91   +0.16  0.04    −0.10  0.10    +0.66  0.71"),
+      edit("8-ray",           "",          "0.329 0.886   −0.90   +0.21  0.00    −0.07  0.12    +0.71  0.73"),
+      edit("5-ray",           "",          "0.277 0.850   −0.89   +0.14  0.15    −0.10  0.14    +0.81  0.77"),
     ],
   },
   {
@@ -78,15 +91,15 @@ export const TABLE2: EditGroup[] = [
     label: "Rayworld",
     sub: "categorical",
     rows: [
-      edit("128-ray",         "3736 bins", "−0.94   −0.31  0.02    +0.31  0.21    +0.64  0.71"),
-      edit("16-ray",          "77 bins",   "−0.91   −0.06  0.04    +0.28  0.15    +0.82  0.71"),
-      edit("8-ray",           "30 bins",   "−0.90   +0.38  0.05    +0.46  0.46    +0.87  0.73"),
-      edit("5-ray",           "14 bins",   "−0.91   +0.51  0.30    +0.60  0.54    +0.91  0.75"),
+      edit("128-ray",         "3736 bins", "0.077 0.261   −0.94   −0.31  0.02    +0.31  0.21    +0.64  0.71"),
+      edit("16-ray",          "77 bins",   "0.356 0.879   −0.91   −0.06  0.04    +0.28  0.15    +0.82  0.71"),
+      edit("8-ray",           "30 bins",   "0.477 0.935   −0.90   +0.38  0.05    +0.46  0.46    +0.87  0.73"),
+      edit("5-ray",           "14 bins",   "0.522 0.926   −0.91   +0.51  0.30    +0.60  0.54    +0.91  0.75"),
     ],
   },
 ];
 
-/* ---------- Table 10 (p. 21): by residual point ----------
+/* ---------- Table 10 (p. 23): by residual point ----------
    standard Othello and standard Rayworld. Probe Skill is the MLP probe's; Inverse R² is
    the held-out fit of g from simulator state to latent state at that point; IM Index and
    Fid. are the Edit Index and Edit Fidelity of the overwrite z* = g(s*) written there.
@@ -135,10 +148,59 @@ export const MODELS: { id: Model; label: string }[] = [
 /** Residual points 0 (the embedding) to 8. */
 export const POINTS = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 
-/** Where IM lands on standard Othello (Edit Fidelity ≥ 0): the bottleneck (A.7). */
+/** Where the board is written into standard Othello: residual points 4 and 5, the only
+    points where IM keeps Edit Fidelity ≥ 0 and both PI and IM succeed (section 4, A.7).
+    Figure 6 shades 3 to 5, where both Indices are above 0; the text names 4 and 5. */
 export const BOTTLENECK = [4, 5];
 
-/* ---------- Table 1 (p. 8): decodability ----------
+/* ---------- Figure 6 (p. 9): PI by residual point ----------
+   PI's Edit Index at every residual point of the standard models, which no table prints.
+   Read from the figure's vector paths (the plotted coordinates, not a raster), on the axis
+   its ticks define. The inverse map's points in the same figure, read the same way, match
+   Table 10 to within 0.005 at all 18, so these are good to about ±0.01. Every PI point is
+   inside the fidelity guard (Edit Fidelity ≥ 0). Its best points match Table 1: +0.82 on
+   Othello (point 4), −0.10 on Rayworld (point 5). */
+
+// biome-ignore format: one row per model, residual points 0 to 8
+export const FIG6_PI: Record<Model, string[]> = {
+  othello:  "−0.93 −0.42 +0.41 +0.69 +0.82 +0.78 −0.13 −0.66 −0.63".split(" "),
+  rayworld: "−0.93 −0.23 −0.29 −0.24 −0.17 −0.10 −0.20 −0.42 −0.69".split(" "),
+};
+
+/* ---------- Attention restricted from a block onward (A.7, in the text) ----------
+   standard Othello: each position attends only to itself from the given block onward, so
+   those blocks cannot read the history. The rise in held-out loss, nats per move; the
+   model's own loss is 2.029, 0.018 above the Bayes floor of 2.011 (Table 3). */
+
+export const ATTENTION_CUT: { from: number; earlier?: true; cost: string }[] = [
+  { from: 7, cost: "+0.013" },
+  { from: 6, cost: "+0.076" },
+  { from: 5, earlier: true, cost: "> +0.258" },
+];
+
+/* ---------- Table 16 (p. 38): withholding the viewpoint ----------
+   Editability of continuous positions when the model must commit to a state before it
+   knows the next viewpoint. One step: the step that renders the next frame reads only that
+   state. Full history: it reads every earlier position. Single observer repeats Table 1. */
+
+export type ViewRow = { model: string; view: string; pi: Pair; gs: Pair };
+
+/** Columns: PI Index, Fid. | GS Index, Fid. */
+function view(model: string, v: string, line: string): ViewRow {
+  const [pi, pf, gi, gf] = cells(line);
+  return { model, view: v, pi: { index: pi, fid: pf }, gs: { index: gi, fid: gf } };
+}
+
+// biome-ignore format: the rows stay as the paper prints them
+export const TABLE16: ViewRow[] = [
+  view("8-ray",   "single observer",         "+0.21  0.00   −0.07  0.12"),
+  view("8-ray",   "withheld, full history",  "−0.79  0.00   −0.61  0.01"),
+  view("8-ray",   "withheld, one step",      "+0.55  0.41   +0.42  0.37"),
+  view("128-ray", "single observer",         "−0.02  0.02   −0.10  0.03"),
+  view("128-ray", "withheld, one step",      "+0.20 +0.14   +0.14 +0.15"),
+];
+
+/* ---------- Table 2 (p. 16): decodability ----------
    Probe Skill at the trained model's best residual point, with random-initialization and
    observation baselines fit with the same probes on the same sequences. The inverse map
    columns give its R² in predicting latent state from simulator state, at its best
@@ -169,7 +231,7 @@ function decode(group: Model, name: string, note: string, line: string): DecodeR
 }
 
 // biome-ignore format: the rows stay as the paper prints them
-export const TABLE1: DecodeRow[] = [
+export const TABLE2: DecodeRow[] = [
   decode("othello",  "standard",        "",          "0.792 0.809  0.577 0.583  0.975 0.976  0.884 0.827"),
   decode("othello",  "adjacent-flip",   "",          "0.888 0.914  0.674 0.700  0.947 0.970  0.968 0.959"),
   decode("othello",  "adjacent-noflip", "",          "0.988 0.983  0.581 0.588  0.988 0.990  0.978 0.855"),
@@ -182,8 +244,8 @@ export const TABLE1: DecodeRow[] = [
   decode("rayworld", "5-ray",           "",          "0.277 0.829  0.855 0.871  0.850 0.883  0.617 0.469"),
 ];
 
-/** Table 1's trained MLP probe skill per variant (the paper's "at least 0.88"). */
-export const MLP_SKILL = TABLE1.map(({ group, name, note, trained }) => ({
+/** Table 2's trained MLP probe skill per variant (the paper's "at least 0.88"). */
+export const MLP_SKILL = TABLE2.map(({ group, name, note, trained }) => ({
   group,
   name,
   note,
