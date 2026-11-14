@@ -71,11 +71,12 @@ export const EDIT_WORDS = {
     rejected: { unchanged: "unchanged", empty: "no moves" },
     /** The canvas's description: what it shows, and its keys. */
     about:
-      "Othello board playing a real 20-move opening, legal moves filled. Click any token to swap its color, which pauses the opening at that move; click it again, or Resume, to undo and carry on. From the keyboard: the arrow keys move a cursor and Enter swaps.",
+      "Othello board playing a real 20-move opening, legal moves filled. Click any token to swap its color, which pauses the opening at that move. Resume plays the rest of the opening on from the edited board; clicking the token again undoes the swap instead. From the keyboard: the arrow keys move a cursor and Enter swaps.",
     say: {
       flip: (sq: string, before: number, after: number, changed: number) =>
         `${sq} flipped. Legal moves ${before} to ${after}, ${changed} changed.`,
       unflip: (sq: string) => `${sq} restored`,
+      resume: (sq: string) => `Playing on with ${sq} swapped`,
       refused: "Nothing to flip there",
     },
   },
@@ -231,7 +232,7 @@ function OthelloPanel() {
     const el = cv.current;
     if (!el) return;
     const paint = (r: OthReport) => {
-      setHeld(r.flipped >= 0 && r.ply < r.total);
+      setHeld(r.resumable);
       if (top.current) top.current.textContent = W.oth.move(r.ply, r.total);
       const [who, what] = low.current?.children ?? [];
       if (!who || !what) return;
@@ -254,6 +255,7 @@ function OthelloPanel() {
           ),
         );
       } else if (e.kind === "unflip") setSay(W.oth.say.unflip(squareName(e.sq)));
+      else if (e.kind === "resume") setSay(W.oth.say.resume(squareName(e.sq)));
       else setSay(W.oth.say.refused);
     };
     const d = othelloDemo(el, { variant: "standard", tones: tones(el), report: paint, announce });

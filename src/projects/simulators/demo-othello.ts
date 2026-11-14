@@ -2,9 +2,11 @@
 // as the paper's generator plays) under one of the four rule variants. The visitor recolours any
 // token, at any move: the opening stops there, and the board shows the cells whose legality
 // changed, cyan for legal before and not after, magenta for legal only after (figures 5b and 12),
-// and fills the legal moves of the edited board. A second flip of the same token, or resume(),
-// undoes the edit and the opening carries on; a flip of another token replaces it (one flip at a
-// time, as in the paper, which edits only after move 20 and never the centre four).
+// and fills the legal moves of the edited board. A second flip of the same token undoes the edit
+// and the opening carries on; a flip of another token replaces it (one flip at a time, as in the
+// paper, which edits only after move 20 and never the centre four). resume() keeps the edit: the
+// rest of the opening is drawn anew from the edited board, uniform over its legal moves, and the
+// recoloured token stays ringed while it keeps its new colour.
 // - the opening plays on the shared loop when it first comes on screen; STILL shows move 20
 // - a mouse acts on press, a finger or pen on a tap, so a swipe that scrolls the page past the
 //   board never changes it
@@ -43,11 +45,14 @@ export type OthReport = {
   readonly rejected: O.Rejection | null;
   /** the recoloured square, or -1 */
   readonly flipped: number;
+  /** a flip holds the opening, and the edited board has moves to play on with */
+  readonly resumable: boolean;
 };
 
 export type OthEvent =
   | { kind: "flip"; edit: O.Edit }
   | { kind: "unflip"; sq: number }
+  | { kind: "resume"; sq: number }
   | { kind: "refused"; sq: number };
 
 export type OthOptions = {
@@ -61,7 +66,7 @@ export type OthelloDemo = {
   setVariant: (v: O.Variant) => void;
   /** A new opening, played from the start. */
   renew: () => void;
-  /** Undo the flip and carry on with the opening. */
+  /** Keep the flip and play the rest of the opening on from the edited board. */
   resume: () => void;
   dispose: () => void;
 };
@@ -81,6 +86,8 @@ export function othelloDemo(cv: HTMLCanvasElement, opts: OthOptions): OthelloDem
   let playing = false;
   let started = false;
   let ed: O.Edit | null = null;
+  /** a flip carried into the game: its square, colour, and the move it was made at */
+  let kept: { sq: number; color: O.Color; at: number } | null = null;
   let cursor = 19;
   let keys = false;
   let hover = -1;
@@ -101,11 +108,14 @@ export function othelloDemo(cv: HTMLCanvasElement, opts: OthOptions): OthelloDem
     }
     moves = g.moves;
     ed = null;
+    kept = null;
     refuse = -1;
     cursor = moves[moves.length - 1]?.sq ?? 19;
   }
 
   const now = () => boards[shown];
+  /** the last move of the game being shown: move 20, or sooner if an edited game ends */
+  const last = () => boards.length - 1;
   /** Any token may be flipped here (the paper keeps to the outer squares, see othello.ts). */
   const flippable = (sq: number) => sq >= 0 && sq < 64 && now().cells[sq] !== 0;
 
@@ -122,6 +132,7 @@ export function othelloDemo(cv: HTMLCanvasElement, opts: OthOptions): OthelloDem
       changed: ed ? ed.changed.length : null,
       rejected: ed ? ed.rejected : null,
       flipped: ed ? ed.sq : -1,
+      resumable: !!ed && !STILL && shown < OPENING && ed.after.moves.length > 0,
     };
     const key = JSON.stringify(r);
     if (key === lastReport) return;
@@ -136,7 +147,7 @@ export function othelloDemo(cv: HTMLCanvasElement, opts: OthOptions): OthelloDem
     } else {
       shown = from0 ? 0 : shown;
       acc = -LEAD_MS;
-      playing = shown < OPENING;
+      playing = shown < last();
     }
     loop.setPaused(!playing);
   }
@@ -219,6 +230,13 @@ export function othelloDemo(cv: HTMLCanvasElement, opts: OthOptions): OthelloDem
       ctx.lineWidth = w;
       ctx.strokeRect(cx(sq) + w / 2, cy(sq) + w / 2, inner - w, inner - w);
     };
+    if (!ed && kept && shown >= kept.at && st.cells[kept.sq] === kept.color) {
+      ctx.beginPath();
+      ctx.arc(cx(kept.sq) + inner / 2, cy(kept.sq) + inner / 2, rad + mw + d, 0, Math.PI * 2);
+      ctx.strokeStyle = T.post;
+      ctx.lineWidth = Math.max(1, Math.round(d));
+      ctx.stroke();
+    }
     if (ed) {
       for (const sq of ed.lost) box(sq, T.pre, mw);
       for (const sq of ed.gained) box(sq, T.post, mw);
@@ -271,6 +289,7 @@ export function othelloDemo(cv: HTMLCanvasElement, opts: OthOptions): OthelloDem
       playing = false;
       loop.setPaused(true);
       ed = O.edit(now(), sq, O.legal(now()), true);
+      kept = null;
       opts.announce({ kind: "flip", edit: ed });
     }
     setCursor();
@@ -283,7 +302,33 @@ export function othelloDemo(cv: HTMLCanvasElement, opts: OthOptions): OthelloDem
     const sq = ed.sq;
     ed = null;
     opts.announce({ kind: "unflip", sq });
-    if (STILL || shown >= OPENING) return;
+    carryOn();
+  }
+
+  /** The flip kept: the edited board replaces this move's, and the rest of the opening is drawn
+   * anew from it, uniform over the legal moves as the generator plays (ending early if the
+   * edited game does). */
+  function keep() {
+    if (!ed || STILL || shown >= OPENING) return;
+    const s = O.clone(ed.state);
+    kept = { sq: ed.sq, color: s.cells[ed.sq] as O.Color, at: shown };
+    opts.announce({ kind: "resume", sq: ed.sq });
+    ed = null;
+    boards.length = shown;
+    boards.push(O.clone(s));
+    moves.length = shown;
+    const rand = O.rng(seed * 4099 + shown * 67 + kept.sq + 1);
+    while (s.ply < OPENING) {
+      const ok = O.legal(s).moves;
+      if (!ok.length) break;
+      moves.push(O.play(s, ok[Math.floor(rand() * ok.length)]));
+      boards.push(O.clone(s));
+    }
+    carryOn();
+  }
+
+  function carryOn() {
+    if (STILL || shown >= last()) return;
     acc = 0;
     playing = true;
     loop.setPaused(false);
@@ -400,12 +445,12 @@ export function othelloDemo(cv: HTMLCanvasElement, opts: OthOptions): OthelloDem
       if (!playing) return;
       acc += dt;
       let moved = false;
-      while (acc >= STEP_MS && shown < OPENING) {
+      while (acc >= STEP_MS && shown < last()) {
         acc -= STEP_MS;
         shown++;
         moved = true;
       }
-      if (shown >= OPENING) {
+      if (shown >= last()) {
         playing = false;
         loop.setPaused(true);
         moved = true;
@@ -439,7 +484,7 @@ export function othelloDemo(cv: HTMLCanvasElement, opts: OthOptions): OthelloDem
       after();
     },
     resume() {
-      undo();
+      keep();
       setCursor();
       after();
     },
