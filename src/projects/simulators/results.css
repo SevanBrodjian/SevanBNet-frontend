@@ -199,48 +199,6 @@
   padding-bottom: 8px;
 }
 
-/* ---------- Table 10 ---------- */
-
-.gr-t10 tbody .gr-var {
-  font-family: var(--sans);
-}
-
-/* Where IM lands on Othello: a thin mark at the edge of the block, rows 4 and 5. */
-.gr-tbl td.gr-bn {
-  box-shadow: inset 2px 0 0 var(--gs-post);
-}
-
-.gr-bnk {
-  display: inline-block;
-  width: 2px;
-  height: 0.95em;
-  margin: 0 7px 0 1px;
-  background: var(--gs-post);
-  vertical-align: -0.12em;
-}
-
-/* The residual point being looked at (here or in the chart). */
-.gr-t10 tbody tr {
-  cursor: default;
-}
-
-.gr-t10 tbody tr.gr-on > * {
-  box-shadow:
-    inset 0 1px 0 var(--tx3),
-    inset 0 -1px 0 var(--tx3);
-}
-
-.gr-t10 tbody tr.gr-on > td.gr-bn {
-  box-shadow:
-    inset 2px 0 0 var(--gs-post),
-    inset 0 1px 0 var(--tx3),
-    inset 0 -1px 0 var(--tx3);
-}
-
-.gr-t10 tr.gr-on .gr-var {
-  color: var(--tx);
-}
-
 /* ---------- the depth chart ---------- */
 
 .gr-key {

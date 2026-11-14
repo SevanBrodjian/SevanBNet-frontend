@@ -1,0 +1,513 @@
+/* The findings under the statement (Findings.tsx), the causal state's definition, and the
+   withheld viewpoint (Withheld.tsx) on /projects/generative-models-as-simulators. Owned by the
+   Projects area. */
+
+/* ---------- the three findings, each with its numbers drawn small ---------- */
+.gt {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px 40px;
+  margin: 0 0 64px;
+  padding: 0;
+  list-style: none;
+  counter-reset: gt;
+}
+
+.gt > li {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule2);
+  counter-increment: gt;
+}
+
+.gt-h {
+  margin: 0;
+  font: var(--w5) 17px / 1.3 var(--sans);
+}
+
+.gt-h::before {
+  content: counter(gt) "  ";
+  color: var(--tx3);
+  font: var(--w4) 12.5px var(--mono);
+  white-space: pre;
+}
+
+.gt-h a {
+  color: var(--tx);
+  text-decoration: none;
+}
+
+.gt-h a:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--tx3);
+  text-underline-offset: 3px;
+}
+
+.gt > li > p {
+  margin: 0;
+  color: var(--tx2);
+  font: var(--w4) 15px / 1.55 var(--sans);
+}
+
+/* The numbers sit at the foot of each finding, level across the row. */
+.gt .gt-rules,
+.gt .gt-depth,
+.gt .gt-fix {
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+.gt-note {
+  color: var(--tx3);
+  font: 11.5px / 1.3 var(--mono);
+}
+
+.gt .gt-rules {
+  display: grid;
+  gap: 4px;
+}
+
+.gt-rule {
+  display: grid;
+  grid-template-columns: 15ch 120px auto;
+  gap: 10px;
+  align-items: center;
+  font: 12px / 1.2 var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.gt-rule code {
+  overflow: hidden;
+  color: var(--tx2);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gt-rule svg,
+.gt-depth svg {
+  display: block;
+  overflow: visible;
+}
+
+.gt-bar {
+  fill: color-mix(in oklab, var(--gs-bad) 70%, var(--g0));
+}
+
+.gt-bar.gt-ok {
+  fill: color-mix(in oklab, var(--gs-good) 80%, var(--g0));
+}
+
+.gt-zero {
+  stroke: var(--tx3);
+  stroke-width: 1;
+}
+
+.gt-thr {
+  stroke: color-mix(in oklab, var(--gs-good) 55%, transparent);
+  stroke-dasharray: 1 2;
+  stroke-width: 1;
+}
+
+.gt .gt-depth {
+  margin-right: 0;
+  margin-bottom: 0;
+  margin-left: 0;
+}
+
+.gt-depth svg {
+  width: 100%;
+  max-width: 260px;
+  height: auto;
+}
+
+.gt-bn {
+  fill: color-mix(in oklab, var(--gs-post) 9%, transparent);
+}
+
+.gt-line {
+  fill: none;
+  stroke: var(--tx);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.gt-line.gt-ray {
+  stroke: var(--tx2);
+  stroke-dasharray: 5 3;
+}
+
+.gt-depth figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  margin-top: 6px;
+  color: var(--tx3);
+  font: 11.5px / 1.3 var(--mono);
+}
+
+.gt-depth .gt-oth {
+  color: var(--tx);
+}
+
+.gt-depth .gt-oth::before,
+.gt-depth .gt-rw::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  margin-right: 6px;
+  border-top: 1.5px solid var(--tx);
+  vertical-align: 0.3em;
+}
+
+.gt-depth .gt-rw::before {
+  border-top: 1.5px dashed var(--tx2);
+}
+
+.gt .gt-fix {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin-bottom: 0;
+  font: var(--w45) 34px / 1.1 var(--sans);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.gt-arrow {
+  color: var(--tx3);
+  font-size: 26px;
+}
+
+.gt-unit {
+  flex-basis: 100%;
+  color: var(--tx3);
+  font: 11.5px / 1.3 var(--mono);
+  letter-spacing: 0;
+}
+
+/* ---------- the causal state's definition ---------- */
+.gi-eq {
+  max-width: 100%;
+  margin: 26px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  color: var(--tx);
+  font-size: 18px;
+}
+
+.gi-eq .katex {
+  padding: 6px 0;
+  white-space: nowrap;
+}
+
+/* One line, scrolled sideways on narrow screens, never broken at a relation. */
+.gi-eq .katex-html {
+  white-space: nowrap;
+}
+
+/* ---------- the withheld viewpoint: the orbit beside the two steps, the score below ---------- */
+.vf {
+  --vf-amber: oklch(0.78 0.13 70);
+  margin: 36px 0 0;
+}
+
+.vf-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 24px 40px;
+}
+
+.vf-orbit {
+  flex: none;
+  width: 300px;
+  max-width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.vf-pipes {
+  flex: 1 1 540px;
+  min-width: 0;
+}
+
+.vf-pipe {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.vf-wide {
+  max-width: 584px;
+}
+
+.vf-narrow {
+  display: none;
+  max-width: 340px;
+}
+
+.vf-ring {
+  fill: none;
+  stroke: var(--tx3);
+  stroke-dasharray: 3 4;
+  stroke-width: 1;
+}
+
+.vf-arena {
+  fill: none;
+  stroke: var(--tx3);
+  stroke-dasharray: 1 3;
+  stroke-linecap: round;
+  stroke-width: 1;
+}
+
+.vf-vp {
+  fill: var(--g0);
+  stroke: var(--tx3);
+  stroke-width: 1;
+}
+
+.vf-ray {
+  stroke: color-mix(in oklab, var(--tx) 22%, transparent);
+  stroke-width: 1;
+}
+
+.vf-ray.vf-hit {
+  stroke: color-mix(in oklab, var(--tx) 55%, transparent);
+}
+
+.vf-edge {
+  fill: none;
+  stroke: color-mix(in oklab, var(--vf-amber) 70%, transparent);
+  stroke-width: 1;
+}
+
+.vf-disc {
+  fill: color-mix(in oklab, var(--tx) 45%, var(--g0));
+}
+
+.vf-disc.vf-bright {
+  fill: color-mix(in oklab, var(--tx) 92%, var(--g0));
+}
+
+.vf-obs {
+  fill: var(--vf-amber);
+}
+
+.vf-obs-l {
+  fill: var(--vf-amber);
+  font: 12px var(--mono);
+}
+
+.vf-stage {
+  fill: var(--tx2);
+  font: var(--w5) 11px var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.vf-lbl {
+  fill: var(--tx3);
+  font: 12px var(--mono);
+}
+
+.vf-m {
+  fill: var(--tx);
+  font: 19px var(--serif);
+}
+
+.vf-m.vf-amber {
+  fill: var(--vf-amber);
+}
+
+.vf-it {
+  font-style: italic;
+}
+
+.vf-sub {
+  font-size: 12.5px;
+}
+
+.vf-hat {
+  fill: none;
+  stroke: var(--tx);
+  stroke-width: 1.2;
+}
+
+.vf-sbox {
+  fill: none;
+  stroke: var(--tx3);
+  stroke-width: 1;
+}
+
+.vf-sbox.vf-out {
+  stroke: var(--vf-amber);
+  stroke-width: 1.5;
+}
+
+.vf-wire {
+  fill: none;
+  stroke: var(--tx3);
+  stroke-width: 1;
+}
+
+.vf-head {
+  fill: var(--tx3);
+}
+
+.vf-tf {
+  fill: color-mix(in oklab, var(--tx) 8%, var(--g0));
+  stroke: var(--tx3);
+  stroke-width: 1;
+}
+
+.vf-tf-t {
+  fill: var(--tx);
+  font: var(--w5) 14px var(--sans);
+}
+
+.vf-lat {
+  fill: var(--vf-amber);
+}
+
+.vf-lat-box {
+  fill: none;
+  stroke: var(--vf-amber);
+  stroke-width: 1;
+}
+
+.vf-score {
+  margin-top: 28px;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.vf-score th,
+.vf-score td {
+  padding: 2px 0;
+  text-align: left;
+  vertical-align: baseline;
+}
+
+.vf-score thead th {
+  padding-bottom: 6px;
+}
+
+.vf-score tbody th {
+  padding-right: 28px;
+  color: var(--tx2);
+  font: var(--w4) 16px / 1.3 var(--sans);
+}
+
+.vf-score tbody td {
+  font: var(--w45) clamp(24px, 2.4vw, 32px) / 1.2 var(--sans);
+  letter-spacing: -0.01em;
+}
+
+.vf-score .vf-go {
+  padding: 0 22px;
+  vertical-align: middle;
+}
+
+.vf-go svg {
+  display: block;
+  fill: var(--tx2);
+  stroke: var(--tx2);
+  stroke-width: 1.5;
+}
+
+.vf .cap {
+  margin-top: 18px;
+}
+
+.gr-t16 .gr-gl code {
+  color: var(--tx);
+  font: var(--w4) 12px var(--mono);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+@media (max-width: 1180px) {
+  .gt {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+    max-width: 68ch;
+  }
+}
+
+@media (max-width: 760px) {
+  .gi-eq {
+    font-size: 17px;
+  }
+
+  /* On a phone, three lines: broken after the ⟺ and after the =, the only places it reads
+     well (each KaTeX base is a flex item; the two pseudo-elements are the breaks). */
+  .gi-eq .katex-html {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    row-gap: 0.35em;
+  }
+
+  .gi-eq .katex-html::before,
+  .gi-eq .katex-html::after {
+    content: "";
+    flex-basis: 100%;
+  }
+
+  .gi-eq .katex-base:nth-child(-n + 2) {
+    order: 1;
+  }
+
+  .gi-eq .katex-html::before {
+    order: 2;
+  }
+
+  .gi-eq .katex-base:nth-child(n + 3) {
+    order: 3;
+  }
+
+  .gi-eq .katex-html::after {
+    order: 4;
+  }
+
+  .gi-eq .katex-base:nth-child(n + 5) {
+    order: 5;
+  }
+
+  .vf-top {
+    justify-content: center;
+  }
+
+  .vf-orbit {
+    width: 250px;
+  }
+
+  .vf-wide {
+    display: none;
+  }
+
+  .vf-narrow {
+    display: block;
+    margin: 0 auto;
+  }
+
+  .vf-score tbody th {
+    padding-right: 14px;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .vf-score .vf-go {
+    padding: 0 10px;
+  }
+
+  .vf-go svg {
+    width: 32px;
+  }
+}

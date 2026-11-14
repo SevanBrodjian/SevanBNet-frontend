@@ -6,15 +6,24 @@ import {
   useRef,
   useState,
 } from "react";
-import { BOTTLENECK, type DepthRow, MODELS, type Model, num, POINTS, TABLE10 } from "./data";
+import {
+  BOTTLENECK,
+  type DepthRow,
+  FIG6_PI,
+  MODELS,
+  type Model,
+  num,
+  POINTS,
+  TABLE10,
+} from "./data";
 import { isTap, setPoint, travel, usePoint } from "./Results";
 import "./results.css";
 
-// Editability across residual points (the paper's figure 8), drawn only from Table 10's
-// numbers: the inverse map's Edit Index on top (hollow where its Edit Fidelity is below 0,
-// outside the fidelity guard), its R² and the MLP probe's skill below. Hovering, tapping or
-// focusing a point shows its values here and marks its row in Table 10, and the other way
-// round. A finger also scrubs sideways; a swipe up or down scrolls the page and picks nothing.
+// Editability across residual points: the paper's figure 6 on top, Table 10's fits below. On
+// top, the Edit Index of PI (read from figure 6, see data.ts) and of the inverse map (hollow
+// where its Edit Fidelity is below 0, outside the fidelity guard); below, the inverse map's R²
+// and the MLP probe's skill. Hovering, tapping or focusing a point shows its values here. A
+// finger also scrubs sideways; a swipe up or down scrolls the page and picks nothing.
 
 const LAST = POINTS.length - 1;
 
@@ -49,7 +58,8 @@ function summary(model: Model, label: string) {
       ? "Edit Fidelity at least 0 at every point"
       : `Edit Fidelity at least 0 only at points ${kept.join(" and ")}`;
   return (
-    `${label} standard, residual points 0 to 8. Inverse map Edit Index: ${listOf(model, "index")}; ${guard}. ` +
+    `${label} standard, residual points 0 to 8. PI Edit Index: ${FIG6_PI[model].join(", ")}. ` +
+    `Inverse map Edit Index: ${listOf(model, "index")}; ${guard}. ` +
     `Inverse map R²: ${listOf(model, "r2")}. MLP probe skill: ${listOf(model, "skill")}.`
   );
 }
@@ -79,9 +89,24 @@ function Dia({ x, y }: { x: number; y: number }) {
   );
 }
 
+/** PI's mark, a circle, as in the paper's figure 6. */
 function Dot({ x, y }: { x: number; y: number }) {
   return (
-    <circle cx={x} cy={y} r={2.8} fill="var(--tx3)" stroke="var(--gs-well)" strokeWidth={1.5} />
+    <circle cx={x} cy={y} r={3.6} fill="var(--tx2)" stroke="var(--gs-well)" strokeWidth={1.5} />
+  );
+}
+
+function Sq({ x, y }: { x: number; y: number }) {
+  return (
+    <rect
+      x={x - 2.8}
+      y={y - 2.8}
+      width={5.6}
+      height={5.6}
+      fill="var(--tx3)"
+      stroke="var(--gs-well)"
+      strokeWidth={1.5}
+    />
   );
 }
 
@@ -111,8 +136,14 @@ function Panel({ model, label, k }: { model: Model; label: string; k: number | n
   const yT = (v: number) => T0 + ((1 - v) / 2) * hT;
   const yB = (v: number) => B0 + (1 - v) * hB;
 
+  const path = (y: (v: number) => number, vs: string[]) =>
+    vs.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)} ${y(num(v)).toFixed(1)}`).join("");
   const line = (y: (v: number) => number, key: keyof DepthRow) =>
-    rows.map((r, i) => `${i ? "L" : "M"}${x(i).toFixed(1)} ${y(num(r[key])).toFixed(1)}`).join("");
+    path(
+      y,
+      rows.map((r) => r[key]),
+    );
+  const pi = FIG6_PI[model];
 
   const near = (e: PointerEvent<SVGRectElement>) => {
     const r = e.currentTarget.ownerSVGElement?.getBoundingClientRect();
@@ -135,7 +166,8 @@ function Panel({ model, label, k }: { model: Model; label: string; k: number | n
         </h3>
         <p className="gr-rd" aria-hidden="true" data-idle={k === null ? "" : undefined}>
           <Rd name="pt" w={1} v={String(k ?? 0)} />
-          <Rd name="Index" v={shown.index} />
+          <Rd name="PI" v={pi[k ?? 0]} />
+          <Rd name="IM" v={shown.index} />
           <Rd name="Fid." v={shown.fid} />
           <Rd name="R²" v={shown.r2} />
           <Rd name="Skill" v={shown.skill} />
@@ -239,18 +271,27 @@ function Panel({ model, label, k }: { model: Model; label: string; k: number | n
             />
           )}
 
+          <path
+            d={path(yT, pi)}
+            fill="none"
+            stroke="var(--tx3)"
+            strokeWidth={1}
+            strokeDasharray="3 3"
+          />
           <path d={line(yT, "index")} fill="none" stroke="var(--tx2)" strokeWidth={1} />
           <path d={line(yB, "skill")} fill="none" stroke="var(--tx3)" strokeWidth={1} />
           <path d={line(yB, "r2")} fill="none" stroke="var(--tx2)" strokeWidth={1} />
           {rows.map((row, i) => (
             <g key={POINTS[i]}>
-              <Dot x={x(i)} y={yB(num(row.skill))} />
+              <Sq x={x(i)} y={yB(num(row.skill))} />
               <Dia x={x(i)} y={yB(num(row.r2))} />
+              <Dot x={x(i)} y={yT(num(pi[i]))} />
               <Tri x={x(i)} y={yT(num(row.index))} hollow={num(row.fid) < 0} />
             </g>
           ))}
           {r && k !== null && (
             <g fill="none" stroke="var(--tx)" strokeWidth={1}>
+              <circle cx={x(k)} cy={yT(num(pi[k]))} r={8} stroke="var(--tx3)" />
               <circle cx={x(k)} cy={yT(num(r.index))} r={9} />
               <circle cx={x(k)} cy={yB(num(r.r2))} r={8} />
               <circle cx={x(k)} cy={yB(num(r.skill))} r={6} stroke="var(--tx3)" />
@@ -301,6 +342,12 @@ function Key() {
     <ul className="gr-key">
       <li>
         <svg width="12" height="12" viewBox="-6 -6 12 12" aria-hidden="true">
+          <Dot x={0} y={0} />
+        </svg>
+        <span>PI Edit Index</span>
+      </li>
+      <li>
+        <svg width="12" height="12" viewBox="-6 -6 12 12" aria-hidden="true">
           <Tri x={0} y={0.6} />
         </svg>
         <span>inverse map Edit Index</span>
@@ -321,7 +368,7 @@ function Key() {
       </li>
       <li>
         <svg width="12" height="12" viewBox="-6 -6 12 12" aria-hidden="true">
-          <Dot x={0} y={0} />
+          <Sq x={0} y={0} />
         </svg>
         <span>MLP probe skill</span>
       </li>
@@ -333,7 +380,7 @@ function Key() {
 function said(k: number) {
   return `Residual point ${k}${k === 0 ? " (embedding)" : ""}. ${MODELS.map((m) => {
     const r = TABLE10[m.id][k];
-    return `${m.label}: Edit Index ${r.index}, Edit Fidelity ${r.fid}, inverse R² ${r.r2}, probe skill ${r.skill}.`;
+    return `${m.label}: PI Edit Index ${FIG6_PI[m.id][k]}, inverse map Edit Index ${r.index}, Edit Fidelity ${r.fid}, inverse R² ${r.r2}, probe skill ${r.skill}.`;
   }).join(" ")}`;
 }
 
@@ -379,9 +426,10 @@ export default function DepthChart() {
         ))}
       </div>
       <figcaption className="cap">
-        The table above as a chart, from the embedding (0) to the last block (8). Top, the inverse
-        map's Edit Index, hollow where it leaves the prediction worse than no edit. Bottom, its{" "}
-        <i>R²</i> and the MLP probe's skill.
+        The <code>standard</code> models, from the embedding (0) to the last block (8). Top, the
+        Edit Index of PI and of the inverse map, hollow where the inverse map leaves the prediction
+        worse than no edit. Bottom, the inverse map's <i>R²</i> and the MLP probe's skill. Point to
+        read the values. PI's points are read from the paper's figure 6.
       </figcaption>
     </figure>
   );

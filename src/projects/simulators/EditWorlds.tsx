@@ -61,6 +61,8 @@ export const EDIT_WORDS = {
       "standard-noflip": "standard-noflip",
     } satisfies Record<OthVariant, string>,
     renew: "New opening",
+    resume: "Resume",
+    hint: "click to swap token colors",
     move: (n: number, of: number) => `move ${String(n).padStart(2, "0")}/${of}`,
     player: { 1: "black to move", [-1]: "white to move" } as Record<number, string>,
     legal: (before: number, after: number | null) =>
@@ -69,12 +71,13 @@ export const EDIT_WORDS = {
     rejected: { unchanged: "unchanged", empty: "no moves" },
     /** The canvas's description: what it shows, and its keys. */
     about:
-      "Othello board after a real 20-move opening, legal moves filled. Click a token outside the centre four to flip its colour; click it again to undo. From the keyboard: the arrow keys move a cursor and Enter flips.",
+      "Othello board playing a real 20-move opening, legal moves filled. Click any token to swap its color, which pauses the opening at that move. Resume plays the rest of the opening on from the edited board; clicking the token again undoes the swap instead. From the keyboard: the arrow keys move a cursor and Enter swaps.",
     say: {
       flip: (sq: string, before: number, after: number, changed: number) =>
         `${sq} flipped. Legal moves ${before} to ${after}, ${changed} changed.`,
       unflip: (sq: string) => `${sq} restored`,
-      refused: { center: "The centre four cannot be flipped", empty: "Nothing to flip there" },
+      resume: (sq: string) => `Playing on with ${sq} swapped`,
+      refused: "Nothing to flip there",
     },
   },
 };
@@ -222,12 +225,14 @@ function OthelloPanel() {
   const demo = useRef<OthelloDemo | null>(null);
   const [variant, setVariant] = useState<OthVariant>("standard");
   const [say, setSay] = useState("");
+  const [held, setHeld] = useState(false); // a flip has paused the opening
   const how = useId();
 
   useEffect(() => {
     const el = cv.current;
     if (!el) return;
     const paint = (r: OthReport) => {
+      setHeld(r.resumable);
       if (top.current) top.current.textContent = W.oth.move(r.ply, r.total);
       const [who, what] = low.current?.children ?? [];
       if (!who || !what) return;
@@ -250,7 +255,8 @@ function OthelloPanel() {
           ),
         );
       } else if (e.kind === "unflip") setSay(W.oth.say.unflip(squareName(e.sq)));
-      else setSay(W.oth.say.refused[e.why]);
+      else if (e.kind === "resume") setSay(W.oth.say.resume(squareName(e.sq)));
+      else setSay(W.oth.say.refused);
     };
     const d = othelloDemo(el, { variant: "standard", tones: tones(el), report: paint, announce });
     demo.current = d;
@@ -272,13 +278,25 @@ function OthelloPanel() {
           aria-describedby={how}
         />
         <span className="osd ew-name">{W.oth.name}</span>
+        <span className="osd ew-hint" aria-hidden="true">
+          {W.oth.hint}
+        </span>
         <span className="osd ew-rd" ref={top} />
         <span className="osd ew-low" ref={low}>
           <span />
           <span />
         </span>
         <span className="ew-acts">
-          <button type="button" className="ew-act" onClick={() => demo.current?.renew()}>
+          {held && (
+            <button
+              type="button"
+              className="ew-act ew-resume"
+              onClick={() => demo.current?.resume()}
+            >
+              {W.oth.resume}
+            </button>
+          )}
+          <button type="button" className="ew-act ew-renew" onClick={() => demo.current?.renew()}>
             {W.oth.renew}
           </button>
         </span>

@@ -305,16 +305,18 @@ export const canEdit = (s: State, sq: number) =>
  * The board with one token recoloured and nothing else changed, not even whose turn it is. It
  * need not be a board any legal game reaches.
  */
-export function recolor(s: State, sq: number): State {
-  if (!canEdit(s, sq)) throw new Error(`othello: ${squareName(sq)} cannot be edited`);
+/** The board with one token recoloured; `any` allows the centre four too (the page's demo). */
+export function recolor(s: State, sq: number, any = false): State {
+  if (any ? !(sq >= 0 && sq < 64 && s.cells[sq]) : !canEdit(s, sq))
+    throw new Error(`othello: ${squareName(sq)} cannot be edited`);
   const t = clone(s);
   t.cells[sq] = -t.cells[sq];
   return t;
 }
 
 /** Recolours `sq` and compares the legal moves before and after. */
-export function edit(s: State, sq: number, before: Legal = legal(s)): Edit {
-  const state = recolor(s, sq);
+export function edit(s: State, sq: number, before: Legal = legal(s), any = false): Edit {
+  const state = recolor(s, sq, any);
   const after = legal(state);
   const was = new Uint8Array(64);
   const is = new Uint8Array(64);
