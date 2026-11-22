@@ -42,6 +42,26 @@ html[data-room="essay"] {
   pointer-events: none;
 }
 
+/* On the list the garden is pinned under the header: a box the height of the window that
+   stays put while the list scrolls. It takes no room in the flow (the negative margin), and
+   the room clips it so it never hangs over the footer at the end of the page. */
+.room-list {
+  overflow: clip;
+}
+
+.w-pin {
+  position: sticky;
+  top: var(--hdr-b, 65px);
+  z-index: 0;
+  height: calc(100svh - var(--hdr-b, 65px));
+  margin-bottom: calc(var(--hdr-b, 65px) - 100svh);
+  pointer-events: none;
+}
+
+html.k-over .w-pin {
+  z-index: 2;
+}
+
 /* The garden can run further down than a short page: the box shows the page's share. */
 /* Overgrowth (the Broken view): the garden over the page, not behind it. */
 html.k-over .growth {
