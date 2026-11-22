@@ -29,9 +29,20 @@ export default function About() {
       <PageFrame />
       <section className="wrap about-in">
         <div className="about-id">
-          <p className="lbl role">
-            {ROLE.title}, {ROLE.department}, {ROLE.institution}
-          </p>
+          {site.about_blurb_html !== undefined ? (
+            site.about_blurb_html && (
+              // biome-ignore lint/security/noDangerouslySetInnerHtml: Markdown sanitized by the backend (nh3)
+              <div
+                className="lbl role"
+                data-slot="about.blurb"
+                dangerouslySetInnerHTML={{ __html: site.about_blurb_html }}
+              />
+            )
+          ) : (
+            <p className="lbl role">
+              {ROLE.title}, {ROLE.department}, {ROLE.institution}
+            </p>
+          )}
           <h1>{NAME}</h1>
           <Actions className="docs">
             {DOCUMENTS.map((d) => (

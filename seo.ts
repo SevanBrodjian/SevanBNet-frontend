@@ -283,7 +283,9 @@ function pages({ site, projects, papers, posts }: Content): Page[] {
       file: "about.html",
       body: page(
         `<h1>${esc(NAME)}</h1>` +
-          `<p>${esc(`${ROLE.title}, ${ROLE.department}, ${ROLE.institution}`)}</p>` +
+          // the blurb is Markdown sanitized by the backend; an older API has none
+          (site.about_blurb_html ??
+            `<p>${esc(`${ROLE.title}, ${ROLE.department}, ${ROLE.institution}`)}</p>`) +
           site.about.map((t) => `<p>${esc(t)}</p>`).join("") +
           profiles(),
       ),

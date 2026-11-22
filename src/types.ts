@@ -73,6 +73,11 @@ export type Post = {
 export type Site = {
   home_line: string;
   role: string;
+  /** The small line above the name on the About page, in Markdown; empty for none.
+   *  Missing from older APIs. */
+  about_blurb?: string;
+  /** The blurb from its Markdown, sanitized by the backend. */
+  about_blurb_html?: string;
   /** The About page, one string per paragraph (plain, for crawlers and fallbacks). */
   about: string[];
   /** The About page from its Markdown, sanitized by the backend. Missing from older APIs. */
