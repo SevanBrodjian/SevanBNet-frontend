@@ -32,6 +32,8 @@ html[data-room="essay"] {
 .room-w {
   position: relative;
   display: flow-root;
+  /* The writing pages have no footer: the room, and the garden, run to the bottom. */
+  min-height: calc(100svh - var(--hdr-b, 65px));
 }
 
 .growth {
@@ -40,6 +42,27 @@ html[data-room="essay"] {
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
+}
+
+/* The garden stays put under the header while the page scrolls past it: a box the height
+   of the window, sticky in a rail as tall as the room. At the end of the room the rail ends
+   and the garden leaves with it, whole, ahead of the footer. */
+.w-rail {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: clip;
+  pointer-events: none;
+}
+
+.w-pin {
+  position: sticky;
+  top: var(--hdr-b, 65px);
+  height: calc(100svh - var(--hdr-b, 65px));
+}
+
+html.k-over .w-rail {
+  z-index: 2;
 }
 
 /* The garden can run further down than a short page: the box shows the page's share. */
@@ -86,6 +109,7 @@ html.dusk {
   z-index: 1;
   max-width: 880px;
   margin: 0 auto;
+  padding-bottom: 80px;
 }
 
 /* The note under the title (Site settings): a faint red aside, set apart from the essays. */
@@ -114,7 +138,7 @@ html.dusk {
 
 /* ---------- an essay ---------- */
 .room-night {
-  padding-bottom: 8px;
+  padding-bottom: 80px;
 }
 
 html[data-room="essay"] .hdr {

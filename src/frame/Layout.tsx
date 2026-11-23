@@ -26,6 +26,10 @@ const NAV = [
 /** The rooms that sit in space (StarSky behind them). */
 const SPACE = new Set(["projects", "project"]);
 
+/** The rooms with no footer: the writing pages end with the garden, and an essay with its
+ *  own way on. */
+const NO_FOOTER = new Set(["writing", "essay"]);
+
 /** The room a path belongs to: page areas colour their room in their own CSS file. */
 export function roomFor(path: string) {
   if (path === "/") return "home";
@@ -119,22 +123,24 @@ export default function Layout({ children }: { children: ReactNode }) {
           <Boundary resetKey={pathname}>{children}</Boundary>
         </Suspense>
       </main>
-      <footer className="ftr">
-        <div className="ftr-in">
-          <ul className="ftr-links">
-            {PROFILES.map((p) => (
-              <li key={p.url}>
-                <ExternalLink href={p.url} className="cx">
-                  {p.label}
-                </ExternalLink>
-              </li>
-            ))}
-          </ul>
-          <span className="y">
-            © <Time iso={`${new Date().getFullYear()}`} f="y" />
-          </span>
-        </div>
-      </footer>
+      {!NO_FOOTER.has(room) && (
+        <footer className="ftr">
+          <div className="ftr-in">
+            <ul className="ftr-links">
+              {PROFILES.map((p) => (
+                <li key={p.url}>
+                  <ExternalLink href={p.url} className="cx">
+                    {p.label}
+                  </ExternalLink>
+                </li>
+              ))}
+            </ul>
+            <span className="y">
+              © <Time iso={`${new Date().getFullYear()}`} f="y" />
+            </span>
+          </div>
+        </footer>
+      )}
       {/* One sky for the Projects list and every project page: it carries on across them. */}
       {SPACE.has(room) && <StarSky page={pathname} />}
       {panelOpen && (
