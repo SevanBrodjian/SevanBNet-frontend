@@ -88,8 +88,8 @@ const UPRIGHT_PHONE = "(max-width: 760px)";
 let lastDark: boolean | null = null;
 
 /**
- * The garden in the margins of the element this sits in (the page's room, or a pinned box
- * in it), on either side of the element matching `column`. `night` for essays; the controls' Light setting can
+ * The garden in the margins of the page's room, on either side of the element matching
+ * `column`. It stays put while the page scrolls past it (see .w-rail in writing.css). `night` for essays; the controls' Light setting can
  * override it.
  */
 export default function Ecosystem({ column, night }: { column: string; night: boolean }) {
@@ -109,8 +109,7 @@ export default function Ecosystem({ column, night }: { column: string; night: bo
     if (lastDark !== null && lastDark !== dark) dusk();
     lastDark = dark;
     const g = garden(biome);
-    // The column is in the room, beside the garden when it is pinned (the list), or
-    // around it (an essay).
+    // The garden is pinned in a box beside the column; the column is in the room.
     const room = el.closest(".room-w") ?? el;
     g.attach(el, () => room.querySelector(column), dark);
     return () => {
@@ -131,5 +130,11 @@ export default function Ecosystem({ column, night }: { column: string; night: bo
     if (season !== undefined) eco?.seasonChanged();
   }, [season]);
 
-  return <i ref={mark} hidden />;
+  return (
+    <div className="w-rail">
+      <div className="w-pin">
+        <i ref={mark} hidden />
+      </div>
+    </div>
+  );
 }

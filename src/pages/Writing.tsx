@@ -17,12 +17,9 @@ export default function Writing() {
   const html = site.writing_note_html;
   const note = (site.writing_note ?? NOTE).trim();
   return (
-    <div className="room-w room-list">
+    <div className="room-w">
       <title>{PAGES.writing.title}</title>
-      {/* The garden stays put in the margins while the list scrolls past it. */}
-      <div className="w-pin">
-        <Ecosystem column=".w-col" night={false} />
-      </div>
+      <Ecosystem column=".w-col" night={false} />
       <div className="wrap">
         <div className="w-col">
           <div className="ptitle w-title">
