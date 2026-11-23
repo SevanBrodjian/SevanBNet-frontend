@@ -32,6 +32,8 @@ html[data-room="essay"] {
 .room-w {
   position: relative;
   display: flow-root;
+  /* The writing pages have no footer: the room, and the garden, run to the bottom. */
+  min-height: calc(100svh - var(--hdr-b, 65px));
 }
 
 .growth {
@@ -107,6 +109,7 @@ html.dusk {
   z-index: 1;
   max-width: 880px;
   margin: 0 auto;
+  padding-bottom: 80px;
 }
 
 /* The note under the title (Site settings): a faint red aside, set apart from the essays. */
@@ -135,7 +138,7 @@ html.dusk {
 
 /* ---------- an essay ---------- */
 .room-night {
-  padding-bottom: 8px;
+  padding-bottom: 80px;
 }
 
 html[data-room="essay"] .hdr {
